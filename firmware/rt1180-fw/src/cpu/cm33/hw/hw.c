@@ -1,9 +1,13 @@
 #include "hw.h"
 #include "fsl_clock.h"
+#include "clock.h"
 
 
 #if CLI_USE(HW_BOOT)
 static void cliBoot(cli_args_t *args);
+#endif
+#if CLI_USE(HW_CLOCK)
+static void cliClock(cli_args_t *args);
 #endif
 
 
@@ -30,10 +34,14 @@ bool hwInit(void)
   logPrintf("Booting..Ver   \t\t: %s\r\n", _DEF_FIRMWATRE_VERSION);
   logPrintf("Booting..Clock \t\t: %d MHz\r\n", (int)(SystemCoreClock / 1000000));
   logPrintf("Booting..Mode  \t\t: 0x%08X\r\n", (unsigned)SRC_GENERAL_REG->SBMR2);
+  logPrintf("Booting..Clock Init\t: %s\r\n", clockIsApplied() ? "PLL" : "ROM default");
   logPrintf("\r\n");
 
 #if CLI_USE(HW_BOOT)
   cliAdd("boot", cliBoot);
+#endif
+#if CLI_USE(HW_CLOCK)
+  cliAdd("clock", cliClock);
 #endif
 
   cliOpen(HW_UART_CH_CLI, 115200);
@@ -94,6 +102,53 @@ void cliBoot(cli_args_t *args)
   if (ret == false)
   {
     cliPrintf("boot info\n");
+  }
+}
+#endif
+
+
+#if CLI_USE(HW_CLOCK)
+/*
+ * 클럭 상태. calc 는 CCM 레지스터로 계산한 값, meas 는 CCM OBSERVE 가
+ * 하드웨어로 센 값이다. 둘이 다르면 계산의 전제(PLL 설정 등)가 틀린 것이다.
+ */
+void cliClock(cli_args_t *args)
+{
+  bool ret = false;
+
+  if (args->argc == 1 && args->isStr(0, "info"))
+  {
+    const char *name;
+    bool        en, bypass;
+    uint32_t    hz;
+
+    cliPrintf("OSC 24M      : %s\n", clockIsOsc24mOn() ? "on (stable)" : "off");
+    cliPrintf("init         : %s\n", clockIsApplied() ? "PLL (bsp/clock.c)" : "ROM default");
+    cliPrintf("\n");
+
+    for (uint32_t i = 0; i < clockGetPllCount(); i++)
+    {
+      clockGetPllInfo(i, &name, &en, &bypass, &hz);
+      cliPrintf("%-10s : %-3s %-7s %10d Hz\n", name, en ? "on" : "off", bypass ? "bypass" : "", (int)hz);
+    }
+    cliPrintf("\n");
+
+    cliPrintf("%-10s   mux div %12s %12s\n", "root", "calc Hz", "meas Hz");
+    for (uint32_t i = 0; i < clockGetRootCount(); i++)
+    {
+      clock_info_t info;
+
+      clockGetRootInfo(i, &info);
+      cliPrintf("%-10s : %3d %3d %12d %12d\n",
+                info.name, (int)info.mux, (int)info.div, (int)info.calc_hz, (int)info.meas_hz);
+    }
+    cliPrintf("\nSystemCoreClock : %d Hz\n", (int)SystemCoreClock);
+    ret = true;
+  }
+
+  if (ret == false)
+  {
+    cliPrintf("clock info\n");
   }
 }
 #endif

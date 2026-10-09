@@ -34,6 +34,7 @@
 #define _USE_CLI_HW_UART             1
 #define _USE_CLI_HW_LOG              1
 #define _USE_CLI_HW_BOOT             1
+#define _USE_CLI_HW_CLOCK            1
 
 
 #endif

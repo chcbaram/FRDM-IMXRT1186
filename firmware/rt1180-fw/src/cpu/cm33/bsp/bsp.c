@@ -1,6 +1,7 @@
 #include "bsp.h"
 #include "hw_def.h"
 #include "fsl_clock.h"
+#include "clock.h"
 
 
 static volatile uint32_t systick_ms = 0;
@@ -10,14 +11,11 @@ static volatile uint32_t systick_ms = 0;
 
 bool bspInit(void)
 {
-  //-- 클럭은 아직 건드리지 않는다. BootROM 이 설정해 둔 그대로 쓴다.
-  //   BOOT_FREQ 퓨즈가 0 이라 CM33 은 RCOSC200M 에서 200 MHz 로 넘어온다.
-  //   (docs/01-boot-sequence.md 3절) PLL 설정은 로드맵 22 에서 한다.
+  //-- 클럭 루트를 PLL 로 옮긴다 (bsp/clock.c). SystemCoreClock 도 여기서 고쳐진다.
+  //   system_MIMXRT1186_cm33.c 의 초기값(240 MHz)은 ROM 상태(200 MHz)와 맞지 않아
+  //   CCM 을 읽은 값으로 덮는다.
   //
-  //   system_MIMXRT1186_cm33.c 의 SystemCoreClock 초기값(240 MHz)은 BOOT_FREQ=1
-  //   기준이라 맞지 않는다. CCM 의 클럭 루트를 실제로 읽어 고친다.
-  //
-  SystemCoreClock = CLOCK_GetRootClockFreq(kCLOCK_Root_M33);
+  clockInit();
 
   SysTick_Config(SystemCoreClock / 1000);   // 1ms
 

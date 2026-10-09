@@ -116,7 +116,7 @@ _DEF_UART1 : LPUART1 MCU-Link 115200 bps, clk 24000000 Hz  rx 25, tx 936
 
 baram-term 이 포트를 잡고 있지 않을 때는 스크립트로 확인한다. Python 표준 라이브러리 `termios` 로 포트를 연다.
 
-1. `probe-rs reset` 으로 POR 을 건다.
+1. AIRCR SYSRESETREQ 로 리셋한다(`probe-rs write --chip MIMXRT1180 b32 0xE000ED0C 0x05FA0004`). `probe-rs reset` 은 리셋 동안의 VCOM 출력을 버린다([22-clock.md](22-clock.md) 5절).
 2. 1.5 초 동안 받아 배너를 확인한다.
 3. `help`, `boot info`, `uart info` 를 보내 응답을 확인한다.
 
@@ -138,6 +138,6 @@ baram-term 이 포트를 잡고 있지 않을 때는 스크립트로 확인한�
 
 ## 8. 다음
 
-- [ ] 22 — PLL. CM33 300 MHz. LPUART 가 SysPll3Div2 에 기대고 있으니 PLL3 을 건드릴 때 주의한다
+- [x] 22 — 클럭. CM33 240 MHz, PLL3 는 건드리지 않고 루트만 옮겼다 ([22-clock.md](22-clock.md))
 - [ ] 송신 DMA (로그량이 늘면)
 - [ ] baram-term `--match N1APBXYNYYR5I` 로 CLI 자동 시험

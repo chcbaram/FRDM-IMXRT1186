@@ -6,12 +6,12 @@ NXP FRDM-IMXRT1186 보드(i.MX RT1186 — Cortex-M33 + Cortex-M7, EdgeLock, TSN 
 
 | | |
 |---|---|
-| MCU | MIMXRT1186CVJ8C (CM33 300 MHz 부트 코어 / CM7 800 MHz) |
+| MCU | MIMXRT1186CVJ8C (CM33 부트 코어 240 MHz 사용 · 최대 300 / CM7 800 MHz) |
 | 부트 플래시 | W25Q128JV 16 MB QSPI (FlexSPI2) |
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) → probe-rs |
 | 툴체인 | Arm GNU Toolchain 15.3 · CMake 4.4 · Ninja 1.13 |
 | SDK | MCUXpresso SDK 에서 필요한 파일만 (커밋 SHA 고정, BSD-3) |
-| 상태 | CM33 LED 점멸 · UART 콘솔(MCU-Link VCOM) · CLI · 로그 |
+| 상태 | CM33 240 MHz · LED · UART 콘솔(MCU-Link VCOM) · CLI · 로그 |
 
 ## 구성
 

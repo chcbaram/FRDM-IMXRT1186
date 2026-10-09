@@ -10,9 +10,9 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) · probe-rs 0.32 |
 | 펌웨어 | `firmware/rt1180-fw` — CM33 **LED 점멸 · UART(LPUART1) · CLI · 로그** |
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
-| 클럭 | ROM 설정 그대로 — CM33 **200 MHz** (RCOSC200M, `BOOT_FREQ=0`) |
+| 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `clock info` 로 CCM 실측 ([22](22-clock.md)) |
 | SDK | MCUXpresso SDK 에서 150개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
-| 빌드 | FLASH 30,136 B / 211 KB · DTCM 18,336 B / 128 KB |
+| 빌드 | FLASH 31,856 B / 211 KB · DTCM 18,336 B / 128 KB |
 | 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `boot info` 로 부트 모드/퓨즈/클럭 확인 |
 | CM7 | 미기동 (로드맵 25) |
 
@@ -33,9 +33,8 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **22 클럭** — PLL, CM33 300 MHz. ROM 클럭 루트를 고정 루트로 옮긴 뒤 바꾼다(RM 12.4.4 경고). LPUART 가 ROM 이 켠 PLL3 에 기대고 있다([21](21-uart-cli.md))
-2. **23 SysTick · 버튼 · swtimer**
-3. **25 CM7 기동** — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
+1. **23 SysTick · 버튼 · swtimer**
+2. **25 CM7 기동** — ARM_PLL 800 MHz, 오버드라이브 전압 — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
 
 ### 미해결 과제
 
@@ -45,6 +44,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | VSCode 에서 main 자동 정지 | probe-rs 확장에 `runToEntryPoint` 가 없다. 지금은 브레이크포인트를 걸고 ROM 에서 F5. cortex-debug + `probe-rs gdb` 조합을 검토 중 | 21 전후 |
 | Windows / Linux 환경 미검증 | 절차만 적어 두었다 ([13](13-os-setup.md)) | 다른 PC 를 쓸 때 |
 | TRDC 권한 | SDK 예제는 시작할 때 TRDC 를 연다. GPIO 에는 필요 없었지만 DMA/CM7/NETC 에서는 필요할 수 있다 | 24~25 |
+| VCOM 앞쪽 바이트 손실 | 출력 덩어리 앞 0~8 B 가 가끔 빠진다. 클럭과 무관. MCU 수신은 정상 ([22](22-clock.md) 5절) | 로직 분석기 확보 시 |
 | QSPI 쓰기 중 XIP | 같은 플래시에서 실행하며 쓸 수 없다. NVS 와 부트로더는 TCM 실행이 전제다 | 26, 41 |
 
 ## 문서 번호 규칙
@@ -87,7 +87,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 |---|---|---|
 | [20](20-led.md) | **LED 점멸** — 부트 헤더, XIP, 200 MHz SysTick | ✅ |
 | [21](21-uart-cli.md) | **UART(LPUART1) + CLI + 로그** — 부팅 배너, `boot info` | ✅ |
-| 22 | 클럭 — PLL, CM33 300 MHz / CM7 800 MHz 준비 | 예정 |
+| [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | 23 | SysTick · 버튼(SW4) · swtimer | 예정 |
 | 24 | 캐시(XCACHE) / MPU / TRDC | 예정 |
 | 25 | **CM7 기동** + MU/IPC + probe-rs CM7 타깃 | 예정 |
@@ -138,6 +138,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | ![](images/board-block.svg) | [03](03-board-mapping.md) 보드 블록도 |
 | ![](images/board-boot-config.svg) | [03](03-board-mapping.md) 부트 설정 |
 | ![](images/network-topology.svg) | [05](05-network-overview.md) 네트워크 |
+| ![](images/clock-tree.svg) | [22](22-clock.md) CM33 클럭 트리 |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 
 그림은 전부 손으로 쓴 SVG 다. 코드블록 ASCII 아트는 한글이 2칸 폭이라 정렬이 깨진다. 아래 두 스크립트로 검사한다.

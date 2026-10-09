@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="560" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">CM33 클럭 트리 — ROM 이 남긴 것과 로드맵 22 에서 바꾼 것</text>
+  <text x="20" y="48" class="s">초록 굵은 선 = 이번에 옮긴 루트 · 둘째 줄은 ROM 상태 · 괄호 안은 CCM OBSERVE 실측값</text>
+
+  <!-- 소스 -->
+  <text x="40" y="84" class="b" fill="#6b7280">소스</text>
+  <rect x="20" y="96" width="180" height="50" rx="6" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="110" y="118" class="b" text-anchor="middle">OSC 24M (Y2)</text>
+  <text x="110" y="136" class="s" text-anchor="middle">크리스탈 · PLL 기준</text>
+
+  <rect x="20" y="166" width="180" height="50" rx="6" fill="#fef3c7" stroke="#d97706"/>
+  <text x="110" y="188" class="b" text-anchor="middle" fill="#b45309">OSC RC 400M</text>
+  <text x="110" y="206" class="s" text-anchor="middle">RC 발진기 · 오차 있음</text>
+
+  <!-- PLL -->
+  <text x="260" y="84" class="b" fill="#6b7280">PLL (ROM 이 켜 둠)</text>
+  <rect x="240" y="96" width="200" height="50" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="340" y="118" class="b" text-anchor="middle" fill="#1e40af">SYS_PLL3  480 MHz</text>
+  <text x="340" y="136" class="s" text-anchor="middle">PFD2 → FlexSPI2 (XIP 중)</text>
+
+  <rect x="240" y="166" width="200" height="50" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="340" y="188" class="b" text-anchor="middle" fill="#1e40af">SYS_PLL2  528 MHz</text>
+  <text x="340" y="206" class="s" text-anchor="middle">버스 클럭</text>
+
+  <rect x="240" y="236" width="200" height="50" rx="6" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="5 3"/>
+  <text x="340" y="258" class="b" text-anchor="middle" fill="#6b7280">ARM_PLL · SYS_PLL1</text>
+  <text x="340" y="276" class="s" text-anchor="middle">꺼짐 → 로드맵 25 (CM7)</text>
+
+  <line x1="200" y1="121" x2="238" y2="121" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="200" y1="121" x2="238" y2="188" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- 루트 -->
+  <text x="540" y="84" class="b" fill="#6b7280">클럭 루트 (CCM)</text>
+
+  <rect x="520" y="96" width="420" height="44" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="536" y="116" class="b" fill="#15803d">M33</text>
+  <text x="620" y="116" class="m">PLL3 / 2 = 240 MHz  (240.017)</text>
+  <text x="620" y="132" class="s">ROM: RC400M / 2 = 200 MHz (199.74)</text>
+
+  <rect x="520" y="150" width="420" height="44" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="536" y="170" class="b" fill="#15803d">BUS_AON · WAKEUP</text>
+  <text x="680" y="170" class="m">PLL2 / 4 = 132 MHz</text>
+  <text x="680" y="186" class="s">ROM: RC400M / 4 = 100 MHz</text>
+
+  <rect x="520" y="204" width="420" height="44" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="536" y="224" class="b" fill="#15803d">WAKEUP_AXI</text>
+  <text x="680" y="224" class="m">PLL3 / 2 = 240 MHz</text>
+  <text x="680" y="240" class="s">ROM: RC400M / 3 = 133 MHz</text>
+
+  <rect x="520" y="258" width="420" height="44" rx="6" fill="#ffffff" stroke="#3b82f6"/>
+  <text x="536" y="278" class="b" fill="#1e40af">FLEXSPI2</text>
+  <text x="680" y="278" class="m">PLL3_PFD2 / 3 = 99.3 MHz</text>
+  <text x="680" y="294" class="s">그대로 — XIP 중이라 건드리지 않는다</text>
+
+  <rect x="520" y="312" width="420" height="44" rx="6" fill="#ffffff" stroke="#3b82f6"/>
+  <text x="536" y="332" class="b" fill="#1e40af">LPUART0102</text>
+  <text x="680" y="332" class="m">PLL3 / 2 / 10 = 24 MHz</text>
+  <text x="680" y="348" class="s">uart.c 가 설정 (로드맵 21)</text>
+
+  <rect x="520" y="366" width="420" height="44" rx="6" fill="#ffffff" stroke="#d97706"/>
+  <text x="536" y="386" class="b" fill="#b45309">EDGELOCK</text>
+  <text x="680" y="386" class="m">RC400M / 3 = 133 MHz</text>
+  <text x="680" y="402" class="s">그대로 — ELE 클럭은 ELE API 로 바꾼다</text>
+
+  <!-- 연결 -->
+  <line x1="440" y1="121" x2="518" y2="118" stroke="#16a34a" stroke-width="2.5" marker-end="url(#a)"/>
+  <line x1="440" y1="121" x2="518" y2="226" stroke="#16a34a" stroke-width="2.5" marker-end="url(#a)"/>
+  <line x1="440" y1="121" x2="518" y2="280" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#a)"/>
+  <line x1="440" y1="121" x2="518" y2="334" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#a)"/>
+  <line x1="440" y1="191" x2="518" y2="172" stroke="#16a34a" stroke-width="2.5" marker-end="url(#a)"/>
+  <polyline points="110,216 110,420 500,420 500,388 518,388" fill="none" stroke="#d97706" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#a)"/>
+
+  <!-- 주석 -->
+  <rect x="20" y="436" width="920" height="104" rx="8" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="36" y="460" class="b" fill="#c2410c">왜 PLL 을 다시 잡지 않나</text>
+  <text x="36" y="482" class="s">지금 실행 중인 코드가 FlexSPI2 에서 XIP 로 돈다. FlexSPI2 클럭은 PLL3_PFD2 다.</text>
+  <text x="36" y="502" class="s">PLL3 을 다시 설정하면 그 순간 코드 페치가 멈춘다. SDK 는 FlexSPI 를 안전 클럭으로 옮기는 코드를 RAM 에서 돌린다.</text>
+  <text x="36" y="522" class="s">ROM 이 이미 PLL2 · PLL3 을 켜 두었으므로 이번 단계는 클럭 루트의 mux/div 만 바꾼다.</text>
+</svg>

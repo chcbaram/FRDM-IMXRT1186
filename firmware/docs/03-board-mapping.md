@@ -14,7 +14,7 @@
 | 항목 | 값 |
 |---|---|
 | MCU | MIMXRT1186CVJ8C (LFBGA196) |
-| CM33 | 최대 300 MHz (부팅 직후 200 MHz, [01-boot-sequence.md](01-boot-sequence.md) 3절) |
+| CM33 | 240 MHz (Normal Drive, [22-clock.md](22-clock.md)) · 300 MHz 는 오버드라이브 · 부팅 직후 200 MHz |
 | CM7 | 최대 800 MHz |
 | 크리스탈 | Y2 24 MHz (메인), Y1 32.768 kHz (RTC) |
 
