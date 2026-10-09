@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" width="900" height="470" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <rect x="0" y="0" width="900" height="470" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">QSPI 16 MB 파티션 계획</text>
+  <text x="20" y="48" class="s">로드맵 40 에서 확정 · 1차 LED 단계는 맨 앞 256 KB 자리에서 XIP 로 돈다</text>
+
+  <rect x="200" y="70" width="380" height="64" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="40" y="96" class="m">0x0400_0000</text>
+  <text x="390" y="94" class="b" text-anchor="middle" fill="#5b21b6">부트 헤더 + 부트로더  256 KB</text>
+  <text x="390" y="114" class="s" text-anchor="middle">FCB · 컨테이너 · 이미지 (ROM 이 TCM 으로 복사)</text>
+
+  <rect x="200" y="134" width="380" height="30" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="40" y="154" class="m">0x0404_0000</text>
+  <text x="390" y="154" class="b" text-anchor="middle" fill="#b45309">앱 TAG  4 KB</text>
+
+  <rect x="200" y="164" width="380" height="110" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="40" y="184" class="m">0x0404_1000</text>
+  <text x="390" y="214" class="b" text-anchor="middle" fill="#15803d">CM33 앱  ~7.7 MB</text>
+  <text x="390" y="234" class="s" text-anchor="middle">XIP 실행</text>
+
+  <rect x="200" y="274" width="380" height="70" rx="4" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="40" y="294" class="m">0x0480_0000</text>
+  <text x="390" y="306" class="b" text-anchor="middle" fill="#c2410c">CM7 이미지  4 MB</text>
+  <text x="390" y="326" class="s" text-anchor="middle">CM7 TCM 으로 복사해 실행</text>
+
+  <rect x="200" y="344" width="380" height="70" rx="4" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="40" y="364" class="m">0x04C0_0000</text>
+  <text x="390" y="376" class="b" text-anchor="middle" fill="#4b5563">데이터 · NVS · 업데이트  4 MB</text>
+  <text x="390" y="396" class="s" text-anchor="middle">필요할 때 나눈다</text>
+  <text x="40" y="420" class="m">0x0500_0000</text>
+
+  <text x="610" y="94" class="s">로드맵 41</text>
+  <text x="610" y="154" class="s">로드맵 42 · CRC32 검증</text>
+  <text x="610" y="214" class="s">로드맵 42</text>
+  <text x="610" y="306" class="s">로드맵 44 · SDK 와 같은 위치</text>
+  <text x="610" y="376" class="s">로드맵 43 이후</text>
+</svg>

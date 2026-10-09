@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13.5px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="560" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">FlexSPI NOR 부트 이미지 배치 (QSPI W25Q128, FlexSPI2)</text>
+  <text x="20" y="48" class="s">RM Figure 50 / Table 81 · SDK MIMXRT1186xxxxx_cm33_flexspi_nor.ld · CM33 주소 기준</text>
+
+  <!-- 주소 열 -->
+  <text x="40" y="84" class="b" fill="#6b7280">CM33 주소</text>
+  <text x="160" y="84" class="b" fill="#6b7280">오프셋</text>
+  <text x="280" y="84" class="b" fill="#6b7280">내용</text>
+
+  <rect x="260" y="96" width="320" height="40" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="40" y="121" class="m">0x0400_0000</text><text x="160" y="121" class="m">0x0000</text>
+  <text x="420" y="121" class="b" text-anchor="middle" fill="#6b7280">OTFAD KeyBlob (0)</text>
+
+  <rect x="260" y="136" width="320" height="30" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="40" y="156" class="m">0x0400_0200</text><text x="160" y="156" class="m">0x0200</text>
+  <text x="420" y="156" class="s" text-anchor="middle">padding</text>
+
+  <rect x="260" y="166" width="320" height="44" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="40" y="193" class="m">0x0400_0400</text><text x="160" y="193" class="m">0x0400</text>
+  <text x="420" y="186" class="b" text-anchor="middle" fill="#1e40af">FCB  512 B</text>
+  <text x="420" y="203" class="m" text-anchor="middle">.boot_hdr.conf</text>
+
+  <rect x="260" y="210" width="320" height="30" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="40" y="230" class="m">0x0400_0600</text><text x="160" y="230" class="m">0x0600</text>
+  <text x="420" y="230" class="s" text-anchor="middle">padding</text>
+
+  <rect x="260" y="240" width="320" height="40" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="40" y="265" class="m">0x0400_0800</text><text x="160" y="265" class="m">0x0800</text>
+  <text x="420" y="265" class="b" text-anchor="middle" fill="#6b7280">XMCD (사용 안 함)</text>
+
+  <rect x="260" y="280" width="320" height="30" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="40" y="300" class="m">0x0400_0A00</text><text x="160" y="300" class="m">0x0A00</text>
+  <text x="420" y="300" class="s" text-anchor="middle">padding</text>
+
+  <rect x="260" y="310" width="320" height="58" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="40" y="344" class="m">0x0400_1000</text><text x="160" y="344" class="m">0x1000</text>
+  <text x="420" y="332" class="b" text-anchor="middle" fill="#5b21b6">컨테이너</text>
+  <text x="420" y="350" class="m" text-anchor="middle">헤더 · 이미지 엔트리 · 서명블록</text>
+
+  <rect x="260" y="368" width="320" height="30" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="40" y="388" class="m">0x0400_3000</text><text x="160" y="388" class="m">0x3000</text>
+  <text x="420" y="388" class="s" text-anchor="middle">비어 있음</text>
+
+  <rect x="260" y="398" width="320" height="44" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="40" y="425" class="m">0x0400_B000</text><text x="160" y="425" class="m">0xB000</text>
+  <text x="420" y="418" class="b" text-anchor="middle" fill="#15803d">벡터 테이블  1 KB</text>
+  <text x="420" y="435" class="m" text-anchor="middle">SP · Reset_Handler</text>
+
+  <rect x="260" y="442" width="320" height="70" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="40" y="472" class="m">0x0400_B400</text><text x="160" y="472" class="m">0xB400</text>
+  <text x="420" y="472" class="b" text-anchor="middle" fill="#15803d">.text · .rodata</text>
+  <text x="420" y="490" class="m" text-anchor="middle">.data 초기값 (LMA)</text>
+  <text x="40" y="534" class="m">0x0500_0000</text><text x="160" y="534" class="s">16 MB 끝</text>
+
+  <!-- 설명 -->
+  <rect x="610" y="166" width="270" height="44" rx="5" fill="#ffffff" stroke="#3b82f6"/>
+  <text x="622" y="185" class="s">ROM 이 30 MHz 로 읽어 FlexSPI 를</text>
+  <text x="622" y="201" class="s">다시 설정한다</text>
+
+  <rect x="610" y="310" width="270" height="72" rx="5" fill="#ffffff" stroke="#7c3aed"/>
+  <text x="622" y="329" class="m">offset = 0xA000 (컨테이너 기준)</text>
+  <text x="622" y="347" class="m">load = entry = 0x0400_B000</text>
+  <text x="622" y="365" class="m">flags = 0x213 · 서명 없음</text>
+
+  <line x1="608" y1="346" x2="586" y2="410" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#a)"/>
+</svg>

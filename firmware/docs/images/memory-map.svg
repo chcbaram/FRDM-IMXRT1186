@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 700" width="960" height="700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <rect x="0" y="0" width="960" height="700" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">i.MX RT1186 메모리 맵 — CM33 과 CM7 이 보는 주소</text>
+  <text x="20" y="48" class="s">RM Table 4, 5 · NS 주소 기준 (CM33 Secure alias = NS + 0x1000_0000) · 가운데는 물리 메모리</text>
+
+  <!-- 헤더 -->
+  <text x="40" y="84" class="b" fill="#1e40af">CM33 주소</text>
+  <text x="400" y="84" class="b" fill="#374151">물리 메모리</text>
+  <text x="760" y="84" class="b" fill="#c2410c">CM7 주소</text>
+
+  <!-- 행: 주소CM33 | 블록 | 주소CM7 -->
+  <!-- ROM -->
+  <text x="40" y="118" class="m">0x0000_0000</text>
+  <rect x="300" y="100" width="340" height="30" rx="4" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="470" y="120" class="b" text-anchor="middle" fill="#4b5563">CM33 BootROM  160 KB</text>
+  <text x="760" y="118" class="m">0x0010_0000 (alias)</text>
+
+  <!-- FlexSPI2 -->
+  <text x="40" y="158" class="m">0x0400_0000</text>
+  <rect x="300" y="140" width="340" height="36" rx="4" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="470" y="158" class="b" text-anchor="middle" fill="#1e40af">FlexSPI2 — QSPI NOR 16 MB</text>
+  <text x="470" y="172" class="s" text-anchor="middle">부트 플래시 · XIP</text>
+  <text x="760" y="158" class="m">0x0400_0000</text>
+
+  <!-- CM33 Code TCM -->
+  <text x="40" y="206" class="m">0x0FFE_0000</text>
+  <rect x="300" y="188" width="340" height="36" rx="4" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="470" y="206" class="b" text-anchor="middle" fill="#3730a3">CM33 Code TCM  128 KB</text>
+  <text x="470" y="220" class="s" text-anchor="middle">ECC · ROM 이 0 으로 채움</text>
+  <text x="760" y="206" class="m">0x201E_0000 (alias)</text>
+
+  <!-- CM33 System TCM -->
+  <text x="40" y="254" class="m">0x2000_0000</text>
+  <rect x="300" y="236" width="340" height="36" rx="4" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="470" y="254" class="b" text-anchor="middle" fill="#3730a3">CM33 System TCM  128 KB</text>
+  <text x="470" y="268" class="s" text-anchor="middle">.data · .bss · 스택</text>
+  <text x="760" y="254" class="m">0x2020_0000 (alias)</text>
+
+  <!-- CM7 ITCM -->
+  <text x="40" y="302" class="m">0x203C_0000 (alias)</text>
+  <rect x="300" y="284" width="340" height="36" rx="4" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="470" y="302" class="b" text-anchor="middle" fill="#c2410c">CM7 ITCM  256 KB</text>
+  <text x="470" y="316" class="s" text-anchor="middle">ECC · CM33 이 0 으로 채워야 함</text>
+  <text x="760" y="302" class="m">0x0000_0000</text>
+
+  <!-- CM7 DTCM -->
+  <text x="40" y="350" class="m">0x2040_0000 (alias)</text>
+  <rect x="300" y="332" width="340" height="36" rx="4" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="470" y="350" class="b" text-anchor="middle" fill="#c2410c">CM7 DTCM  256 KB</text>
+  <text x="470" y="364" class="s" text-anchor="middle">ECC · CM33 이 0 으로 채워야 함</text>
+  <text x="760" y="350" class="m">0x2000_0000</text>
+
+  <!-- OCRAM1 -->
+  <text x="40" y="398" class="m">0x2048_0000</text>
+  <rect x="300" y="380" width="340" height="36" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="470" y="398" class="b" text-anchor="middle" fill="#15803d">OCRAM1  512 KB</text>
+  <text x="470" y="412" class="s" text-anchor="middle">앞 16 KB TRDC 차단 · 부팅 중 ROM 사용</text>
+  <text x="760" y="398" class="m">0x2048_0000</text>
+
+  <!-- OCRAM2 -->
+  <text x="40" y="446" class="m">0x2050_0000</text>
+  <rect x="300" y="428" width="340" height="36" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="470" y="446" class="b" text-anchor="middle" fill="#15803d">OCRAM2  256 KB</text>
+  <text x="470" y="460" class="s" text-anchor="middle">코어 간 공유 메모리 후보</text>
+  <text x="760" y="446" class="m">0x2050_0000</text>
+
+  <!-- FlexSPI1 -->
+  <text x="40" y="494" class="m">0x2800_0000</text>
+  <rect x="300" y="476" width="340" height="36" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="470" y="494" class="b" text-anchor="middle" fill="#b45309">FlexSPI1 — HyperRAM 8 MB</text>
+  <text x="470" y="508" class="s" text-anchor="middle">HyperFlash 64 MB 는 기본 미연결</text>
+  <text x="760" y="494" class="m">0x2800_0000</text>
+
+  <!-- Periph -->
+  <text x="40" y="542" class="m">0x4000_0000 ~</text>
+  <rect x="300" y="524" width="340" height="36" rx="4" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="470" y="542" class="b" text-anchor="middle" fill="#4b5563">주변장치</text>
+  <text x="470" y="556" class="s" text-anchor="middle">Secure 는 0x5xxx_xxxx</text>
+  <text x="760" y="542" class="m">0x4000_0000 ~</text>
+
+  <!-- NETC -->
+  <text x="40" y="590" class="m">0x6000_0000</text>
+  <rect x="300" y="572" width="340" height="36" rx="4" fill="#fce7f3" stroke="#db2777" stroke-width="1.5"/>
+  <text x="470" y="590" class="b" text-anchor="middle" fill="#9d174d">NETC 레지스터  16 MB</text>
+  <text x="470" y="604" class="s" text-anchor="middle">TSN 스위치 · ENETC</text>
+  <text x="760" y="590" class="m">0x6000_0000</text>
+
+  <!-- 주의 -->
+  <rect x="20" y="628" width="920" height="54" rx="6" fill="#fff7ed" stroke="#fdba74"/>
+  <text x="36" y="650" class="b" fill="#c2410c">주의</text>
+  <text x="80" y="650" class="s">0x0000_0000 과 0x2000_0000 은 두 코어에서 서로 다른 메모리다.</text>
+  <text x="80" y="670" class="s">코어 간 공유 데이터는 양쪽이 같은 주소로 보는 OCRAM 에 둔다.</text>
+</svg>

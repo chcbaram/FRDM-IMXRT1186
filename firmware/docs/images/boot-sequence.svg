@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13.5px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="760" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">i.MX RT1180 부팅 시퀀스 — POR 에서 CM33 main() 과 CM7 기동까지</text>
+  <text x="20" y="48" class="s">RM 12.3 / 12.5.1 / 12.6 · 왼쪽은 BootROM(CM33), 오른쪽은 우리 코드</text>
+
+  <!-- 영역 구분 -->
+  <rect x="20" y="62" width="520" height="680" rx="8" fill="#f3f4f6" stroke="#d1d5db"/>
+  <text x="36" y="84" class="b" fill="#374151">BootROM (CM33, Secure)</text>
+  <rect x="560" y="62" width="320" height="680" rx="8" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="576" y="84" class="b" fill="#047857">사용자 코드</text>
+
+  <!-- POR -->
+  <rect x="180" y="96" width="200" height="34" rx="17" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="280" y="118" class="b" text-anchor="middle">POR_B 해제</text>
+  <line x1="280" y1="130" x2="280" y2="150" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="120" y="152" width="320" height="46" rx="5" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="280" y="172" class="b" text-anchor="middle">BOOT_MODE[2:0] 샘플 → SBMR2</text>
+  <text x="280" y="189" class="s" text-anchor="middle">J60 딥스위치 · CM33 TCM 0 프리로드</text>
+  <line x1="280" y1="198" x2="280" y2="218" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- 모드 판정 -->
+  <path d="M280,220 L420,256 L280,292 L140,256 Z" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="280" y="252" class="b" text-anchor="middle" fill="#b45309">BOOT_MODE ?</text>
+  <text x="280" y="270" class="m" text-anchor="middle">퓨즈 · ROM API 우선</text>
+
+  <line x1="140" y1="256" x2="70" y2="256" stroke="#9ca3af" stroke-width="1.5"/>
+  <line x1="70" y1="256" x2="70" y2="676" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="104" y="248" class="m" text-anchor="middle">001</text>
+
+  <line x1="280" y1="292" x2="280" y2="314" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="292" y="308" class="m">100</text>
+
+  <!-- FlexSPI -->
+  <rect x="120" y="316" width="320" height="46" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="280" y="336" class="b" text-anchor="middle" fill="#1e40af">FlexSPI 30 MHz 1-bit 읽기</text>
+  <text x="280" y="353" class="m" text-anchor="middle">인스턴스 = XSPI_INSTANCE 퓨즈</text>
+  <line x1="280" y1="362" x2="280" y2="382" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="120" y="384" width="320" height="46" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="280" y="404" class="b" text-anchor="middle" fill="#1e40af">FCB 읽기 → FlexSPI 재설정</text>
+  <text x="280" y="421" class="m" text-anchor="middle">+0x400 "FCFB" · LUT · 4 pad</text>
+  <line x1="280" y1="430" x2="280" y2="450" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="120" y="452" width="320" height="46" rx="5" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="280" y="472" class="b" text-anchor="middle">XMCD (선택)</text>
+  <text x="280" y="489" class="m" text-anchor="middle">+0x800 · HyperRAM/SDRAM 설정</text>
+  <line x1="280" y1="498" x2="280" y2="518" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="120" y="520" width="320" height="46" rx="5" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="280" y="540" class="b" text-anchor="middle" fill="#5b21b6">컨테이너 검증 (ELE)</text>
+  <text x="280" y="557" class="m" text-anchor="middle">+0x1000 tag 0x87 · OEM Open</text>
+  <line x1="280" y1="566" x2="280" y2="586" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <path d="M280,588 L400,618 L280,648 L160,618 Z" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="280" y="623" class="b" text-anchor="middle" fill="#b45309">성공 ?</text>
+  <line x1="160" y1="618" x2="72" y2="618" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="124" y="610" class="s" text-anchor="middle">No</text>
+
+  <rect x="36" y="678" width="200" height="48" rx="5" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="136" y="699" class="b" text-anchor="middle" fill="#b91c1c">시리얼 다운로더</text>
+  <text x="136" y="716" class="s" text-anchor="middle">USB-HID / LPUART1</text>
+
+  <!-- 점프 -->
+  <line x1="400" y1="618" x2="590" y2="618" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="440" y="610" class="s">Yes · XIP</text>
+  <line x1="590" y1="618" x2="590" y2="140" stroke="#9ca3af" stroke-width="1.5"/>
+  <line x1="590" y1="140" x2="608" y2="140" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="610" y="104" width="250" height="70" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="735" y="125" class="b" text-anchor="middle" fill="#15803d">Reset_Handler</text>
+  <text x="735" y="143" class="m" text-anchor="middle">0x0400_B000 벡터</text>
+  <text x="735" y="161" class="s" text-anchor="middle">VTOR · MSP · MSPLIM</text>
+  <line x1="735" y1="174" x2="735" y2="196" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="610" y="198" width="250" height="70" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="735" y="219" class="b" text-anchor="middle" fill="#15803d">SystemInit()</text>
+  <text x="735" y="237" class="s" text-anchor="middle">RTWDOG1~5 끔 · SysTick 끔</text>
+  <text x="735" y="255" class="s" text-anchor="middle">XCACHE_PC 켬</text>
+  <line x1="735" y1="268" x2="735" y2="290" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="610" y="292" width="250" height="46" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="735" y="312" class="b" text-anchor="middle" fill="#15803d">.data 복사 · .bss 클리어</text>
+  <text x="735" y="329" class="m" text-anchor="middle">플래시 → DTCM</text>
+  <line x1="735" y1="338" x2="735" y2="360" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <rect x="610" y="362" width="250" height="70" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="735" y="383" class="b" text-anchor="middle" fill="#15803d">main()</text>
+  <text x="735" y="401" class="m" text-anchor="middle">bspInit → hwInit</text>
+  <text x="735" y="419" class="m" text-anchor="middle">apInit → apMain</text>
+  <line x1="735" y1="432" x2="735" y2="476" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <text x="747" y="460" class="s">로드맵 25</text>
+
+  <rect x="610" y="478" width="250" height="110" rx="5" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="735" y="499" class="b" text-anchor="middle" fill="#c2410c">CM7 기동 (CM33 이 수행)</text>
+  <text x="626" y="520" class="s">1. ARM PLL · LDO 준비</text>
+  <text x="626" y="538" class="s">2. M7_CFG.INITVTOR 설정</text>
+  <text x="626" y="556" class="s">3. SRC SCR BT_RELEASE_M7</text>
+  <text x="626" y="574" class="s">4. CM7 TCM 0 채움 (ECC)</text>
+</svg>
