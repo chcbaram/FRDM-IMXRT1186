@@ -117,7 +117,7 @@ cmake --build build --target flash        # 녹색 LED 500 ms 점멸
 같은 환경인지 확인하는 방법은 다음과 같다.
 
 ```bash
-python3 tools/fetch_nxp_sdk.py --check    # 148개 중 0개 다름
+python3 tools/fetch_nxp_sdk.py --check    # 150개 중 0개 다름
 python3 tools/check_layers.py             # 위반 0건
 ```
 

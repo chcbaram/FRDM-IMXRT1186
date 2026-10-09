@@ -24,7 +24,7 @@ MCUXpresso SDK 는 west 매니페스트로 수십 개 저장소를 묶은 구조
 
 ```bash
 cd firmware/rt1180-fw
-python3 tools/fetch_nxp_sdk.py --check     # 148개 중 0개 다름
+python3 tools/fetch_nxp_sdk.py --check     # 150개 중 0개 다름
 ```
 
 ## 2. 고정한 버전
@@ -60,6 +60,7 @@ python3 tools/fetch_nxp_sdk.py --check     # 148개 중 0개 다름
 | `nxp/devices/MIMXRT1186/gcc/*.ld` | [RT1180/MIMXRT1186/gcc](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/MIMXRT1186/gcc) | **참고용**. 빌드는 `bsp/ldscript` 의 우리 스크립트를 쓴다 |
 | `nxp/devices/periph/` | [RT1180/periph](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/periph) (107개) | 주변장치 레지스터 정의. 디바이스 헤더가 전부 include 한다 |
 | `nxp/drivers/` | [RT1180/MIMXRT1189/drivers](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/MIMXRT1189/drivers) | `fsl_clock`, `fsl_pmu`, `fsl_iomuxc.h` (RT1186 은 RT1189 것을 공유한다) |
+| `nxp/drivers/` | [drivers/lpuart](https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/c6f4223f45fdab59509f25ee3ea63a71bd29d8aa/drivers/lpuart) | `fsl_lpuart` (로드맵 21) |
 | `nxp/drivers/` | [drivers/common](https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/c6f4223f45fdab59509f25ee3ea63a71bd29d8aa/drivers/common), [drivers/rgpio](https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/c6f4223f45fdab59509f25ee3ea63a71bd29d8aa/drivers/rgpio) | `fsl_common`, `fsl_common_arm`, `fsl_rgpio` |
 | `nxp/boards/frdmimxrt1186/` | [_boards/frdmimxrt1186/xip](https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/3151bc057b8924db54c7395d39b213c05ab94dc3/_boards/frdmimxrt1186/xip) | FCB 타입 정의 헤더. `.c.ref` 는 값 참고용 (빌드 제외) |
 

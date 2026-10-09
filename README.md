@@ -11,7 +11,7 @@ NXP FRDM-IMXRT1186 보드(i.MX RT1186 — Cortex-M33 + Cortex-M7, EdgeLock, TSN 
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) → probe-rs |
 | 툴체인 | Arm GNU Toolchain 15.3 · CMake 4.4 · Ninja 1.13 |
 | SDK | MCUXpresso SDK 에서 필요한 파일만 (커밋 SHA 고정, BSD-3) |
-| 상태 | CM33 LED 점멸 (1차 목표) |
+| 상태 | CM33 LED 점멸 · UART 콘솔(MCU-Link VCOM) · CLI · 로그 |
 
 ## 구성
 

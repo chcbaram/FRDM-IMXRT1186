@@ -63,6 +63,7 @@ set(NXP_SRC_FILES
   ${NXP_DIR}/drivers/fsl_clock.c
   ${NXP_DIR}/drivers/fsl_pmu.c
   ${NXP_DIR}/drivers/fsl_rgpio.c
+  ${NXP_DIR}/drivers/fsl_lpuart.c
   )
 
 

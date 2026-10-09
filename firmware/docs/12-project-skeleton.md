@@ -24,7 +24,7 @@ firmware/rt1180-fw/
     ├── common/                 포터블 코드. 벤더 금지
     │   ├── def.h  err_code.h  evt_code.h
     │   ├── core/               qbuffer, util_core
-    │   └── hw/include/         드라이버 공개 헤더 (led.h …)
+    │   └── hw/include/         드라이버 공개 헤더 (led · uart · cli · log)
     ├── cpu/
     │   ├── cm33/               부트 코어
     │   │   ├── main.c          bspInit → hwInit → apInit → apMain
@@ -32,7 +32,7 @@ firmware/rt1180-fw/
     │   │   ├── bsp/            bsp.c (SysTick, delay, millis), syscalls.c
     │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너
     │   │   │   └── ldscript/   rt1180-fw-cm33.ld
-    │   │   └── hw/             hw.c, hw_def.h (_USE_HW_*), driver/*.c
+    │   │   └── hw/             hw.c (배너, boot 명령), hw_def.h (_USE_HW_*), driver/ led · uart · cli · log
     │   ├── cm7/                로드맵 25
     │   └── shared/             (로드맵 25) 코어 간 규약
     └── lib/
@@ -50,7 +50,7 @@ firmware/rt1180-fw/
 `tools/check_layers.py` 가 이 규칙을 검사한다. titan-mini 의 검사기를 NXP 패턴으로 바꿨다. 검사 대상은 `fsl_*.h`, `PERI_*.h`, `RGPIO*`, `IOMUXC*`, `CLOCK_*`, `kCLOCK_*`, `status_t` 등이다.
 
 ```bash
-python3 tools/check_layers.py     # 벤더 HAL 금지 층 11개 파일 검사, 위반 0건
+python3 tools/check_layers.py     # 벤더 HAL 금지 층 14개 파일 검사, 위반 0건
 ```
 
 ### 핀 번호는 드라이버 `.c` 에 적는다

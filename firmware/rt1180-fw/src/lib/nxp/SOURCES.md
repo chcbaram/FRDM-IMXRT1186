@@ -155,6 +155,8 @@
 | `nxp/drivers/fsl_common_arm.c` | nxp-mcuxpresso/mcuxsdk-core | `drivers/common/fsl_common_arm.c` | `ab25cf6f43b8` |
 | `nxp/drivers/fsl_common_arm.h` | nxp-mcuxpresso/mcuxsdk-core | `drivers/common/fsl_common_arm.h` | `93dcc8425fa4` |
 | `nxp/drivers/fsl_iomuxc.h` | nxp-mcuxpresso/mcux-devices-rt | `RT1180/MIMXRT1189/drivers/fsl_iomuxc.h` | `303e54737354` |
+| `nxp/drivers/fsl_lpuart.c` | nxp-mcuxpresso/mcuxsdk-core | `drivers/lpuart/fsl_lpuart.c` | `7d60d4e678ff` |
+| `nxp/drivers/fsl_lpuart.h` | nxp-mcuxpresso/mcuxsdk-core | `drivers/lpuart/fsl_lpuart.h` | `257c5f7ad425` |
 | `nxp/drivers/fsl_pmu.c` | nxp-mcuxpresso/mcux-devices-rt | `RT1180/MIMXRT1189/drivers/fsl_pmu.c` | `2d433df7fa1b` |
 | `nxp/drivers/fsl_pmu.h` | nxp-mcuxpresso/mcux-devices-rt | `RT1180/MIMXRT1189/drivers/fsl_pmu.h` | `37ed801bf67d` |
 | `nxp/drivers/fsl_rgpio.c` | nxp-mcuxpresso/mcuxsdk-core | `drivers/rgpio/fsl_rgpio.c` | `acfcbf12c310` |

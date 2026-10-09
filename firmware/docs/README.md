@@ -8,11 +8,12 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 |---|---|
 | 보드 | FRDM-IMXRT1186 (SCH-95302 Rev C) · MCU `MIMXRT1186CVJ8C` (LFBGA196) |
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) · probe-rs 0.32 |
-| 펌웨어 | `firmware/rt1180-fw` — CM33 **LED 점멸** (1차 목표 달성) |
+| 펌웨어 | `firmware/rt1180-fw` — CM33 **LED 점멸 · UART(LPUART1) · CLI · 로그** |
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
 | 클럭 | ROM 설정 그대로 — CM33 **200 MHz** (RCOSC200M, `BOOT_FREQ=0`) |
-| SDK | MCUXpresso SDK 에서 148개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
-| 빌드 | FLASH 10,908 B / 211 KB · DTCM 12,752 B / 128 KB |
+| SDK | MCUXpresso SDK 에서 150개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
+| 빌드 | FLASH 30,136 B / 211 KB · DTCM 18,336 B / 128 KB |
+| 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `boot info` 로 부트 모드/퓨즈/클럭 확인 |
 | CM7 | 미기동 (로드맵 25) |
 
 ### 바로 다시 시작하기
@@ -24,16 +25,17 @@ cd firmware/rt1180-fw
 cmake -S . -B build -G Ninja
 cmake --build build
 cmake --build build --target flash        # D4 녹색 500 ms 점멸
+
+# 콘솔: /dev/cu.usbmodem*3 115200 (baram-term 등) → 부팅 배너 + cli#
 ```
 
 VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **21 UART + CLI** — LPUART1(MCU-Link VCOM), 부팅 배너, `_write` 를 UART 로 연결
-2. **22 클럭** — PLL, CM33 300 MHz. ROM 클럭 루트를 고정 루트로 옮긴 뒤 바꾼다(RM 12.4.4 경고)
-3. **23 SysTick · 버튼 · swtimer**
-4. **25 CM7 기동** — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
+1. **22 클럭** — PLL, CM33 300 MHz. ROM 클럭 루트를 고정 루트로 옮긴 뒤 바꾼다(RM 12.4.4 경고). LPUART 가 ROM 이 켠 PLL3 에 기대고 있다([21](21-uart-cli.md))
+2. **23 SysTick · 버튼 · swtimer**
+3. **25 CM7 기동** — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
 
 ### 미해결 과제
 
@@ -84,7 +86,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | 번호 | 내용 | 상태 |
 |---|---|---|
 | [20](20-led.md) | **LED 점멸** — 부트 헤더, XIP, 200 MHz SysTick | ✅ |
-| 21 | UART(LPUART1) + CLI + 로그 | 예정 |
+| [21](21-uart-cli.md) | **UART(LPUART1) + CLI + 로그** — 부팅 배너, `boot info` | ✅ |
 | 22 | 클럭 — PLL, CM33 300 MHz / CM7 800 MHz 준비 | 예정 |
 | 23 | SysTick · 버튼(SW4) · swtimer | 예정 |
 | 24 | 캐시(XCACHE) / MPU / TRDC | 예정 |
