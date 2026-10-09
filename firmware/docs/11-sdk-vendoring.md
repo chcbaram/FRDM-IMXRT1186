@@ -31,22 +31,39 @@ python3 tools/fetch_nxp_sdk.py --check     # 148개 중 0개 다름
 
 | 저장소 | ref | 내용 |
 |---|---|---|
-| `nxp-mcuxpresso/mcux-devices-rt` | `f7b174e` (2026-08-27) | 디바이스 헤더, startup, SoC 드라이버 |
-| `nxp-mcuxpresso/mcuxsdk-core` | `c6f4223` (2026-09-03) | 공통 드라이버 |
-| `nxp-mcuxpresso/mcuxsdk-examples` | `3151bc0` (2026-09-21) | FRDM 보드 파일 |
-| `ARM-software/CMSIS_6` | `v6.4.0` | CMSIS Core |
+| [nxp-mcuxpresso/mcux-devices-rt](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c) | `f7b174e` (2026-08-27) | 디바이스 헤더, startup, SoC 드라이버 |
+| [nxp-mcuxpresso/mcuxsdk-core](https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/c6f4223f45fdab59509f25ee3ea63a71bd29d8aa) | `c6f4223` (2026-09-03) | 공통 드라이버 |
+| [nxp-mcuxpresso/mcuxsdk-examples](https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/3151bc057b8924db54c7395d39b213c05ab94dc3) | `3151bc0` (2026-09-21) | FRDM 보드 파일, 예제 |
+| [ARM-software/CMSIS_6](https://github.com/ARM-software/CMSIS_6/tree/v6.4.0) | `v6.4.0` | CMSIS Core |
+
+링크는 모두 **고정한 커밋** 기준이다. 저장소의 `main` 이 바뀌어도 여기서 보는 내용은 우리가 가져온 파일과 같다.
+
+### 함께 보면 좋은 곳
+
+| 무엇 | 링크 |
+|---|---|
+| SDK 전체 시작점 (west 매니페스트) | [nxp-mcuxpresso/mcuxsdk-manifests](https://github.com/nxp-mcuxpresso/mcuxsdk-manifests) |
+| SDK 문서 — FRDM-IMXRT1186 보드 페이지 | [mcuxpresso.nxp.com … frdmimxrt1186](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/boards/RT/frdmimxrt1186/index.html) |
+| 이 보드 예제 전체 | [_boards/frdmimxrt1186](https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/3151bc057b8924db54c7395d39b213c05ab94dc3/_boards/frdmimxrt1186) |
+| 보드 공용 파일 (board.c, pin_mux, clock_config) | [_boards/frdmimxrt1186/common](https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/3151bc057b8924db54c7395d39b213c05ab94dc3/_boards/frdmimxrt1186/common) |
+| EtherCAT 예제 ([05](05-network-overview.md) 3절) | [_boards/frdmimxrt1186/ecat_examples](https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/3151bc057b8924db54c7395d39b213c05ab94dc3/_boards/frdmimxrt1186/ecat_examples) |
+| RT1180 의 모든 드라이버 (RT1186 은 RT1189 것을 공유) | [RT1180/MIMXRT1189/drivers](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/MIMXRT1189/drivers) |
+| 공통 드라이버 전체 (lpuart, flexspi, netc, ecat …) | [mcuxsdk-core/drivers](https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/c6f4223f45fdab59509f25ee3ea63a71bd29d8aa/drivers) |
+| CMSIS 팩 (SVD 출처, [10](10-dev-environment.md) 3절) | [NXP.MIMXRT1186_DFP 26.09.00](https://mcuxpresso.nxp.com/cmsis_pack/repo/NXP.MIMXRT1186_DFP.26.09.00.pack) |
 
 ## 3. 무엇을 어디로
 
 | 저장 위치 (`src/lib/`) | 원본 | 용도 |
 |---|---|---|
-| `cmsis/Core/Include/` | CMSIS_6 `CMSIS/Core/Include` (M-profile 만) | `core_cm33.h`, `core_cm7.h` |
-| `nxp/devices/MIMXRT1186/` | `RT1180/MIMXRT1186/` | `MIMXRT1186_cm33.h` 등 디바이스 헤더, `system_*.c`, `gcc/startup_*.S` |
-| `nxp/devices/MIMXRT1186/gcc/*.ld` | 〃 | **참고용**. 빌드는 `bsp/ldscript` 의 우리 스크립트를 쓴다 |
-| `nxp/devices/periph/` | `RT1180/periph/*.h` (107개) | 주변장치 레지스터 정의. 디바이스 헤더가 전부 include 한다 |
-| `nxp/drivers/` | `RT1180/MIMXRT1189/drivers/` | `fsl_clock`, `fsl_pmu`, `fsl_iomuxc.h` (RT1186 은 RT1189 것을 공유한다) |
-| `nxp/drivers/` | `mcuxsdk-core/drivers/` | `fsl_common`, `fsl_common_arm`, `fsl_rgpio` |
-| `nxp/boards/frdmimxrt1186/` | `_boards/frdmimxrt1186/xip/` | FCB 타입 정의 헤더. `.c.ref` 는 값 참고용 (빌드 제외) |
+| `cmsis/Core/Include/` | [CMSIS/Core/Include](https://github.com/ARM-software/CMSIS_6/tree/v6.4.0/CMSIS/Core/Include) (M-profile 만) | `core_cm33.h`, `core_cm7.h` |
+| `nxp/devices/MIMXRT1186/` | [RT1180/MIMXRT1186](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/MIMXRT1186) | `MIMXRT1186_cm33.h` 등 디바이스 헤더, `system_*.c`, `gcc/startup_*.S` |
+| `nxp/devices/MIMXRT1186/gcc/*.ld` | [RT1180/MIMXRT1186/gcc](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/MIMXRT1186/gcc) | **참고용**. 빌드는 `bsp/ldscript` 의 우리 스크립트를 쓴다 |
+| `nxp/devices/periph/` | [RT1180/periph](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/periph) (107개) | 주변장치 레지스터 정의. 디바이스 헤더가 전부 include 한다 |
+| `nxp/drivers/` | [RT1180/MIMXRT1189/drivers](https://github.com/nxp-mcuxpresso/mcux-devices-rt/tree/f7b174ef993614aaa3a23b3ca77a996c2211994c/RT1180/MIMXRT1189/drivers) | `fsl_clock`, `fsl_pmu`, `fsl_iomuxc.h` (RT1186 은 RT1189 것을 공유한다) |
+| `nxp/drivers/` | [drivers/common](https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/c6f4223f45fdab59509f25ee3ea63a71bd29d8aa/drivers/common), [drivers/rgpio](https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/c6f4223f45fdab59509f25ee3ea63a71bd29d8aa/drivers/rgpio) | `fsl_common`, `fsl_common_arm`, `fsl_rgpio` |
+| `nxp/boards/frdmimxrt1186/` | [_boards/frdmimxrt1186/xip](https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/3151bc057b8924db54c7395d39b213c05ab94dc3/_boards/frdmimxrt1186/xip) | FCB 타입 정의 헤더. `.c.ref` 는 값 참고용 (빌드 제외) |
+
+파일 하나하나의 원본 경로와 sha256 은 [src/lib/nxp/SOURCES.md](../rt1180-fw/src/lib/nxp/SOURCES.md) 에 있다.
 
 ## 4. 디바이스 헤더 구조
 

@@ -3,7 +3,7 @@
 > 이 보드의 핵심 기능인 Ethernet(TSN 스위치)과 EtherCAT 이 칩 안에서 어떻게 구성되고, 보드에서 어떤 PHY 와 커넥터로 나오는지 정리한다. 네트워크 대역(로드맵 50~57)의 출발점이다.
 > 관련: [03-board-mapping.md](03-board-mapping.md) · [02-memory-map.md](02-memory-map.md)
 >
-> 출처: RM 53장 Ethernet Controller (NETC) 53.2, 53.4.1 / 55장 EtherCAT Controller (eCAT) 55.2 / UM12450 2.4, 2.5, Table 4 (J12, J13, J17, J18) / 회로도 7페이지 "ECAT/ETH Option".
+> 출처: RM 53장 Ethernet Controller (NETC) 53.2, 53.4.1 / 55장 EtherCAT Controller (eCAT) 55.2 / UM12450 2.4, 2.5, Table 4 (J12, J13, J17, J18), Table 19 / 회로도 7페이지 "ECAT/ETH Option" / SDK `ecat_examples/digital_io/example_board_readme.md` / SOES·SOEM `LICENSE`.
 
 ![네트워크 구성](images/network-topology.svg)
 
@@ -79,7 +79,54 @@ OE 점퍼(J13/J17)를 1-2 로 두면 먹스가 꺼져 두 PHY 모두 끊긴다. 
 | PHY | MDIO 로 RTL8201 / YT8531 레지스터 설정 | 직접 작성 (작다) |
 | TCP/IP | lwIP | 기존 프로젝트(NUCLEO-C5A3ZG `src/lib/lwip`) 방식 재사용 |
 | ESC 하드웨어 | 레지스터, SII EEPROM, PDI | RM 55장 + ETG.1000 |
-| EtherCAT 스택 | Beckhoff SSC 는 ETG 회원 전용. 오픈소스는 **SOES**(rt-labs) | 라이선스 확인 후 결정 |
+| EtherCAT 스택 | Beckhoff SSC 는 ETG 회원 전용. 오픈소스는 **SOES**(rt-labs) | **SOES** — 아래 절 |
+
+### NXP SDK 의 EtherCAT 예제
+
+SDK(`mcuxsdk-examples` `_boards/frdmimxrt1186/ecat_examples/`)에 이 보드용 **서브디바이스(슬레이브)** 예제가 5개 있다.
+
+| 예제 | 내용 | 추가 하드웨어 |
+|---|---|---|
+| `digital_io` | 디지털 입출력 PDO. 가장 기본 | 없음 |
+| `eoe` | Ethernet over EtherCAT | 없음 |
+| `foe` | File over EtherCAT (펌웨어 갱신 방식) | 없음 |
+| `servo_motor` | CiA402 서보 | FRDM-LVPMSM 모터 보드 |
+| `dual_cores_servo_motor` | CM33 + CM7 분담 서보 | 〃 |
+
+`dual_cores_servo_motor` 의 `master/`, `remote/` 폴더는 듀얼코어의 주/보조 코어라는 뜻이다. EtherCAT 마스터 예제가 아니다.
+
+`digital_io` readme 를 보면 두 가지가 전제다.
+
+1. **Beckhoff SSC(Slave Stack Code)**. 스택 소스는 SDK 에 없다. Beckhoff 의 **SSC Tool v5.13** 으로 설정 파일(`digital_io.xml`, `.xlsx`)을 읽어 생성해야 한다. SSC Tool 은 ETG 회원 로그인이 있어야 받을 수 있고, 생성된 코드는 재배포가 제한된다.
+2. **TwinCAT3 (Windows)** 를 마스터로 쓴다.
+
+"제조사 도구와 비공개 스택을 쓰지 않는다" 는 이 프로젝트의 방침과 맞지 않는다. 그래서 **스택만 바꾼다.**
+
+| 역할 | NXP 예제 | 이 프로젝트 |
+|---|---|---|
+| 서브디바이스 스택 | Beckhoff SSC (생성 코드) | **SOES** (`OpenEtherCATsociety/SOES`) |
+| ESC 하드웨어 초기화 (핀먹스, 클럭, PHY 리셋, EEPROM) | `hardware_init.c`, `pin_mux.c` (NXP BSD-3) | **레퍼런스로 읽고 직접 작성** (로드맵 55) |
+| 마스터 (PC) | TwinCAT3 | **SOEM** (`OpenEtherCATsociety/SOEM`, Linux/macOS/Windows). 교차 확인용으로 TwinCAT3 무료 평가판도 쓸 수 있다 |
+| ESI (장치 설명 XML) | SSC Tool 이 생성 | SOES 의 객체 사전에 맞춰 직접 작성 (TwinCAT 용) |
+
+### 라이선스
+
+| 소프트웨어 | 라이선스 | 이 프로젝트에서 |
+|---|---|---|
+| SOES | **GPLv2 + 링크 예외** — 링크해도 펌웨어 전체가 GPL 이 되지는 않는다. SOES 소스는 공개해야 한다 | 펌웨어에 넣는다. 공개 저장소라 문제없다 |
+| SOEM | **GPLv3 / 상용** 이중 라이선스 | PC 쪽 시험 도구로만 쓴다. 펌웨어에 들어가지 않는다 |
+| Beckhoff SSC | ETG 회원 전용, 재배포 제한 | 쓰지 않는다 |
+
+"EtherCAT" 이름과 로고는 Beckhoff 의 상표다. 제품으로 내려면 ETG 가입과 Vendor ID 가 필요하다. 개발과 학습 단계에서는 상관없다.
+
+### ESC 용 EEPROM (SII)
+
+ESC 는 부팅할 때 SII EEPROM 에서 설정을 읽는다(RM 55 장 *"Loading EtherCAT EEPROM"*). 보드 사정은 다음과 같다.
+
+- UM Table 19 에 따르면 LPI2C3 에 **EEPROM U38**(주소 `0xA0`)이 있다.
+- SDK readme 는 *"EEPROM 하드웨어를 쓰면 이 장은 건너뛰라"* 며 **LPI2C EEPROM 에뮬레이터** 개조를 따로 설명한다. J31/J35 의 1-2 를 떼고, R297/R299 를 1-3 으로 옮기고, R30/R31 을 추가하는 방식이다.
+
+U38 이 기본 상태에서 ESC 의 EEPROM 핀에 연결되어 있는지는 회로도로 확인해야 한다(5절).
 
 ## 4. 로드맵 (50 대역)
 
@@ -90,7 +137,7 @@ OE 점퍼(J13/J17)를 1-2 로 두면 먹스가 꺼져 두 PHY 모두 끊긴다. 
 | 52 | lwIP — ping, UDP | J12 1-2 |
 | 53 | ETH2 추가, 두 포트 스위칭 | J12, J18 1-2 |
 | 55 | EtherCAT ESC 기초 — 레지스터, SII EEPROM, 링크 | 기본 |
-| 56 | EtherCAT 서브디바이스 스택 (SOES), 마스터에서 OP 진입 | 기본 |
+| 56 | EtherCAT 서브디바이스 스택 (SOES), PC 마스터(SOEM)에서 OP 진입 | 기본 |
 | 57 | Ethernet + EtherCAT 동시 (ECAT0 + ETH2) | J18 1-2 |
 
 ### 시험 환경 — PC 한 대로 확인할 수 있는 것만 한다
@@ -112,5 +159,6 @@ OE 점퍼(J13/J17)를 1-2 로 두면 먹스가 꺼져 두 PHY 모두 끊긴다. 
 ## 5. 확인 필요
 
 - [ ] PHY MDIO 주소 4개 (회로도 10~13페이지 strap)
-- [ ] ECAT 쪽 SII EEPROM 실장 여부와 위치
-- [ ] SOES 라이선스와 ESC 지원 범위
+- [x] SOES 라이선스 — GPLv2 + 링크 예외 (3절)
+- [ ] SOES 가 RT1180 ESC 를 그대로 지원하는지 (PDI 접근 방식, 인터럽트)
+- [ ] U38 이 기본 상태에서 ESC 의 SII EEPROM 인지
