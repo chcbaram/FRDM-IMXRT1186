@@ -136,6 +136,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | ![](images/board-block.svg) | [03](03-board-mapping.md) 보드 블록도 |
 | ![](images/board-boot-config.svg) | [03](03-board-mapping.md) 부트 설정 |
 | ![](images/network-topology.svg) | [05](05-network-overview.md) 네트워크 |
+| ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 
 그림은 전부 손으로 쓴 SVG 다. 코드블록 ASCII 아트는 한글이 2칸 폭이라 정렬이 깨진다. 아래 두 스크립트로 검사한다.
 

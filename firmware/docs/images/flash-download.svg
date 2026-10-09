@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="600" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">디버거로 QSPI 에 기록하는 경로 — probe-rs 플래시 알고리즘</text>
+  <text x="20" y="48" class="s">디버거는 RAM 에 작은 프로그램을 올리고 함수처럼 부른다 · 실제 FlexSPI 조작은 BootROM 의 NOR API 가 한다</text>
+
+  <!-- PC -->
+  <rect x="20" y="70" width="190" height="200" rx="8" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="115" y="94" class="b" text-anchor="middle">PC · probe-rs</text>
+  <text x="36" y="120" class="s">1. elf 로드 구간 추출</text>
+  <text x="36" y="140" class="s">2. 코어 정지</text>
+  <text x="36" y="160" class="s">3. 알고리즘 RAM 적재</text>
+  <text x="36" y="180" class="s">4. 함수 호출 반복</text>
+  <text x="36" y="200" class="s">5. 읽어서 비교</text>
+  <text x="36" y="220" class="s">6. 리셋 → POR</text>
+  <text x="36" y="250" class="m">약 1.4 s</text>
+
+  <!-- MCU-Link -->
+  <rect x="250" y="130" width="120" height="80" rx="8" fill="#fce7f3" stroke="#db2777"/>
+  <text x="310" y="160" class="b" text-anchor="middle" fill="#9d174d">MCU-Link</text>
+  <text x="310" y="180" class="s" text-anchor="middle">CMSIS-DAP</text>
+  <text x="310" y="198" class="m" text-anchor="middle">USB → SWD</text>
+  <line x1="210" y1="170" x2="248" y2="170" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- 칩 -->
+  <rect x="410" y="66" width="530" height="510" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="426" y="90" class="b" fill="#3730a3">MIMXRT1186</text>
+
+  <rect x="430" y="106" width="150" height="70" rx="6" fill="#ffffff" stroke="#db2777"/>
+  <text x="505" y="132" class="b" text-anchor="middle" fill="#9d174d">AHB-AP (AP 3)</text>
+  <text x="505" y="152" class="s" text-anchor="middle">메모리 읽기/쓰기</text>
+  <text x="505" y="168" class="s" text-anchor="middle">코어 정지/재개</text>
+  <line x1="370" y1="160" x2="428" y2="145" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- DTCM -->
+  <rect x="620" y="96" width="300" height="190" rx="6" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="636" y="118" class="b" fill="#3730a3">CM33 DTCM</text>
+  <rect x="636" y="130" width="268" height="64" rx="4" fill="#ffffff" stroke="#6366f1"/>
+  <text x="648" y="150" class="m">0x2000_0008  알고리즘 1580 B</text>
+  <text x="648" y="168" class="m">Init · EraseSector</text>
+  <text x="648" y="184" class="m">ProgramPage · UnInit</text>
+  <rect x="636" y="202" width="268" height="34" rx="4" fill="#ffffff" stroke="#6366f1"/>
+  <text x="648" y="224" class="m">+0x410  데이터 버퍼 (256 B 페이지)</text>
+  <rect x="636" y="244" width="268" height="30" rx="4" fill="#ffffff" stroke="#6366f1"/>
+  <text x="648" y="264" class="m">스택 4 KB</text>
+  <line x1="580" y1="140" x2="618" y2="160" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- CM33 -->
+  <rect x="430" y="220" width="150" height="80" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="505" y="246" class="b" text-anchor="middle" fill="#3730a3">CM33</text>
+  <text x="505" y="266" class="s" text-anchor="middle">PC ← 함수 주소</text>
+  <text x="505" y="284" class="s" text-anchor="middle">LR → BKPT 로 복귀</text>
+  <line x1="505" y1="176" x2="505" y2="218" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="582" y1="250" x2="634" y2="200" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <text x="590" y="236" class="s">실행</text>
+
+  <!-- ROM -->
+  <rect x="430" y="330" width="490" height="120" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="446" y="352" class="b" fill="#b45309">BootROM FlexSPI NOR API</text>
+  <text x="446" y="374" class="m">[0x1000_001C] → 트리 0x1000_1BAC → 드라이버 0x1000_0400</text>
+  <text x="446" y="396" class="m">get_config(+0x24)  init(+0x04)  erase(+0x10)</text>
+  <text x="446" y="416" class="m">page_program(+0x08)  erase_all(+0x0C)</text>
+  <text x="446" y="438" class="s">옵션 0xC000_0005 = QuadSPI SDR · SFDP 자동 탐지 · 100 MHz</text>
+  <line x1="505" y1="300" x2="505" y2="328" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="515" y="320" class="s">알고리즘이 호출</text>
+
+  <!-- FlexSPI2 / QSPI -->
+  <rect x="430" y="480" width="200" height="76" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="530" y="504" class="b" text-anchor="middle" fill="#1e40af">FlexSPI2</text>
+  <text x="530" y="524" class="s" text-anchor="middle">IP 명령: WREN · 0x20 · 0x02</text>
+  <text x="530" y="542" class="s" text-anchor="middle">AHB 창 0x0400_0000 은 읽기 전용</text>
+  <rect x="680" y="480" width="240" height="76" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="800" y="504" class="b" text-anchor="middle" fill="#1e40af">W25Q128 QSPI NOR</text>
+  <text x="800" y="524" class="s" text-anchor="middle">4 KB 섹터 지우기</text>
+  <text x="800" y="542" class="s" text-anchor="middle">256 B 페이지 쓰기</text>
+  <line x1="530" y1="450" x2="530" y2="478" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="630" y1="518" x2="678" y2="518" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- 검증 경로 -->
+  <rect x="20" y="300" width="370" height="130" rx="8" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="36" y="324" class="b">이번 이미지에서 건드린 섹터</text>
+  <text x="36" y="346" class="m">0x0400_0000  FCB (0x000~0x5FF)</text>
+  <text x="36" y="366" class="m">0x0400_1000  컨테이너</text>
+  <text x="36" y="386" class="m">0x0400_B000~D000  벡터 · 코드 · .data</text>
+  <text x="36" y="410" class="s">4 KB 섹터 5개만 지운다 (칩 전체가 아니다)</text>
+
+  <rect x="20" y="450" width="370" height="106" rx="8" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="36" y="474" class="b">우리 FCB 는 쓰이지 않는다</text>
+  <text x="36" y="496" class="s">기록은 ROM 이 SFDP 로 만든 설정으로 한다.</text>
+  <text x="36" y="516" class="s">FCB 가 틀려도 기록은 성공한다.</text>
+  <text x="36" y="536" class="s">대신 부팅이 안 된다 → 검증은 부팅으로.</text>
+</svg>

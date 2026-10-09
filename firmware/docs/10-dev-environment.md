@@ -84,3 +84,101 @@ probe-rs reset --chip MIMXRT1180
 ```
 
 `probe-rs read` 는 코어를 멈추지 않고 AHB-AP 로 읽는다. 레지스터 값을 확인하는 데 가장 빠른 방법이다. [20-led.md](20-led.md) 의 검증이 전부 이 방법이다.
+
+## 6. 플래시 기록 원리 — 디버거는 QSPI 에 직접 쓰지 않는다
+
+![플래시 기록 경로](images/flash-download.svg)
+
+SWD 로 할 수 있는 일은 AHB-AP 를 통한 **메모리 읽기/쓰기**와 **코어 제어**뿐이다. 그런데 `0x0400_0000`(FlexSPI2)은 읽기 전용 AHB 창이다. 플래시에 쓰려면 FlexSPI 컨트롤러로 쓰기 허가 → 지우기 → 페이지 쓰기 명령을 보내야 한다. probe-rs 는 이 일을 **칩 안에서 돌아가는 작은 프로그램(플래시 알고리즘)** 에 맡긴다. CMSIS-Pack 의 FLM 과 같은 방식이다.
+
+### 6-1. 알고리즘 — `MIMXRT1180.yaml` 의 `flexspi2_qspi_cm33`
+
+| 항목 | 값 |
+|---|---|
+| 적재 위치 | `0x2000_0008` (CM33 DTCM), 1580 B |
+| 함수 | `Init +0x1`, `EraseSector +0x225`, `ProgramPage +0x255`, `EraseAll +0x209`, `UnInit +0x205` |
+| 데이터 버퍼 | `+0x410` |
+| 지우기 / 쓰기 단위 | 4 KB 섹터 / 256 B 페이지 |
+| 스택 | 4 KB. yaml 주석: *"이렇게 안 하면 BootROM 의 스택이 알고리즘 코드를 덮어쓴다"* |
+
+함수를 호출하는 방법은 다음과 같다.
+
+1. 레지스터 R0~R3 에 인자를 넣는다.
+2. LR 은 BKPT 명령을 가리키게 하고, PC 는 함수 주소에 둔 뒤 코어를 재개한다.
+3. BKPT 에 걸려 멈추면 R0 의 반환값을 읽는다.
+
+### 6-2. 알고리즘은 BootROM API 를 부르는 껍데기다
+
+yaml 의 `instructions` 를 base64 로 풀어 역어셈블했다(`arm-none-eabi-objdump -D -b binary -marm -Mforce-thumb`). 하는 일은 두 가지다.
+
+1. `0x1000_001C` 에서 ROM API 트리 포인터를 읽는다. SDK `fsl_romapi.c` 의 `ROM_API_Init()` 과 같은 코드다(`*(uint32_t *)0x1000001C`).
+2. 트리의 `flexSpiNorDriver` 함수 테이블로 점프한다.
+
+보드에서 읽은 실제 값은 다음과 같다.
+
+```
+$ probe-rs read --chip MIMXRT1180 b32 0x1000001C 1
+1000001c: 10001bac                                  ← bootloader_api_entry_t
+$ probe-rs read --chip MIMXRT1180 b32 0x10001bac 4
+10001bac: 1001bc31 4b030001 10000444 10000400       ← runBootloader, 버전 K3.0.1, 저작권 문자열, flexSpiNorDriver
+$ probe-rs read --chip MIMXRT1180 b32 0x10000400 14
+10000400: 00010803 1000988d 10009be1 10009f5d 1000cd59 1000cde5 100091b3 10008f6d
+10000420: 10008eed 1000aa89 1000a2ab 1000a44f 00000000 100091d5
+```
+
+`0x1000_0444` 의 문자열은 *"(c) Copyright 2024, NXP Semiconductor. All rights reserved."* 다.
+
+| 드라이버 오프셋 | ROM 함수 | 주소 | 알고리즘에서 |
+|---|---|---|---|
+| `+0x00` | version | `0x0001_0803` | — |
+| `+0x04` | `init` | `0x1000_988D` | Init |
+| `+0x08` | `page_program` | `0x1000_9BE1` | ProgramPage (페이지 단위로 반복) |
+| `+0x0C` | `erase_all` | `0x1000_9F5D` | EraseAll |
+| `+0x10` | `erase` | `0x1000_CD59` | EraseSector |
+| `+0x24` | `get_config` | `0x1000_AA89` | Init |
+
+오프셋 해석은 SDK `fsl_romapi.c` 의 `flexspi_nor_driver_interface_t` 를 따른다. 원본은 `RT1180/MIMXRT1189/drivers/romapi` 다([11-sdk-vendoring.md](11-sdk-vendoring.md)).
+
+`Init` 은 ROM API 를 부르기 전에 다음 준비를 한다.
+
+- 워치독 4개를 끈다.
+- 캐시 설정을 정리한다.
+- FlexSPI2 클럭 루트(CCM root 22, `0x4445_0B00`)를 0 으로 되돌린다.
+
+### 6-3. probe-rs 는 우리 FCB 를 쓰지 않는다
+
+`Init` 은 `get_config(instance=2, &config, &option)` 에 옵션 워드 **`0xC000_0005`** 를 넘긴다. ROM 은 이 옵션으로 플래시의 **SFDP(JESD216)** 를 읽어 설정 블록을 스스로 만든다. SDK `serial_nor_config_option_t` 로 해석하면 다음과 같다.
+
+| 필드 | 값 | 의미 |
+|---|---|---|
+| tag [31:28] | `0xC` | 옵션 워드 표식 |
+| device_type [23:20] | 0 | QuadSPI SDR |
+| query_pads [19:16] | 0 | SFDP 를 1 pad 로 읽는다 |
+| max_freq [3:0] | 5 | 100 MHz |
+
+RM 12.9.2.11.1 의 예시 *"QuadSPI NOR - Quad SDR Read: option0 = 0xc0000007 (133MHz)"* 와 같은 형식이다.
+
+**결과적으로, 우리 FCB(`boot_hdr.c`)가 틀려도 기록은 성공한다. 부팅만 안 된다.** FCB 는 BootROM 이 부팅할 때만 읽는다. 그래서 FCB 를 고친 뒤의 검증은 기록 성공이 아니라 **POR 후 부팅**으로 한다.
+
+### 6-4. 실제로 기록되는 것
+
+`probe-rs download` 의 로그(`RUST_LOG=probe_rs::flashing=debug`)에 나온 elf 로드 구간은 다음과 같다.
+
+| 구간 | 주소 | 크기 | 섹터 |
+|---|---|---|---|
+| `.fcb` | `0x0400_0000` | 1536 B | 0 |
+| `.container` | `0x0400_1000` | 160 B | 1 |
+| `.interrupts` | `0x0400_B000` | 1 KB | 11 |
+| `.text` 외 | `0x0400_B400` | 10908 B | 11~13 |
+| `.data` 초기값 | `0x0400_DE9C` | 96 B | 13 |
+
+- 4 KB 섹터 **5개**만 지우고 쓴다. 나머지 플래시는 그대로다.
+- `.fcb` 구간이 `0x400` 이 아니라 `0x0` 부터 1536 B 인 이유는 링커가 프로그램 헤더를 정렬하면서 앞의 OTFAD KeyBlob 자리(`0x000~0x3FF`)를 0 으로 채워 넣었기 때문이다. RM 은 이 자리를 0 으로 두라고 하므로 맞는 동작이다.
+- 기록하는 동안 DTCM 의 `.data` 와 스택은 알고리즘에 덮어써진다. 끝나면 리셋하므로 문제가 없다.
+
+| 경우 | 시간 |
+|---|---|
+| `probe-rs download --verify` (지우기 + 쓰기 + 비교) | **1.41 s** |
+| 같은 이미지에 `--preverify` (먼저 읽어 보고 같으면 건너뜀) | **0.30 s** |
+
+VSCode `Debug CM33` 의 `verifyBeforeFlashing` 이 이 `--preverify` 에 해당한다.
