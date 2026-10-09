@@ -23,6 +23,7 @@ bool hwInit(void)
   cliInit();
   logInit();
 
+  swtimerInit();
   ledInit();
   uartInit();
 
@@ -36,6 +37,8 @@ bool hwInit(void)
   logPrintf("Booting..Mode  \t\t: 0x%08X\r\n", (unsigned)SRC_GENERAL_REG->SBMR2);
   logPrintf("Booting..Clock Init\t: %s\r\n", clockIsApplied() ? "PLL" : "ROM default");
   logPrintf("\r\n");
+
+  buttonInit();
 
 #if CLI_USE(HW_BOOT)
   cliAdd("boot", cliBoot);

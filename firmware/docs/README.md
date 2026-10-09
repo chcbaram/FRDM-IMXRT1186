@@ -8,11 +8,11 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 |---|---|
 | 보드 | FRDM-IMXRT1186 (SCH-95302 Rev C) · MCU `MIMXRT1186CVJ8C` (LFBGA196) |
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) · probe-rs 0.32 |
-| 펌웨어 | `firmware/rt1180-fw` — CM33 **LED 점멸 · UART(LPUART1) · CLI · 로그** |
+| 펌웨어 | `firmware/rt1180-fw` — CM33 **LED · UART(LPUART1) · CLI · 로그 · 240 MHz · 버튼 · swtimer** |
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
 | 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `clock info` 로 CCM 실측 ([22](22-clock.md)) |
 | SDK | MCUXpresso SDK 에서 150개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
-| 빌드 | FLASH 31,856 B / 211 KB · DTCM 18,336 B / 128 KB |
+| 빌드 | FLASH 34,888 B / 211 KB · DTCM 18,624 B / 128 KB |
 | 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `boot info` 로 부트 모드/퓨즈/클럭 확인 |
 | CM7 | 미기동 (로드맵 25) |
 
@@ -33,8 +33,8 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **23 SysTick · 버튼 · swtimer**
-2. **25 CM7 기동** — ARM_PLL 800 MHz, 오버드라이브 전압 — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
+1. **25 CM7 기동** — ARM_PLL 800 MHz, 오버드라이브 전압, CM7 TCM 초기화, MU, probe-rs CM7 타깃 (24 캐시/MPU/TRDC 는 필요해지면 같이)
+2. SW4 를 눌러서 확인 ([23](23-button-swtimer.md) 6절) — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
 
 ### 미해결 과제
 
@@ -88,7 +88,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [20](20-led.md) | **LED 점멸** — 부트 헤더, XIP, 200 MHz SysTick | ✅ |
 | [21](21-uart-cli.md) | **UART(LPUART1) + CLI + 로그** — 부팅 배너, `boot info` | ✅ |
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
-| 23 | SysTick · 버튼(SW4) · swtimer | 예정 |
+| [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
 | 24 | 캐시(XCACHE) / MPU / TRDC | 예정 |
 | 25 | **CM7 기동** + MU/IPC + probe-rs CM7 타깃 | 예정 |
 | 26 | QSPI NOR 드라이버 (TCM 실행 지우기/쓰기) | 예정 |

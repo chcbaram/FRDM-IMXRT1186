@@ -8,6 +8,8 @@ extern "C" {
 #include "hw_def.h"
 
 #include "led.h"
+#include "swtimer.h"
+#include "button.h"
 #include "uart.h"
 #include "cli.h"
 #include "log.h"

@@ -138,5 +138,5 @@ LPUART0102 :   2  10     24000000     24001792
 
 ## 6. 다음
 
-- [ ] 23 — SysTick · 버튼(SW4) · swtimer
+- [x] 23 — 버튼(SW4) · swtimer ([23-button-swtimer.md](23-button-swtimer.md))
 - [ ] 25 — ARM_PLL 800 MHz + 오버드라이브(DCDC 1.1 V, FBB) + CM7 기동

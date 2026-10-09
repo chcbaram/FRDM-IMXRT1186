@@ -3,6 +3,10 @@
 #include "fsl_clock.h"
 #include "clock.h"
 
+#ifdef _USE_HW_SWTIMER
+void swtimerISR(void);
+#endif
+
 
 static volatile uint32_t systick_ms = 0;
 
@@ -25,6 +29,10 @@ bool bspInit(void)
 void SysTick_Handler(void)
 {
   systick_ms++;
+
+#ifdef _USE_HW_SWTIMER
+  swtimerISR();
+#endif
 }
 
 void delay(uint32_t ms)

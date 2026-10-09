@@ -64,7 +64,7 @@ D4 는 RGB LED 하나다. 세 신호 모두 **3핀 0402 점퍼 두 개를 거쳐
 | LED_RED_CTL | `GPIO_EMC_B1_09` | **RGPIO2.09** | R210 → R197 | High = ON |
 | LED_GREEN_CTL | `GPIO_EMC_B1_11` | **RGPIO2.11** | R368 → R379 | High = ON |
 | LED_BLUE_CTL | `GPIO_EMC_B1_39` | **RGPIO3.07** | R84 → R83 | High = ON |
-| SW4 (GPIO_BUTTON) | `GPIO_AD_12` | **RGPIO4.12** | J30 1-2 (기본) | 확인 필요 |
+| SW4 (GPIO_BUTTON) | `GPIO_AD_12` | **RGPIO4.12** | J30 1-2 (기본) | **Low = 눌림** (외부 풀업 DNP → 내부 풀업, [23](23-button-swtimer.md)) |
 
 - 극성은 SDK `board.h` 의 `LOGIC_LED_ON (1U)` 와 `BOARD_USER_LED_GPIO RGPIO2 / PIN 11` 에서 확인했다.
 - 핀 → GPIO 대응은 SDK `fsl_iomuxc.h` 에서 확인했다. 예: `IOMUXC_GPIO_EMC_B1_11_GPIO2_IO11 = 0x42A1003C, ALT5`.
@@ -120,4 +120,4 @@ RJ45 가 4개(J56A/B, J57A/B)다. 기본 점퍼 상태에서는 **EtherCAT 2포�
 
 - [ ] J4 출하 위치
 - [ ] J34 출하 상태 (LPUART3 VCOM)
-- [ ] SW4 버튼 극성 (풀업 + 누르면 Low 로 예상)
+- [x] SW4 버튼 극성 — 회로도로 확인: GND 로 눌림, R279 DNP ([23](23-button-swtimer.md))
