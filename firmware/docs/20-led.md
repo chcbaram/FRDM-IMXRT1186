@@ -105,7 +105,7 @@ cmake --build build --target flash      # probe-rs download --verify → reset
              FCB:         512 B        512 B    100.00%
        CONTAINER:         160 B         8 KB      1.95%
          VECTORS:          1 KB         1 KB    100.00%
-           FLASH:       10984 B       211 KB      5.08%
+           FLASH:       10908 B       211 KB      5.05%
             DTCM:       12752 B       128 KB      9.73%
 ```
 
@@ -136,7 +136,9 @@ cmake --build build --target flash      # probe-rs download --verify → reset
 warning: _write is not implemented and will always fail
 ```
 
-SDK 드라이버의 `assert()` → `__assert_func` → `fiprintf` 가 stdio 를 끌어온다. 동작에는 문제가 없다. UART 단계(로드맵 21)에서 `_write` 를 구현하며 없앤다.
+SDK 드라이버의 `assert()` → `__assert_func` → `fiprintf` 가 stdio 를 끌어온다. 그러면 nosys.specs 의 빈 스텁(`_write`, `_read`, `_close`, `_fstat`, `_isatty`, `_lseek`, `_getpid`, `_kill`)이 링크되고, ld 가 하나마다 경고를 낸다. 동작에는 문제가 없지만 진짜 경고가 묻힌다.
+
+`bsp/syscalls.c` 에 이 함수들을 직접 정의해 없앴다. ST 템플릿(N657X0 의 `syscalls.c`)은 라이선스 때문에 가져오지 않고 최소 스텁만 썼다. `_write` 는 지금 출력을 버리고 `weak` 로 두었다. UART 단계(로드맵 21)에서 덮어써 콘솔로 보낸다.
 
 ### `SystemCoreClock` 이 240 MHz 로 되어 있다
 
@@ -144,6 +146,6 @@ SDK 드라이버의 `assert()` → `__assert_func` → `fiprintf` 가 stdio 를 
 
 ## 9. 다음
 
-- [ ] 21 — LPUART1(VCOM) + CLI + 부팅 배너, syscalls
+- [ ] 21 — LPUART1(VCOM) + CLI + 부팅 배너, `_write` → UART
 - [ ] 22 — PLL: CM33 300 MHz (여기서 `SystemCoreClock` 을 CCM 에서 읽는 방식이 그대로 쓰인다)
 - [ ] VSCode `Debug CM33` 구성 실제 실행 확인

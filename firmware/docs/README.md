@@ -12,7 +12,7 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
 | 클럭 | ROM 설정 그대로 — CM33 **200 MHz** (RCOSC200M, `BOOT_FREQ=0`) |
 | SDK | MCUXpresso SDK 에서 148개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
-| 빌드 | FLASH 10,984 B / 211 KB · DTCM 12,752 B / 128 KB |
+| 빌드 | FLASH 10,908 B / 211 KB · DTCM 12,752 B / 128 KB |
 | CM7 | 미기동 (로드맵 25) |
 
 ### 바로 다시 시작하기
@@ -30,7 +30,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **21 UART + CLI** — LPUART1(MCU-Link VCOM), 부팅 배너, syscalls 로 링크 경고 제거
+1. **21 UART + CLI** — LPUART1(MCU-Link VCOM), 부팅 배너, `_write` 를 UART 로 연결
 2. **22 클럭** — PLL, CM33 300 MHz. ROM 클럭 루트를 고정 루트로 옮긴 뒤 바꾼다(RM 12.4.4 경고)
 3. **23 SysTick · 버튼 · swtimer**
 4. **25 CM7 기동** — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요

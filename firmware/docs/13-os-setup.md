@@ -157,9 +157,9 @@ python3 tools/check_layers.py             # 위반 0건
 - `probe-rs read --chip MIMXRT1180 b32 0x04001000 4` 의 첫 워드가 `8700a000` 인가. 컨테이너 tag 와 길이다.
 - `probe-rs read --chip MIMXRT1180 b32 0x44460044 1` 이 `0c000000` 인가. CM33 + FlexSPI NOR 부팅이라는 뜻이다.
 
-### 링크 경고 `_write is not implemented`
+### 링크 경고 `_write is not implemented` 가 다시 보인다
 
-정상이다. SDK 드라이버의 `assert` 가 stdio 를 끌어온다. UART 단계에서 syscalls 를 넣으며 없앤다.
+`bsp/syscalls.c` 가 빌드에서 빠진 것이다. SDK 드라이버의 `assert` 가 stdio 를 끌어오기 때문에 시스템콜을 우리가 정의해야 한다([20-led.md](20-led.md) 8절).
 
 ### 공장 데모로 되돌리고 싶다
 

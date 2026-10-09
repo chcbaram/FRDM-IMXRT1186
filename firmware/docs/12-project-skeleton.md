@@ -29,7 +29,7 @@ firmware/rt1180-fw/
     │   ├── cm33/               부트 코어
     │   │   ├── main.c          bspInit → hwInit → apInit → apMain
     │   │   ├── ap/             애플리케이션. 벤더 금지
-    │   │   ├── bsp/            bsp.c (SysTick, delay, millis)
+    │   │   ├── bsp/            bsp.c (SysTick, delay, millis), syscalls.c
     │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너
     │   │   │   └── ldscript/   rt1180-fw-cm33.ld
     │   │   └── hw/             hw.c, hw_def.h (_USE_HW_*), driver/*.c
@@ -148,7 +148,7 @@ Memory region         Used Size  Region Size  %age Used
             XMCD:           0 B        512 B      0.00%
        CONTAINER:         160 B         8 KB      1.95%
          VECTORS:          1 KB         1 KB    100.00%
-           FLASH:       10984 B       211 KB      5.08%
+           FLASH:       10908 B       211 KB      5.05%
             ITCM:           0 B       128 KB      0.00%
             DTCM:       12752 B       128 KB      9.73%
 ```
