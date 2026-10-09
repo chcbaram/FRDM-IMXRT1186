@@ -33,8 +33,9 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **25 CM7 기동** — ARM_PLL 800 MHz, 오버드라이브 전압, CM7 TCM 초기화, MU, probe-rs CM7 타깃 (24 캐시/MPU/TRDC 는 필요해지면 같이)
-2. SW4 를 눌러서 확인 ([23](23-button-swtimer.md) 6절) — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
+1. **24 RTC · reset** — BBNSM 실시간 카운터와 GPR 8워드로 리셋 원인, 부트 모드 플래그, 리셋 더블클릭, 부팅 확인 카운터. stm32h563-core 의 rtc/reset 이식
+2. **25 CM7 기동** — ARM_PLL 800 MHz, 오버드라이브 전압, CM7 TCM 초기화, MU, probe-rs CM7 타깃, 캐시/MPU/TRDC
+3. SW4 를 눌러서 확인 ([23](23-button-swtimer.md) 6절) — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
 
 ### 미해결 과제
 
@@ -89,14 +90,14 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [21](21-uart-cli.md) | **UART(LPUART1) + CLI + 로그** — 부팅 배너, `boot info` | ✅ |
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
-| 24 | 캐시(XCACHE) / MPU / TRDC | 예정 |
-| 25 | **CM7 기동** + MU/IPC + probe-rs CM7 타깃 | 예정 |
+| 24 | **RTC · reset** — BBNSM RTC/알람, GPR 에 리셋 원인 · 부트 모드 · 더블클릭 · 부팅 확인/폴트 카운터 (부트로더 진입의 바탕) | 예정 |
+| 25 | **CM7 기동** + MU/IPC + probe-rs CM7 타깃 + 캐시(XCACHE) / MPU / TRDC | 예정 |
 | 26 | QSPI NOR 드라이버 (TCM 실행 지우기/쓰기) | 예정 |
 | 27 | HyperRAM (FlexSPI1) | 예정 |
 | 28 | FreeRTOS | 예정 |
 | 29 | 로그 / 모듈 / 이벤트 | 예정 |
-| 30~34 | USB(tinyusb CDC) · CAN-FD · I2C · SPI · RTC | 예정 |
-| 40 | 부트 아키텍처 — 부트로더/앱 분리, 파티션 확정, 진입 조건 | 예정 |
+| 30~33 | USB(tinyusb CDC) · CAN-FD · I2C · SPI | 예정 |
+| 40 | 부트 아키텍처 — 부트로더/앱 분리, 파티션 확정, 진입 조건 (24 의 부트 모드 플래그 · 더블클릭) | 예정 |
 | 41 | 부트로더 골격 — `firmware/rt1180-boot`, 컨테이너 load = ITCM (non-XIP) | 예정 |
 | 42 | 앱 TAG (CRC32) 검증과 점프 | 예정 |
 | 43 | UART 다운로드 (cmdproto, TAG 를 마지막에 쓰는 안전 갱신) | 예정 |
@@ -123,6 +124,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 - **UART 가 먼저다.** 이후 모든 단계의 검증이 로그와 CLI 로 바뀐다.
 - **클럭을 UART 다음에 둔다.** PLL 을 잘못 건드리면 SoC 가 멈춘다(RM 12.4.4). 로그가 있어야 원인을 좁힐 수 있다.
+- **RTC · reset 을 CM7 앞에 둔다(24).** 작고, 리셋 원인과 부트 모드 플래그가 이후 디버깅과 부트로더(40~)의 바탕이다.
 - **CM7 을 일찍 깨운다(25).** 메모리 맵이 두 코어 기준으로 확정되어야 파티션, RTOS, 네트워크 배치를 정할 수 있다.
 - **QSPI 드라이버(26)가 부트로더(40~)의 전제다.** 같은 플래시에서 XIP 하며 쓸 수 없다는 제약을 이때 실측한다.
 - **네트워크는 기반이 다 선 뒤에 한다.** NETC 는 디스크립터 링, MSI-X, 캐시 일관성이 모두 걸린다. 24(캐시/MPU)와 28(RTOS)이 먼저다. 상대는 PC 하나다. Ethernet 은 일반 NIC 로, EtherCAT 은 PC 의 마스터 소프트웨어(SOEM)로 확인한다.

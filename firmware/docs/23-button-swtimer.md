@@ -104,4 +104,5 @@ if (buttonInputGetHold(&button_input, _DEF_BUTTON1, 1000))  ledToggle(_DEF_LED1)
 
 ## 7. 다음
 
-- [ ] 25 — CM7 기동 (24 캐시/MPU/TRDC 는 필요해지면 같이)
+- [ ] 24 — RTC · reset (BBNSM GPR)
+- [ ] 25 — CM7 기동 (+ 캐시/MPU/TRDC)
