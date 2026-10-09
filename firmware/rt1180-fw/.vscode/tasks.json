@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-configure",
+      "type": "process",
+      "command": "cmake",
+      "args": ["-S", ".", "-B", "build", "-G", "Ninja"],
+      "problemMatcher": []
+    },
+    {
+      "label": "build-build",
+      "type": "process",
+      "command": "cmake",
+      "args": ["--build", "build", "-j8"],
+      "problemMatcher": ["$gcc"],
+      "group": { "kind": "build", "isDefault": true },
+      "dependsOn": "build-configure"
+    },
+    {
+      "label": "build-clean",
+      "type": "process",
+      "command": "cmake",
+      "args": ["--build", "build", "--target", "clean"],
+      "problemMatcher": []
+    },
+    {
+      "label": "flash",
+      "type": "process",
+      "command": "cmake",
+      "args": ["--build", "build", "--target", "flash"],
+      "problemMatcher": [],
+      "dependsOn": "build-build"
+    }
+  ]
+}

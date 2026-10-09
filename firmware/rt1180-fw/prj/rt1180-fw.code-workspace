@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "name": "rt1180-fw (전체)",
+      "path": "../"
+    }
+  ],
+  "settings": {
+    "C_Cpp.autoAddFileAssociations": false,
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/prj": true,
+      "**/Thumbs.db": true
+    },
+    "search.exclude": {
+      "**/build": true,
+      "src/lib/nxp/devices/periph": true
+    },
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/cm33/compile_commands.json",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-arm"
+  }
+}

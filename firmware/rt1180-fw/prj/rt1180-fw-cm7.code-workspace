@@ -1,0 +1,29 @@
+{
+  "folders": [
+    {
+      "name": "rt1180-fw / CM7",
+      "path": "../"
+    }
+  ],
+  "settings": {
+    "C_Cpp.autoAddFileAssociations": false,
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/prj": true,
+      "**/Thumbs.db": true,
+      "src/cpu/cm33": true
+    },
+    "search.exclude": {
+      "**/build": true,
+      "src/cpu/cm33": true,
+      "src/lib/nxp/devices/periph": true
+    },
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/cm7/compile_commands.json",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-arm"
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": []
+  }
+}

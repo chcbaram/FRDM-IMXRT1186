@@ -1,0 +1,63 @@
+{
+  "folders": [
+    {
+      "name": "rt1180-fw / CM33 (부트 코어)",
+      "path": "../"
+    }
+  ],
+  "settings": {
+    "C_Cpp.autoAddFileAssociations": false,
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/prj": true,
+      "**/Thumbs.db": true,
+      "src/cpu/cm7": true
+    },
+    "search.exclude": {
+      "**/build": true,
+      "src/cpu/cm7": true,
+      "src/lib/nxp/devices/periph": true
+    },
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/cm33/compile_commands.json",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-arm"
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug CM33",
+        "type": "probe-rs-debug",
+        "request": "launch",
+        "cwd": "${workspaceFolder}",
+        "chip": "MIMXRT1180",
+        "preLaunchTask": "build-build",
+        "flashingConfig": {
+          "flashingEnabled": true,
+          "haltAfterReset": true
+        },
+        "coreConfigs": [
+          {
+            "coreIndex": 0,
+            "programBinary": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+            "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml"
+          }
+        ]
+      },
+      {
+        "name": "Attach CM33",
+        "type": "probe-rs-debug",
+        "request": "attach",
+        "cwd": "${workspaceFolder}",
+        "chip": "MIMXRT1180",
+        "coreConfigs": [
+          {
+            "coreIndex": 0,
+            "programBinary": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+            "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml"
+          }
+        ]
+      }
+    ]
+  }
+}
