@@ -18,6 +18,20 @@
 #define _USE_HW_BUTTON
 #define      HW_BUTTON_MAX_CH       BUTTON_PIN_MAX
 
+#define _USE_HW_RTC                                   // BBNSM. 아래 번호는 GPR 인덱스 (0~7)
+#define      HW_RTC_BOOT_MODE       0
+#define      HW_RTC_RESET_BITS      1
+#define      HW_RTC_RESET_CNT       2
+#define      HW_RTC_BOOT_TRY        3
+#define      HW_RTC_FAULT_CNT       4
+#define      HW_RTC_ECC_ADDR        5
+#define      HW_RTC_ECC_VALID       6
+
+#define _USE_HW_RESET
+#define      HW_RESET_BOOT          1                 // 부트로더(41)가 생기면 앱은 0
+#define      HW_RESET_DBLCLK_MS     300
+#define      HW_RESET_DBLCLK_CNT    2
+
 #define _USE_HW_UART
 #define      HW_UART_MAX_CH         1
 #define      HW_UART_CH_CLI         _DEF_UART1
@@ -42,6 +56,8 @@
 #define _USE_CLI_HW_BOOT             1
 #define _USE_CLI_HW_CLOCK            1
 #define _USE_CLI_HW_BUTTON           1
+#define _USE_CLI_HW_RTC              1
+#define _USE_CLI_HW_RESET            1
 
 
 // 사용자 버튼 SW4 (GPIO_AD_12)

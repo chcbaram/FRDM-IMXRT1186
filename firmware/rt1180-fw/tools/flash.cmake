@@ -9,8 +9,9 @@
 # elf 의 로드 주소(0x0400_0400 FCB, 0x0400_1000 컨테이너, 0x0400_B000 이미지)를
 # 보고 필요한 섹터만 지우고 쓴다.
 #
-# 쓰고 나면 리셋한다. MCU-Link 리셋은 J26 을 통해 POR 로 이어지므로 BootROM 부터
-# 다시 돈다 (docs/03-board-mapping.md 2절).
+# 쓰고 나면 리셋한다. probe-rs 의 리셋은 SWD 로 SYSRESETREQ 를 쓰는 소프트 리셋이다
+# (SRSR = CM33_REQUEST, docs/24-rtc-reset.md). BootROM 부터 다시 부팅하지만 POR 이
+# 아니므로 BOOT_MODE 딥스위치를 다시 샘플하지는 않는다.
 #-------------------------------------------------------------------------------
 find_program(PROBE_RS_EXECUTABLE NAMES probe-rs probe-rs.exe)
 

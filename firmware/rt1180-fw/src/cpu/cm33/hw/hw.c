@@ -38,6 +38,8 @@ bool hwInit(void)
   logPrintf("Booting..Clock Init\t: %s\r\n", clockIsApplied() ? "PLL" : "ROM default");
   logPrintf("\r\n");
 
+  rtcInit();
+  resetInit();
   buttonInit();
 
 #if CLI_USE(HW_BOOT)

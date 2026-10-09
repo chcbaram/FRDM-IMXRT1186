@@ -37,7 +37,7 @@
 | SW1 | — | ON/OFF. BBSM 저전력 모드 진입/해제 |
 | SW6 | — | wake-up |
 | **J24** | 단락 | SW2 → POR 연결 |
-| **J26** | 단락 | MCU-Link 리셋(TRG_RST) → POR 연결 |
+| **J26** | 단락 | MCU-Link 리셋(TRG_RST) → POR 연결. `probe-rs reset` 은 이 핀을 쓰지 않는다 (SYSRESETREQ, [24](24-rtc-reset.md)) |
 | J9 | 개방 | EWM_OUT_B(워치독) → 리셋 연결 안 함 |
 
 BOOT_MODE 는 POR 때만 샘플된다. **스위치를 바꾼 뒤 SW2 를 누르면 된다.**

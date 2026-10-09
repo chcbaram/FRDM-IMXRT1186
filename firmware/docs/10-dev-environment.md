@@ -63,7 +63,7 @@ MCUXpresso SDK 는 GitHub 에 공개되어 있다(BSD-3). 이 프로젝트는 SD
 | USB | **J23** (MCU-Link). 전원도 여기서 받는다 (J4 5-6) |
 | J60 | `100` (QSPI 부팅) |
 | J36, J58 | 개방 (기본) — 온보드 MCU-Link 가 온보드 MCU 를 디버깅 |
-| J24, J26 | 단락 (기본) — SW2 와 디버거 리셋이 POR 로 이어진다 |
+| J24, J26 | 단락 (기본) — SW2 와 MCU-Link TRG_RST 가 POR 로 이어진다. `probe-rs reset` 은 SYSRESETREQ 라 이 경로가 아니다 |
 
 `probe-rs list` 결과는 다음과 같다.
 

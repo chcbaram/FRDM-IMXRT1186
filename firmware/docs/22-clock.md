@@ -111,10 +111,10 @@ LPUART0102 :   2  10     24000000     24001792
 
 | 리셋 방법 | 리셋 시간 | 배너 |
 |---|---|---|
-| `probe-rs reset` (MCU-Link 가 J26 로 리셋) | 0.13 s | **0 바이트** |
+| `probe-rs reset` (SWD 로 SYSRESETREQ — [24](24-rtc-reset.md) 6절에서 SRSR 로 확인) | 0.13 s | **0 바이트** |
 | `probe-rs write … 0xE000ED0C 0x05FA0004` (AIRCR SYSRESETREQ) | 0.06 s | 19 ms 뒤 수신 |
 
-펌웨어의 `uart info` 송신 카운터에는 배너가 잡혀 있었다. 즉 **펌웨어는 보냈고, MCU-Link 가 리셋을 처리하는 동안 VCOM 데이터를 버린다.** 이후 시리얼 검증 스크립트는 AIRCR 로 리셋한다. SYSRESETREQ 는 POR 이 아니므로 BOOT_MODE 를 다시 샘플하지 않는다. 그러나 ROM 부터 다시 부팅하는 것은 같다.
+펌웨어의 `uart info` 송신 카운터에는 배너가 잡혀 있었다. 즉 **펌웨어는 보냈고, probe-rs 가 리셋 명령을 처리하는 동안 MCU-Link 가 VCOM 데이터를 버린다.** (처음에는 J26 로 POR_B 를 건다고 추정했으나, 24 에서 SRSR 을 읽어 보니 소프트 리셋이었다) 이후 시리얼 검증 스크립트는 AIRCR 로 리셋한다. SYSRESETREQ 는 POR 이 아니므로 BOOT_MODE 를 다시 샘플하지 않는다. 그러나 ROM 부터 다시 부팅하는 것은 같다.
 
 ### VCOM 에서 가끔 앞쪽 몇 바이트가 빠진다 (미해결)
 

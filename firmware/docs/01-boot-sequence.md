@@ -23,7 +23,7 @@
 
 ## 2. 부트 모드 결정
 
-BootROM 은 `SBMR2[BOOT_MODE]` 를 읽는다. 이 값은 **POR_B 상승 에지에서 BOOT_MODE[2:0] 핀을 샘플**한 것이고, 그 뒤 핀을 바꿔도 변하지 않는다(RM 12.3.3.1). 즉 **딥스위치를 바꾼 뒤에는 POR 이 필요하다.** 이 보드는 SW2 리셋 버튼(J24 단락, 기본)과 MCU-Link 리셋(J26 단락, 기본)이 모두 MCU **power-on reset** 을 건다(UM12450 점퍼 표의 J24, J26). 그래서 SW2 를 누르거나 디버거로 리셋하면 BOOT_MODE 를 다시 읽는다.
+BootROM 은 `SBMR2[BOOT_MODE]` 를 읽는다. 이 값은 **POR_B 상승 에지에서 BOOT_MODE[2:0] 핀을 샘플**한 것이고, 그 뒤 핀을 바꿔도 변하지 않는다(RM 12.3.3.1). 즉 **딥스위치를 바꾼 뒤에는 POR 이 필요하다.** 이 보드는 SW2 리셋 버튼(J24 단락, 기본)과 MCU-Link 리셋(J26 단락, 기본)이 모두 MCU **power-on reset** 을 건다(UM12450 점퍼 표의 J24, J26). 그래서 **SW2 를 누르면** BOOT_MODE 를 다시 읽는다. 단 `probe-rs reset` 은 SWD 로 SYSRESETREQ 를 쓰는 소프트 리셋이라 J26 경로를 타지 않는다. 이 경우 BOOT_MODE 를 다시 샘플하지 않는다([24-rtc-reset.md](24-rtc-reset.md) 6절, SRSR 로 확인).
 
 | BOOT_MODE[2:0] | 동작 (RM Table 52) |
 |---|---|

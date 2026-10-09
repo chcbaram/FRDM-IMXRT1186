@@ -10,6 +10,8 @@ extern "C" {
 #include "led.h"
 #include "swtimer.h"
 #include "button.h"
+#include "rtc.h"
+#include "reset.h"
 #include "uart.h"
 #include "cli.h"
 #include "log.h"

@@ -23,7 +23,7 @@
   <text x="36" y="160" class="s">3. 알고리즘 RAM 적재</text>
   <text x="36" y="180" class="s">4. 함수 호출 반복</text>
   <text x="36" y="200" class="s">5. 읽어서 비교</text>
-  <text x="36" y="220" class="s">6. 리셋 → POR</text>
+  <text x="36" y="220" class="s">6. 리셋 (SYSRESETREQ)</text>
   <text x="36" y="250" class="m">약 1.4 s</text>
 
   <!-- MCU-Link -->
