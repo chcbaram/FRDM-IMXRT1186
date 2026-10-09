@@ -55,7 +55,26 @@ RM Table 52 의 각주가 중요하다. `100` 은 **"Serial NOR via FlexSPI1, Pr
 | `BOOT_CFG1[7]` | `XSPI_NOR_CONNECTION_SEL` | 0 | 0 = PORTA CS0 |
 | `BOOT_CFG1[19:18]` | `XSPI_NOR_FCB_OFFSET` | 0 | 0 = FCB 가 `0x400` |
 
-그런데 이 보드의 부트 플래시(W25Q128, U28)는 **FlexSPI2** 에 물려 있다([03-board-mapping.md](03-board-mapping.md)). 출하 퓨즈 그대로라면 ROM 은 FlexSPI1(HyperFlash 자리, 기본 미연결)을 찾아야 한다. 그런데도 공장 데모가 QSPI 에서 부팅되므로, **FRDM 보드 칩은 `XSPI_INSTANCE` 퓨즈가 이미 구워져 나왔을 가능성이 높다.** 이것은 **확인 필요** 항목이다. 첫 부팅이 되면 OCOTP 퓨즈 섀도를 읽어 이 문서에 기록한다.
+그런데 이 보드의 부트 플래시(W25Q128, U28)는 **FlexSPI2** 에 물려 있다([03-board-mapping.md](03-board-mapping.md)). 출하 퓨즈 그대로라면 ROM 은 기본 미연결인 FlexSPI1(HyperFlash 자리)을 찾게 된다.
+
+**보드에서 확인했다. FRDM 보드의 칩은 `XSPI_INSTANCE` 퓨즈가 구워져 나온다.** probe-rs 로 OCOTP 퓨즈 섀도를 읽은 결과다. `OCOTP_FSB` 의 `OTP_SHADOW_PARTA[n]` 이 퓨즈 워드 n 이고(RM 26.2 Boot Fusemap), 베이스는 Secure `0x5751_8000` / NS `0x4751_8000` 이다.
+
+```
+$ probe-rs read --chip MIMXRT1180 b32 0x57518060 12     # 퓨즈 워드 24~35 = BOOT_CFG0~11
+57518060: 00000000 00000000 00000080 00000000 00000000 00000000 00000000 00000000
+57518080: 00000000 00000000 00000000 00000000
+```
+
+| 워드 | 이름 | 값 | 해석 |
+|---|---|---|---|
+| 24 | BOOT_CFG0 | `0x0` | 부트 모드는 핀이 결정, 다운로더 모두 허용 |
+| 25 | BOOT_CFG1 | `0x0` | JESD216 자동 탐지, 100 MHz, PORTA CS0, FCB `0x400` |
+| **26** | **BOOT_CFG2** | **`0x80`** | **bit7 `XSPI_INSTANCE=1` → FlexSPI2**, 핀 그룹 Primary |
+| 31 | BOOT_CFG7 | `0x0` | `BOOT_FREQ=0` (CM33 200 MHz), `RELEASE_M7_RST_STAT=0` (CM7 리셋 유지), 2nd 이미지 없음 |
+
+같은 때 `SRC_SBMR2`(`0x4446_0044`)는 `0x0C00_0000` 이었다. `IPP_BOOT_MODE = 00_1100b` 는 bit3 = CM33 부팅, [2:0] = `100` = FlexSPI NOR 이다(RM 27.6.1.7). J60 설정과 맞는다.
+
+> ⚠️ 이 칩을 다른 보드에 올리거나 퓨즈가 다른 샘플을 쓰면 같은 이미지라도 부팅되지 않는다. 그때 가장 먼저 볼 곳이 이 워드다.
 
 ## 3. ROM 이 FlexSPI NOR 에서 하는 일
 
@@ -170,5 +189,6 @@ ROM 이 직접 CM7 을 풀게 하는 방법도 있다. `RELEASE_M7_RST_STAT=1` �
 
 ## 8. 확인 필요
 
-- [ ] 이 보드의 `BOOT_CFG2[7] XSPI_INSTANCE` 퓨즈 값 (FlexSPI2 로 부팅되는 실제 근거)
-- [ ] `BOOT_FREQ` 퓨즈 값 — 앱 진입 시 CM33 이 200 MHz 인지 240 MHz 인지
+- [x] `BOOT_CFG2[7] XSPI_INSTANCE` = 1 (2절, 보드에서 읽음)
+- [x] `BOOT_FREQ` = 0 → 앱 진입 시 CM33 200 MHz (2절)
+- [ ] 공장 데모 컨테이너의 Fuse version 필드가 1 인 이유 (`0x0400_1008` = `0x0101_0000`)
