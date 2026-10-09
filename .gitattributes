@@ -1,0 +1,11 @@
+* text=auto eol=lf
+
+*.ld   text eol=lf
+*.lld  text eol=lf
+*.s    text eol=lf
+*.S    text eol=lf
+
+*.pdf  binary
+*.pack binary
+*.hex  binary
+*.bin  binary
