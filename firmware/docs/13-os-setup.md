@@ -125,8 +125,20 @@ python3 tools/check_layers.py             # 위반 0건
 
 ### 5-1. 확장
 
-- `probe-rs.probe-rs-debugger`
-- `ms-vscode.cpptools`
+```bash
+code --install-extension probe-rs.probe-rs-debugger
+code --install-extension ms-vscode.cpptools
+```
+
+probe-rs 확장은 이름이 세 가지라 헷갈린다. 모두 같은 확장이다.
+
+| 구분 | 값 |
+|---|---|
+| Marketplace 표시 이름 | **Debugger for probe-rs** (검색은 `probe-rs` 로) |
+| 확장 ID | `probe-rs.probe-rs-debugger` |
+| 디버그 구성의 `"type"` | `probe-rs-debug` |
+
+확장은 디버거를 따로 들고 오지 않고 PATH 의 `probe-rs` 를 실행한다. 확장 버전과 probe-rs 버전을 맞춘다(둘 다 0.32.0).
 
 ### 5-2. 워크스페이스
 
@@ -139,9 +151,28 @@ python3 tools/check_layers.py             # 위반 0건
 | 빌드 | `Cmd/Ctrl + Shift + B` (`build-build`) |
 | 기록 | 태스크 `flash` |
 | 디버그 | 실행 및 디버그 → `Debug CM33` (빌드 → 기록 → 리셋 후 정지) |
-| 실행 중 붙기 | `Attach CM33` |
+| 실행 중 붙기 | `Attach CM33` (기록하지 않는다) |
 
-> VSCode 디버그 구성은 아직 실제로 실행해 보지 않았다. 명령줄 `probe-rs` 로 기록과 메모리 읽기만 검증했다. 처음 써 보는 날 이 줄을 고친다.
+`Debug CM33` 은 시작할 때마다 elf 를 기록한다. `verifyBeforeFlashing` 이 켜져 있어 내용이 같으면 쓰지 않는다. 기록 없이 붙으려면 `Attach CM33` 을 쓴다.
+
+#### main 에서 멈추려면
+
+probe-rs 확장에는 cortex-debug 의 `runToEntryPoint` 같은 옵션이 없다. `haltAfterReset` 으로 리셋 직후 멈추면 **BootROM 안**이다. 이 칩은 리셋되면 ROM 부터 돌기 때문이다.
+
+1. `main.c` 의 `bspInit();` 에 브레이크포인트를 건다. VSCode 가 워크스페이스별로 기억하므로 한 번만 하면 된다.
+2. `Debug CM33` 을 시작한다. 소스가 없는 ROM 주소에서 멈춘다.
+3. F5 를 누른다. ROM 이 FlexSPI 와 컨테이너를 처리한 뒤 `main` 에서 멈춘다.
+
+같은 흐름을 명령줄 GDB 로 확인한 결과는 다음과 같다.
+
+```
+$ probe-rs gdb --chip MIMXRT1180 --reset-halt     # 다른 터미널에서 arm-none-eabi-gdb 로 접속
+pc 0x1001676c                                     # 리셋 직후 = CM33 BootROM (Secure)
+Breakpoint 1 at 0x400c742: main.c:6               # 플래시라 하드웨어 브레이크포인트
+Breakpoint 1, main () at main.c:6
+```
+
+> 태스크가 워크스페이스 파일에 있는 이유는 [12-project-skeleton.md](12-project-skeleton.md) 5절에 있다. `.vscode/tasks.json` 에 두면 *"Could not find the task 'build-build'"* 가 뜬다.
 
 ## 6. 막혔을 때
 

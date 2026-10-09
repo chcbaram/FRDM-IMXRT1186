@@ -148,4 +148,4 @@ SDK 드라이버의 `assert()` → `__assert_func` → `fiprintf` 가 stdio 를 
 
 - [ ] 21 — LPUART1(VCOM) + CLI + 부팅 배너, `_write` → UART
 - [ ] 22 — PLL: CM33 300 MHz (여기서 `SystemCoreClock` 을 CCM 에서 읽는 방식이 그대로 쓰인다)
-- [ ] VSCode `Debug CM33` 구성 실제 실행 확인
+- [ ] VSCode 에서 main 자동 정지 (cortex-debug + `probe-rs gdb` 검토)

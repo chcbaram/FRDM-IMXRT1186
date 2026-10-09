@@ -11,8 +11,8 @@
 firmware/rt1180-fw/
 ├── CMakeLists.txt              공유 경로, SDK 드라이버 목록, 코어 서브디렉터리
 ├── .clang-format  .gitignore
-├── .vscode/                    tasks · c_cpp_properties · extensions (코어 공통)
-├── prj/                        코어별 VSCode 워크스페이스 (디버그 구성 포함)
+├── .vscode/                    c_cpp_properties · extensions (코어 공통)
+├── prj/                        코어별 VSCode 워크스페이스 (태스크 · 디버그 구성 포함)
 ├── tools/
 │   ├── arm-none-eabi-gcc.cmake 툴체인 (titan-mini 와 같다)
 │   ├── flash.cmake             probe-rs 기록 타깃
@@ -130,7 +130,9 @@ titan-mini 의 규칙을 그대로 지킨다. 실제로 돌려 본 것은 macOS 
 | `rt1180-fw-cm7.code-workspace` | `src/cpu/cm33` | `build/cm7/compile_commands.json` | (로드맵 25) |
 | `rt1180-fw.code-workspace` | — | CM33 | — |
 
-> 같은 폴더를 열기 때문에 `.vscode/launch.json` 은 세 워크스페이스가 공유하게 된다. 그래서 디버그 구성은 `.vscode` 가 아니라 **각 워크스페이스 파일의 `"launch"` 안에** 둔다. 태스크(빌드/기록)는 코어 공통이라 `.vscode/tasks.json` 에 둔다.
+> 같은 폴더를 열기 때문에 `.vscode/launch.json` 은 세 워크스페이스가 공유하게 된다. 그래서 디버그 구성은 `.vscode` 가 아니라 **각 워크스페이스 파일의 `"launch"` 안에** 둔다.
+>
+> ⚠️ **태스크도 워크스페이스 파일에 둔다.** 워크스페이스 파일의 launch 는 `preLaunchTask` 를 **같은 워크스페이스 파일의 `"tasks"` 에서만** 찾는다. 처음에 태스크를 `.vscode/tasks.json` 에 두었더니 빌드(`Cmd+Shift+B`)는 되는데 디버그를 시작하면 *"Could not find the task 'build-build'"* 가 떴다. 그래서 `.vscode/tasks.json` 을 지우고 네 태스크(`build-configure`, `build-build`, `build-clean`, `flash`)를 세 워크스페이스 파일에 똑같이 넣었다. 태스크를 고칠 때는 세 파일을 같이 고친다. `.vscode/` 에는 `c_cpp_properties.json` 과 `extensions.json` 만 남는다.
 
 디버그는 `probe-rs-debug` 타입이다. `Debug CM33` 의 동작은 다음과 같다.
 

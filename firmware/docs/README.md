@@ -40,7 +40,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | 과제 | 왜 중요한가 | 언제 |
 |---|---|---|
 | probe-rs 에 CM7 코어 정의가 없다 | CM7 을 디버깅하려면 커스텀 타깃 yaml(AP 2)이 필요하다 | 25 |
-| VSCode `Debug CM33` 미실행 | 명령줄 기록과 읽기만 검증했다 | 21 전후 |
+| VSCode 에서 main 자동 정지 | probe-rs 확장에 `runToEntryPoint` 가 없다. 지금은 브레이크포인트를 걸고 ROM 에서 F5. cortex-debug + `probe-rs gdb` 조합을 검토 중 | 21 전후 |
 | Windows / Linux 환경 미검증 | 절차만 적어 두었다 ([13](13-os-setup.md)) | 다른 PC 를 쓸 때 |
 | TRDC 권한 | SDK 예제는 시작할 때 TRDC 를 연다. GPIO 에는 필요 없었지만 DMA/CM7/NETC 에서는 필요할 수 있다 | 24~25 |
 | QSPI 쓰기 중 XIP | 같은 플래시에서 실행하며 쓸 수 없다. NVS 와 부트로더는 TCM 실행이 전제다 | 26, 41 |
