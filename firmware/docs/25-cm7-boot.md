@@ -45,6 +45,25 @@ titan-mini 의 CPU1 기동과 같은 틀이다. 공유 블록 핸드셰이크, `
 | `cpu/cm7/` | CM7 프로젝트 — main → bsp → hw → ap (titan-mini cm33 과 같은 최소 구성) |
 | `tools/mkcm7img.py` | CM7 bin 앞에 헤더를 붙여 `.img` 를 만든다 |
 
+### 메모리 할당
+
+![코어별 메모리 할당 맵](images/core-memory-map.svg)
+
+두 링커 스크립트가 잡은 영역이다. 사용량이 아니라 **어느 코어가 어느 영역을 무엇으로 쓰는지**다.
+
+| 물리 메모리 | CM33 주소 | CM7 주소 | 링커 영역 | 할당 |
+|---|---|---|---|---|
+| QSPI 부트 슬롯 256 KB | `0x0400_0000` | — | cm33 `FCB` `CONTAINER` `VECTORS` `FLASH` | CM33 이미지 (XIP) |
+| QSPI CM7 슬롯 4 MB | `0x0480_0000` | — | (링커 밖, `flash` 타깃이 `.img` 를 씀) | CM7 이미지 보관 |
+| CM33 Code TCM 128 KB | `0x0FFE_0000` | `0x201E_0000` | cm33 `ITCM` | `.ram_function` |
+| CM33 System TCM 128 KB | `0x2000_0000` | `0x2020_0000` | cm33 `DTCM` | `.data` `.bss` 힙 4K 스택 8K |
+| CM7 ITCM 256 KB | `0x303C_0000` | `0x0000_0000` | cm7 `ITCM` | 벡터 · 코드 · `.data` 초기값 |
+| CM7 DTCM 256 KB | `0x3040_0000` | `0x2000_0000` | cm7 `DTCM` | `.data` `.bss` 힙 4K 스택 8K |
+| OCRAM2 앞 4 KB | `0x2050_0000` | `0x2050_0000` | cm33 · cm7 `SHARED` | `.shared` (`shared_t`) |
+| OCRAM1, OCRAM2 나머지, HyperRAM | | | — | 미할당 |
+
+QSPI 의 앱 영역(`0x0404_0000`)과 데이터 영역(`0x04C0_0000`)은 파티션 계획만 있다([02](02-memory-map.md) 5절).
+
 ## 3. CM7 이미지
 
 | 단계 | 결과물 |
@@ -64,6 +83,21 @@ titan-mini 의 CPU1 기동과 같은 틀이다. 공유 블록 핸드셰이크, `
 | 12 | reserved | 0 |
 
 CM33 은 기동 전에 셋을 다 확인한다. 하나라도 틀리면 `NO_IMAGE` 로 남고 CM7 을 깨우지 않는다. 빈 플래시나 낡은 이미지로 뛰지 않기 위해서다.
+
+### SDK 와 다른 점
+
+SDK 멀티코어 예제(`multicore_examples/hello_world`)도 CM7 을 **ITCM 에서 돌린다.** 이 보드의 `frdmimxrt1186@cm7` 빌드 목록은 RAM 타깃(`cm7_ram.ld`)만 켜져 있다. `flexspi_nor`(XIP)와 `hyperram` 타깃은 꺼져 있다. CM33 이 `0x303C_0000` 에 복사하고 `MCMGR_StartCore()` 로 깨우는 것도 같다.
+
+다른 것은 CM7 이미지를 어디에 담느냐다.
+
+| | SDK | 여기 |
+|---|---|---|
+| CM7 이미지 위치 | **CM33 이미지 안.** CM7 bin 을 CM33 링크 때 `.core1_code` 섹션으로 넣는다 (`core1_image_start`, 최대 256 KB) | **별도 QSPI 슬롯** `0x0480_0000` + 헤더 |
+| 검증 | 없음. 같은 이미지라 짝이 항상 맞는다 | magic · 크기 · CRC, 공유 블록 version |
+| 기록 | CM33 하나 | `.img` 와 CM33 elf 둘 |
+| 장점 | 한쪽만 기록해 짝이 어긋날 일이 없다 | 코어별 ELF (titan-mini 와 같다), 파티션 계획과 맞는다, 부트로더가 CM7 만 따로 갱신할 수 있다 |
+
+어느 쪽으로 갈지는 부트로더 설계(로드맵 40)에서 다시 정한다.
 
 ### 왜 elf 를 바로 쓰지 않나
 
