@@ -32,6 +32,10 @@
 #define      HW_RESET_DBLCLK_MS     300
 #define      HW_RESET_DBLCLK_CNT    2
 
+#define _USE_HW_IPC                                   // CM7 기동과 생존 확인
+#define      HW_IPC_BOOT_TIMEOUT_MS 500
+#define      HW_IPC_ALIVE_TIMEOUT_MS 100
+
 #define _USE_HW_UART
 #define      HW_UART_MAX_CH         1
 #define      HW_UART_CH_CLI         _DEF_UART1
@@ -58,6 +62,7 @@
 #define _USE_CLI_HW_BUTTON           1
 #define _USE_CLI_HW_RTC              1
 #define _USE_CLI_HW_RESET            1
+#define _USE_CLI_HW_IPC              1
 
 
 // 사용자 버튼 SW4 (GPIO_AD_12)

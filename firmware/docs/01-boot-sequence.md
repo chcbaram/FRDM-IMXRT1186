@@ -176,7 +176,9 @@ CM7 은 리셋이 유지된 채로 시작한다(`RELEASE_M7_RST_STAT=0` 출하�
 | 3 | `SRC_GENERAL_REG->SCR = BT_RELEASE_M7` | CM7 리셋 해제 |
 | 4 | DMA4 로 `0x303C_0000` ~ `0x3043_FFFF` 0 채움 | CM7 ITCM/DTCM ECC 초기화 |
 
-ROM 이 직접 CM7 을 풀게 하는 방법도 있다. `RELEASE_M7_RST_STAT=1` 퓨즈를 구우면 되지만, 그러면 CM7 이 항상 주소 `0x0` 에서 출발한다(RM 12.4.3). **퓨즈를 굽지 않는 방식(CM33 이 해제)을 쓴다.** 상세는 로드맵 25 에서 `04-dualcore.md` 로 정리한다.
+**실제로 해 보니 레지스터만으로는 시작되지 않았다.** `BT_RELEASE_M7` 은 리셋만 풀고 CM7 은 `M7_CFG.WAIT` 에 묶여 있다. 그 뒤 **ELE 에 kick-off 명령(`0x17D2_0106`)을 보내고 WAIT 를 내려야** 돈다(SDK MCMGR 와 같다). 상세는 [25-cm7-boot.md](25-cm7-boot.md).
+
+ROM 이 직접 CM7 을 풀게 하는 방법도 있다. `RELEASE_M7_RST_STAT=1` 퓨즈를 구우면 되지만, 그러면 CM7 이 항상 주소 `0x0` 에서 출발한다(RM 12.4.3). **퓨즈를 굽지 않는 방식(CM33 이 해제)을 쓴다.** 
 
 ## 7. 부팅이 안 될 때 보는 곳
 

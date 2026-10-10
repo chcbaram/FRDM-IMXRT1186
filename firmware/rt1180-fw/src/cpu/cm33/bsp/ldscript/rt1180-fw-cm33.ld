@@ -37,6 +37,7 @@ MEMORY
 
   ITCM       (RWX) : ORIGIN = 0x0FFE0000, LENGTH = 128K    /* CM33 Code TCM   */
   DTCM       (RW)  : ORIGIN = 0x20000000, LENGTH = 128K    /* CM33 System TCM */
+  SHARED     (RW)  : ORIGIN = 0x20500000, LENGTH = 4K      /* OCRAM2 앞 4 KB : 코어 간 공유 블록 (cpu/shared/shared.h) */
 }
 
 /* 컨테이너 이미지 엔트리가 쓰는 값 (bsp/boot/boot_hdr.c) */
@@ -192,6 +193,14 @@ SECTIONS
   __StackLimit = __StackTop - __stack_size__;
   PROVIDE(__stack = __StackTop);
   ASSERT(__StackLimit >= __StackStart, "DTCM overflowed with data, heap and stack")
+
+  /* 코어 간 공유 블록. NOLOAD 라 이미지에 담기지 않고 시작 시 0 으로 밀리지 않는다.
+     CM7 링커 스크립트도 같은 주소에 같은 섹션을 놓는다. */
+  .shared (NOLOAD) :
+  {
+    KEEP(*(.shared))
+    . = ALIGN(4);
+  } > SHARED
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }

@@ -154,5 +154,5 @@ UM 의 설명과도 맞는다. SW2 는 *"보드 전원을 껐다 켜는 파워 �
 
 ## 7. 다음
 
-- [ ] 25 — CM7 기동 (+ 캐시/MPU/TRDC)
+- [x] 25 — CM7 기동 ([25-cm7-boot.md](25-cm7-boot.md))
 - [ ] 폴트 핸들러(fault.c)를 옮겨 `resetIncFaultCount()` 와 ECC 주소 기록을 연결 (stm32h563-core `25-fault`)

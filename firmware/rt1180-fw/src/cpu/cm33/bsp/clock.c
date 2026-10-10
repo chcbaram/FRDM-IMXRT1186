@@ -31,6 +31,7 @@ typedef struct
 
 static const clock_root_tbl_t root_tbl[] =
 {
+  {"M7",         kCLOCK_Root_M7,         CCM_OBS_M7_CLK_ROOT},
   {"M33",        kCLOCK_Root_M33,        CCM_OBS_M33_CLK_ROOT},
   {"EDGELOCK",   kCLOCK_Root_Edgelock,   CCM_OBS_EDGELOCK_CLK_ROOT},
   {"BUS_AON",    kCLOCK_Root_Bus_Aon,    CCM_OBS_BUS_AON_CLK_ROOT},

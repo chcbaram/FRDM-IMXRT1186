@@ -42,6 +42,21 @@ bool hwInit(void)
   resetInit();
   buttonInit();
 
+  //-- CM7 기동은 로그가 열린 뒤에 한다. 시도와 결과를 남기기 위해서다. (titan-mini 와 같다)
+  //
+  ipcInit();
+  if (ipcIsBooted())
+  {
+    logPrintf("[OK] CM7 %s (%d ms)\n", ipcGetStateStr(), (int)ipcGetBootTime());
+    logPrintf("     name  : %s\n", ipcGetName());
+    logPrintf("     ver   : %s\n", ipcGetVersion());
+    logPrintf("     clock : %d MHz\n", (int)(ipcGetClock() / 1000000));
+  }
+  else
+  {
+    logPrintf("[%s] CM7 %s\n", ipcGetState() == IPC_STATE_DISABLED ? "  " : "E_", ipcGetStateStr());
+  }
+
 #if CLI_USE(HW_BOOT)
   cliAdd("boot", cliBoot);
 #endif

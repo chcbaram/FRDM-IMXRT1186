@@ -97,7 +97,7 @@ bool rtcInit(void)
 
   is_init = rtcIsEnabled();
 
-  logPrintf("[%s] rtcInit()\n", is_init ? "OK":"NG");
+  logPrintf("[%s] rtcInit()\n", is_init ? "OK":"E_");
 
 #if CLI_USE(HW_RTC)
   cliAdd("rtc", cliCmd);

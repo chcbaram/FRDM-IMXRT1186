@@ -14,7 +14,7 @@ project(${PRJ_NAME}
 )
 
 
-# CM7 이미지는 아직 없다. 로드맵 25(CM7 기동)에서 켠다.
+# CM7 이미지를 함께 빌드한다. 켜면 CM33 이 부팅 중에 CM7 을 깨운다 (로드맵 25).
 #
 option(BUILD_CM7 "build Cortex-M7 image" OFF)
 
@@ -44,6 +44,7 @@ set(SHARED_INC_DIRS
   ${SHARED_DIR}/common
   ${SHARED_DIR}/common/core
   ${SHARED_DIR}/common/hw/include
+  ${SHARED_DIR}/cpu/shared      # 두 코어가 합의해야 하는 규약 (shared.h)
   ${SHARED_DIR}/lib
 
   ${SHARED_DIR}/lib/cmsis/Core/Include
@@ -62,9 +63,19 @@ set(NXP_SRC_FILES
   ${NXP_DIR}/drivers/fsl_common_arm.c
   ${NXP_DIR}/drivers/fsl_clock.c
   ${NXP_DIR}/drivers/fsl_pmu.c
+  ${NXP_DIR}/drivers/fsl_dcdc.c
   ${NXP_DIR}/drivers/fsl_rgpio.c
   ${NXP_DIR}/drivers/fsl_lpuart.c
   )
+
+
+# Python 은 코어별 compile_commands 분리와 CM7 이미지 헤더(tools/mkcm7img.py)에 쓴다.
+#
+find_package(Python3 COMPONENTS Interpreter)
+
+if(BUILD_CM7 AND NOT Python3_FOUND)
+  message(FATAL_ERROR "BUILD_CM7=ON 에는 python3 가 필요하다 (tools/mkcm7img.py)")
+endif()
 
 
 add_subdirectory(src/cpu/cm33)
@@ -78,8 +89,6 @@ endif()
 # 에는 공유 파일이 항목 두 개로 들어가고 IntelliSense 는 먼저 찾은 것을 쓰므로,
 # 코어별로 갈라 놓아야 워크스페이스가 자기 코어 기준으로 해석한다. (titan-mini 와 같다)
 #
-find_package(Python3 COMPONENTS Interpreter)
-
 if(Python3_FOUND)
   add_custom_target(compdb ALL
     COMMAND ${Python3_EXECUTABLE}

@@ -60,6 +60,9 @@ target_include_directories(${EXECUTABLE} PRIVATE
 target_compile_definitions(${EXECUTABLE} PRIVATE
   CPU_MIMXRT1186CVJ8C_cm33        # fsl_device_registers.h 가 디바이스 헤더를 고른다
 
+  #-- CM7 이미지를 함께 빌드했을 때만 CM33 이 CM7 을 깨운다 (titan-mini 와 같다)
+  _HW_DEF_CM7_IMAGE=$<BOOL:${BUILD_CM7}>
+
   #-- startup_MIMXRT1186_cm33.S 옵션
   __STARTUP_CLEAR_BSS
   __STARTUP_INITIALIZE_RAMFUNCTION

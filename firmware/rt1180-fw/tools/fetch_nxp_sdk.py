@@ -58,7 +58,7 @@ FILES = [
 
     #-- SoC 드라이버 (MIMXRT1186 은 RT1189 의 것을 공유한다: drivers/CMakeLists.txt)
     *[('devices', f'RT1180/MIMXRT1189/drivers/{f}', f'nxp/drivers/{f}') for f in [
-        'fsl_iomuxc.h', 'fsl_clock.c', 'fsl_clock.h', 'fsl_pmu.c', 'fsl_pmu.h',
+        'fsl_iomuxc.h', 'fsl_clock.c', 'fsl_clock.h', 'fsl_pmu.c', 'fsl_pmu.h', 'fsl_dcdc.c', 'fsl_dcdc.h',
     ]],
 
     #-- 공통 드라이버

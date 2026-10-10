@@ -8,13 +8,13 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 |---|---|
 | 보드 | FRDM-IMXRT1186 (SCH-95302 Rev C) · MCU `MIMXRT1186CVJ8C` (LFBGA196) |
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) · probe-rs 0.32 |
-| 펌웨어 | `firmware/rt1180-fw` — CM33 **LED · UART(LPUART1) · CLI · 로그 · 240 MHz · 버튼 · swtimer · RTC · reset** |
+| 펌웨어 | `firmware/rt1180-fw` — CM33 **LED · UART(LPUART1) · CLI · 로그 · 240 MHz · 버튼 · swtimer · RTC · reset** + **CM7 기동** (792 MHz) |
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
 | 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `clock info` 로 CCM 실측 ([22](22-clock.md)) |
 | SDK | MCUXpresso SDK 에서 150개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
 | 빌드 | FLASH 44,360 B / 211 KB · DTCM 18,792 B / 128 KB |
 | 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `boot info` 로 부트 모드/퓨즈/클럭 확인 |
-| CM7 | 미기동 (로드맵 25) |
+| CM7 | **기동 확인** — ELE kick-off, ITCM 실행, 공유 블록 핸드셰이크 ([25](25-cm7-boot.md)). `-DBUILD_CM7=ON` |
 
 ### 바로 다시 시작하기
 
@@ -33,8 +33,9 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **25 CM7 기동** — ARM_PLL 800 MHz, 오버드라이브 전압, CM7 TCM 초기화, MU, probe-rs CM7 타깃, 캐시/MPU/TRDC
-2. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절)
+1. **25b** — probe-rs CM7 디버그(AP 2), CM7 캐시 + MPU, MU 메시지
+2. **26 QSPI NOR 드라이버** — TCM 에서 실행하며 지우기/쓰기. 부트로더의 전제
+3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절), SW2 전원 재인가 후 CM7 기동 ([25](25-cm7-boot.md) 8절)
 
 ### 미해결 과제
 
@@ -69,7 +70,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [01-boot-sequence](01-boot-sequence.md) | BOOT_MODE, FlexSPI NOR 부팅, FCB/컨테이너, 퓨즈 실측, CM7 기동 경로 | ✅ |
 | [02-memory-map](02-memory-map.md) | CM33/CM7 주소 공간, NS/S alias, QSPI 파티션 계획 | ✅ |
 | [03-board-mapping](03-board-mapping.md) | 부트 스위치, 리셋, 디버거, LED/버튼/UART, 메모리, 전원 | ✅ |
-| 04-dualcore | CM7 기동, MU, 공유 메모리 | 25 에서 |
+| 04-dualcore | 코어 간 구조 정리 — 지금은 [25-cm7-boot](25-cm7-boot.md) 에 있다 | 25b 이후 |
 | [05-network-overview](05-network-overview.md) | NETC, eCAT, PHY 4개와 핀 공유 점퍼 | ✅ |
 
 ### 환경과 구조
@@ -90,7 +91,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
 | [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · SW3 더블클릭 · 부팅 확인/폴트 카운터 | ✅ |
-| 25 | **CM7 기동** + MU/IPC + probe-rs CM7 타깃 + 캐시(XCACHE) / MPU / TRDC | 예정 |
+| [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b: CM7 디버그 · 캐시/MPU · MU 남음) |
 | 26 | QSPI NOR 드라이버 (TCM 실행 지우기/쓰기) | 예정 |
 | 27 | HyperRAM (FlexSPI1) | 예정 |
 | 28 | FreeRTOS | 예정 |
@@ -140,6 +141,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | ![](images/board-boot-config.svg) | [03](03-board-mapping.md) 부트 설정 |
 | ![](images/network-topology.svg) | [05](05-network-overview.md) 네트워크 |
 | ![](images/clock-tree.svg) | [22](22-clock.md) CM33 클럭 트리 |
+| ![](images/cm7-boot.svg) | [25](25-cm7-boot.md) CM7 기동 순서 |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 
 그림은 전부 손으로 쓴 SVG 다. 코드블록 ASCII 아트는 한글이 2칸 폭이라 정렬이 깨진다. 아래 두 스크립트로 검사한다.

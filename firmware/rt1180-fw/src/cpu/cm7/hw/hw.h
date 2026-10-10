@@ -6,16 +6,7 @@ extern "C" {
 #endif
 
 #include "hw_def.h"
-
-#include "led.h"
-#include "swtimer.h"
-#include "button.h"
-#include "rtc.h"
-#include "reset.h"
 #include "ipc.h"
-#include "uart.h"
-#include "cli.h"
-#include "log.h"
 
 
 bool hwInit(void);

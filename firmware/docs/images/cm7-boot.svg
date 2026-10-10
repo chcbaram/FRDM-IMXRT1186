@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="640" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">CM7 기동 — CM33 이 깨운다 (퓨즈 없이)</text>
+  <text x="20" y="48" class="s">cm33/hw/driver/ipc.c → cm33/bsp/cm7.c · SDK MCMGR(imxrt1180) 와 같은 순서 · 부팅 로그 기준 10 ms</text>
+
+  <!-- 열 머리 -->
+  <rect x="20" y="66" width="200" height="34" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+  <text x="120" y="88" class="b" text-anchor="middle" fill="#1e40af">QSPI · 공유 메모리</text>
+  <rect x="250" y="66" width="300" height="34" rx="6" fill="#eef2ff" stroke="#4f46e5"/>
+  <text x="400" y="88" class="b" text-anchor="middle" fill="#3730a3">CM33 (240 MHz)</text>
+  <rect x="580" y="66" width="160" height="34" rx="6" fill="#fef3c7" stroke="#d97706"/>
+  <text x="660" y="88" class="b" text-anchor="middle" fill="#b45309">ELE</text>
+  <rect x="770" y="66" width="170" height="34" rx="6" fill="#ffedd5" stroke="#ea580c"/>
+  <text x="855" y="88" class="b" text-anchor="middle" fill="#c2410c">CM7</text>
+
+  <line x1="120" y1="100" x2="120" y2="620" stroke="#d1d5db" stroke-dasharray="4 4"/>
+  <line x1="400" y1="100" x2="400" y2="620" stroke="#d1d5db" stroke-dasharray="4 4"/>
+  <line x1="660" y1="100" x2="660" y2="620" stroke="#d1d5db" stroke-dasharray="4 4"/>
+  <line x1="855" y1="100" x2="855" y2="620" stroke="#d1d5db" stroke-dasharray="4 4"/>
+
+  <!-- 1 이미지 검사 -->
+  <rect x="20" y="116" width="200" height="50" rx="5" fill="#ffffff" stroke="#3b82f6"/>
+  <text x="120" y="136" class="m" text-anchor="middle">0x0480_0000</text>
+  <text x="120" y="154" class="s" text-anchor="middle">헤더 + CM7 bin</text>
+  <rect x="270" y="116" width="260" height="50" rx="5" fill="#ffffff" stroke="#4f46e5"/>
+  <text x="400" y="136" class="b" text-anchor="middle">1. 이미지 검사</text>
+  <text x="400" y="154" class="m" text-anchor="middle">magic · size · CRC-32</text>
+  <line x1="222" y1="141" x2="268" y2="141" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- 2 magic 지우기 -->
+  <rect x="20" y="182" width="200" height="40" rx="5" fill="#ffffff" stroke="#3b82f6"/>
+  <text x="120" y="207" class="m" text-anchor="middle">OCRAM2 0x2050_0000</text>
+  <rect x="270" y="182" width="260" height="40" rx="5" fill="#ffffff" stroke="#4f46e5"/>
+  <text x="400" y="207" class="b" text-anchor="middle">2. 공유 블록 magic = 0</text>
+  <line x1="268" y1="202" x2="222" y2="202" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- 3 Prepare -->
+  <rect x="270" y="238" width="260" height="96" rx="5" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="400" y="258" class="b" text-anchor="middle" fill="#3730a3">3. cm7Prepare()</text>
+  <text x="286" y="278" class="s">Prepare_CM7(0) : INITVTOR 0, 리셋 해제</text>
+  <text x="286" y="296" class="s">(아직 WAIT), DMA4 로 TCM ECC 초기화</text>
+  <text x="286" y="314" class="s">DCDC 1.125 V · FBB · ARM PLL 792 MHz</text>
+  <line x1="532" y1="300" x2="768" y2="300" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <rect x="770" y="280" width="170" height="40" rx="5" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="855" y="305" class="s" text-anchor="middle">리셋 해제 · WAIT</text>
+
+  <!-- 4 Load -->
+  <rect x="270" y="350" width="260" height="50" rx="5" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="400" y="370" class="b" text-anchor="middle" fill="#3730a3">4. cm7Load()</text>
+  <text x="400" y="388" class="m" text-anchor="middle">→ 0x303C_0000 (CM7 ITCM)</text>
+  <line x1="532" y1="375" x2="768" y2="375" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="770" y="355" width="170" height="40" rx="5" fill="#ffffff" stroke="#ea580c"/>
+  <text x="855" y="380" class="m" text-anchor="middle">ITCM 0x0</text>
+
+  <!-- 5 ELE kick -->
+  <rect x="270" y="416" width="260" height="50" rx="5" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="400" y="436" class="b" text-anchor="middle" fill="#3730a3">5. cm7Start()</text>
+  <text x="400" y="454" class="m" text-anchor="middle">S3MU TR[0] = 0x17D2_0106</text>
+  <line x1="532" y1="430" x2="603" y2="430" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="605" y="412" width="110" height="64" rx="5" fill="#fef3c7" stroke="#d97706"/>
+  <text x="660" y="434" class="b" text-anchor="middle" fill="#b45309">kick-off</text>
+  <text x="660" y="452" class="m" text-anchor="middle">E1D20206</text>
+  <text x="660" y="468" class="m" text-anchor="middle">D6 = OK</text>
+  <line x1="603" y1="458" x2="532" y2="458" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- 6 WAIT 해제 -->
+  <rect x="270" y="482" width="260" height="40" rx="5" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="400" y="507" class="b" text-anchor="middle" fill="#3730a3">6. M7_CFG.WAIT = 0</text>
+  <line x1="532" y1="502" x2="768" y2="502" stroke="#ea580c" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="770" y="482" width="170" height="40" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.5"/>
+  <text x="855" y="507" class="b" text-anchor="middle" fill="#c2410c">Reset_Handler</text>
+
+  <!-- 7 handshake -->
+  <rect x="770" y="538" width="170" height="40" rx="5" fill="#ffedd5" stroke="#ea580c"/>
+  <text x="855" y="563" class="s" text-anchor="middle">ipcInit : magic 기록</text>
+  <line x1="768" y1="558" x2="222" y2="558" stroke="#ea580c" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <rect x="20" y="538" width="200" height="40" rx="5" fill="#ffffff" stroke="#3b82f6"/>
+  <text x="120" y="563" class="m" text-anchor="middle">magic "RTSH"</text>
+  <rect x="270" y="584" width="260" height="40" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="400" y="609" class="b" text-anchor="middle" fill="#15803d">7. RUNNING — alive 증가 확인</text>
+  <line x1="222" y1="572" x2="268" y2="598" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+</svg>

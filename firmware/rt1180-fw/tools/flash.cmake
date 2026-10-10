@@ -21,7 +21,24 @@ if(PROBE_RS_EXECUTABLE)
   set(_flash_elfs $<TARGET_FILE:${PRJ_NAME}-cm33.elf>)
   set(_flash_deps ${PRJ_NAME}-cm33.elf)
 
+  #-- CM7 이미지는 elf 가 아니라 헤더를 붙인 bin(.img)을 CM7 슬롯에 쓴다.
+  #   CM7 elf 의 주소는 CM7 ITCM(0x0)이라 그대로는 플래시에 쓸 수 없다.
+  #
+  set(_flash_cm7_cmds "")
+  if(BUILD_CM7)
+    list(APPEND _flash_deps ${PRJ_NAME}-cm7.elf)
+    set(_flash_cm7_cmds
+      COMMAND ${PROBE_RS_EXECUTABLE} download
+              --chip ${PROBE_RS_CHIP}
+              --verify
+              --binary-format bin
+              --base-address 0x04800000
+              ${CMAKE_BINARY_DIR}/cm7/${PRJ_NAME}-cm7.img
+      )
+  endif()
+
   add_custom_target(flash
+    ${_flash_cm7_cmds}
     COMMAND ${PROBE_RS_EXECUTABLE} download
             --chip ${PROBE_RS_CHIP}
             --verify
