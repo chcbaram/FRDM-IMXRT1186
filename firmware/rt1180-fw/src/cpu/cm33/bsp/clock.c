@@ -59,14 +59,12 @@ static const clock_pll_tbl_t pll_tbl[] =
 static bool is_applied = false;
 
 
-
-
 #if CLOCK_APPLY
-static bool pllReady(clock_pll_t pll)
-{
-  return CLOCK_IsPllEnabled(pll) && !CLOCK_IsPllBypassed(pll);
-}
+static bool pllReady(clock_pll_t pll);
 #endif
+
+
+
 
 bool clockInit(void)
 {
@@ -168,3 +166,10 @@ bool clockGetPllInfo(uint32_t index, const char **p_name, bool *p_enable, bool *
 
   return true;
 }
+
+#if CLOCK_APPLY
+static bool pllReady(clock_pll_t pll)
+{
+  return CLOCK_IsPllEnabled(pll) && !CLOCK_IsPllBypassed(pll);
+}
+#endif

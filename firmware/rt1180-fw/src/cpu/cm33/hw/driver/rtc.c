@@ -38,52 +38,13 @@ static bool is_init = false;
 static void cliCmd(cli_args_t *args);
 #endif
 
+static void     rtcSetEnable(bool enable);
+static bool     rtcIsEnabled(void);
+static uint32_t rtcGetSeconds(void);
+static void     rtcSetSeconds(uint32_t seconds);
 
 
 
-static void rtcSetEnable(bool enable)
-{
-  uint32_t ctrl = BBNSM->BBNSM_CTRL;
-
-  ctrl &= ~(BBNSM_BBNSM_CTRL_RTC_EN_MASK | BBNSM_BBNSM_CTRL_TOSP_MASK);
-  ctrl |= BBNSM_BBNSM_CTRL_RTC_EN(enable ? RTC_EN_ENABLE : RTC_EN_DISABLE);
-  BBNSM->BBNSM_CTRL = ctrl;
-}
-
-static bool rtcIsEnabled(void)
-{
-  return ((BBNSM->BBNSM_CTRL & BBNSM_BBNSM_CTRL_RTC_EN_MASK) >> BBNSM_BBNSM_CTRL_RTC_EN_SHIFT) == RTC_EN_ENABLE;
-}
-
-static uint32_t rtcGetSeconds(void)
-{
-  uint32_t seconds;
-  uint32_t tmp = 0;
-
-  //-- 두 레지스터를 따로 읽으므로 LS 가 넘어가는 순간에 걸릴 수 있다.
-  //   같은 값이 두 번 나올 때까지 읽는다. (SDK BBNSM_RTC_GetSeconds 와 같다)
-  //
-  do
-  {
-    seconds = tmp;
-    tmp     = (BBNSM->BBNSM_RTC_MS << 17U) | (BBNSM->BBNSM_RTC_LS >> 15U);
-  } while (tmp != seconds);
-
-  return seconds;
-}
-
-static void rtcSetSeconds(uint32_t seconds)
-{
-  bool enabled = rtcIsEnabled();
-
-  rtcSetEnable(false);
-  BBNSM->BBNSM_RTC_MS = seconds >> 17U;
-  BBNSM->BBNSM_RTC_LS = seconds << 15U;
-  if (enabled)
-  {
-    rtcSetEnable(true);
-  }
-}
 
 bool rtcInit(void)
 {
@@ -219,6 +180,50 @@ bool rtcGetReg(uint32_t index, uint32_t *p_data)
   return true;
 }
 
+
+static void rtcSetEnable(bool enable)
+{
+  uint32_t ctrl = BBNSM->BBNSM_CTRL;
+
+  ctrl &= ~(BBNSM_BBNSM_CTRL_RTC_EN_MASK | BBNSM_BBNSM_CTRL_TOSP_MASK);
+  ctrl |= BBNSM_BBNSM_CTRL_RTC_EN(enable ? RTC_EN_ENABLE : RTC_EN_DISABLE);
+  BBNSM->BBNSM_CTRL = ctrl;
+}
+
+static bool rtcIsEnabled(void)
+{
+  return ((BBNSM->BBNSM_CTRL & BBNSM_BBNSM_CTRL_RTC_EN_MASK) >> BBNSM_BBNSM_CTRL_RTC_EN_SHIFT) == RTC_EN_ENABLE;
+}
+
+static uint32_t rtcGetSeconds(void)
+{
+  uint32_t seconds;
+  uint32_t tmp = 0;
+
+  //-- 두 레지스터를 따로 읽으므로 LS 가 넘어가는 순간에 걸릴 수 있다.
+  //   같은 값이 두 번 나올 때까지 읽는다. (SDK BBNSM_RTC_GetSeconds 와 같다)
+  //
+  do
+  {
+    seconds = tmp;
+    tmp     = (BBNSM->BBNSM_RTC_MS << 17U) | (BBNSM->BBNSM_RTC_LS >> 15U);
+  } while (tmp != seconds);
+
+  return seconds;
+}
+
+static void rtcSetSeconds(uint32_t seconds)
+{
+  bool enabled = rtcIsEnabled();
+
+  rtcSetEnable(false);
+  BBNSM->BBNSM_RTC_MS = seconds >> 17U;
+  BBNSM->BBNSM_RTC_LS = seconds << 15U;
+  if (enabled)
+  {
+    rtcSetEnable(true);
+  }
+}
 
 #if CLI_USE(HW_RTC)
 void cliCmd(cli_args_t *args)

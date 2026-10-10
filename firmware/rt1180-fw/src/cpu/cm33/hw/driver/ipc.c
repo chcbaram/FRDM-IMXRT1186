@@ -24,6 +24,11 @@ static shared_t shared;
 static void cliIpc(cli_args_t *args);
 #endif
 
+#if _HW_DEF_CM7_IMAGE
+static bool     ipcCheckImage(void);
+static uint32_t crc32(const uint8_t *p_data, uint32_t length);
+#endif
+
 
 static IpcState_t ipc_state    = IPC_STATE_DISABLED;
 static uint32_t   boot_time_ms = 0;
@@ -46,38 +51,6 @@ static const char *ipc_state_str[] =
     "RUNNING",
   };
 
-
-#if _HW_DEF_CM7_IMAGE
-static uint32_t crc32(const uint8_t *p_data, uint32_t length)
-{
-  uint32_t crc = 0xFFFFFFFFUL;
-
-  for (uint32_t i = 0; i < length; i++)
-  {
-    crc ^= p_data[i];
-    for (int b = 0; b < 8; b++)
-    {
-      crc = (crc >> 1) ^ (0xEDB88320UL & (0U - (crc & 1U)));
-    }
-  }
-  return ~crc;
-}
-
-static bool ipcCheckImage(void)
-{
-  const cm7_image_t *p_hdr = (const cm7_image_t *)SHARED_CM7_IMAGE_ADDR;
-
-  if (p_hdr->magic != SHARED_CM7_IMAGE_MAGIC)
-    return false;
-  if (p_hdr->size == 0 || p_hdr->size > SHARED_CM7_IMAGE_MAX)
-    return false;
-
-  image_size = p_hdr->size;
-  image_crc  = crc32((const uint8_t *)(p_hdr + 1), p_hdr->size);
-
-  return (image_crc == p_hdr->crc32);
-}
-#endif
 
 bool ipcInit(void)
 {
@@ -200,6 +173,38 @@ uint32_t ipcGetClock(void)
   return ipcIsBooted() ? shared.peer_clock : 0;
 }
 
+
+#if _HW_DEF_CM7_IMAGE
+static uint32_t crc32(const uint8_t *p_data, uint32_t length)
+{
+  uint32_t crc = 0xFFFFFFFFUL;
+
+  for (uint32_t i = 0; i < length; i++)
+  {
+    crc ^= p_data[i];
+    for (int b = 0; b < 8; b++)
+    {
+      crc = (crc >> 1) ^ (0xEDB88320UL & (0U - (crc & 1U)));
+    }
+  }
+  return ~crc;
+}
+
+static bool ipcCheckImage(void)
+{
+  const cm7_image_t *p_hdr = (const cm7_image_t *)SHARED_CM7_IMAGE_ADDR;
+
+  if (p_hdr->magic != SHARED_CM7_IMAGE_MAGIC)
+    return false;
+  if (p_hdr->size == 0 || p_hdr->size > SHARED_CM7_IMAGE_MAX)
+    return false;
+
+  image_size = p_hdr->size;
+  image_crc  = crc32((const uint8_t *)(p_hdr + 1), p_hdr->size);
+
+  return (image_crc == p_hdr->crc32);
+}
+#endif
 
 #if CLI_USE(HW_IPC)
 void cliIpc(cli_args_t *args)
