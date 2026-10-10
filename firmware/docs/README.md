@@ -34,7 +34,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 ### 다음 작업
 
 1. **25 CM7 기동** — ARM_PLL 800 MHz, 오버드라이브 전압, CM7 TCM 초기화, MU, probe-rs CM7 타깃, 캐시/MPU/TRDC
-2. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절), SW2 한 번/두 번 · 전원 재인가 ([24](24-rtc-reset.md) 6절) — 퓨즈 없이 CM33 이 깨운다. probe-rs CM7 타깃 정의 필요
+2. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절)
 
 ### 미해결 과제
 
@@ -89,7 +89,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [21](21-uart-cli.md) | **UART(LPUART1) + CLI + 로그** — 부팅 배너, `boot info` | ✅ |
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
-| [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · 더블클릭 · 부팅 확인/폴트 카운터 | ✅ (SW2 · 전원 시험 남음) |
+| [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · SW3 더블클릭 · 부팅 확인/폴트 카운터 | ✅ |
 | 25 | **CM7 기동** + MU/IPC + probe-rs CM7 타깃 + 캐시(XCACHE) / MPU / TRDC | 예정 |
 | 26 | QSPI NOR 드라이버 (TCM 실행 지우기/쓰기) | 예정 |
 | 27 | HyperRAM (FlexSPI1) | 예정 |

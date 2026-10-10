@@ -69,11 +69,23 @@ stm32h563-core 의 reset.c 를 그대로 옮기고 리셋 원인 판정만 바�
 
 | 분류 | SRSR 비트 |
 |---|---|
-| POWER | `POR_RST` (bit 0) |
-| PIN | `IPP_POR_B` (bit 16) — SW2 (J24) |
+| POWER | `POR_RST` (bit 0) **이면서 BBSM 도 새로 켜진 경우** (GPR 매직 없음) |
+| PIN | `IPP_POR_B` (bit 16) — **SW3** (POR_B 핀) |
 | SOFT | `CM33_REQUEST` (9), `CM7_REQUEST` (11), `JTAG_SW_RST` (8) |
 | WDG | `WDOG1~5` (1~5) |
 | ETC | lockup (10, 12), EdgeLock (7), 온도센서 (6), DCDC 과전압 (13), ECAT (14) |
+
+### ⚠️ SRSR 만으로는 버튼 리셋과 전원 인가를 구분할 수 없다
+
+실측해 보니 SW3(POR_B 핀)를 눌러도 SRSR 이 전원 인가와 똑같이 `0x0001_0001`(POR_RST + IPP_POR_B)이었다. stm32h563-core 의 규칙은 POWER 를 가장 먼저 보고 카운트를 0 으로 되돌린다. 그대로 옮기면 버튼 리셋도 전부 POWER 가 되어 **더블클릭이 절대 세어지지 않는다.**
+
+구분하는 단서는 **BBSM 이 살아남았는지**다. POR_B 는 BBSM 도메인을 리셋하지 않는다. 그래서 매 부팅 `resetCntSave()` 가 GPR2 에 남기는 매직(`0xA55A`)이 그대로 있다. 진짜 전원 인가에서는 BBSM 도 새로 켜지므로 매직이 없다.
+
+```c
+rtcGetReg(HW_RTC_RESET_CNT, &reg);
+if ((reg & 0xFFFF0000UL) == RESET_CNT_MAGIC)   // BBSM 전원 유지 = 전원 인가가 아니다
+  reset_bits &= ~(1<<RESET_BIT_POWER);
+```
 
 **SRSR 은 POR 에서만 지워지고 나머지 리셋에서는 비트가 쌓인다.** 처음 `boot info` 에서 본 `0x0001_0201` 이 쌓인 상태였다. `resetInit()` 은 읽은 값을 그대로 다시 써서 지운다(W1C).
 
@@ -117,12 +129,28 @@ stm32h563-core 의 reset.c 를 그대로 옮기고 리셋 원인 판정만 바�
 
 [22-clock.md](22-clock.md) 5절에서는 *"MCU-Link 가 J26 로 POR_B 를 건다"* 고 추정했다. SRSR 을 읽어 보니 `CM33_REQUEST` 만 남았다. **probe-rs 의 리셋은 SWD 로 SYSRESETREQ 를 쓰는 소프트 리셋**이다. J26(MCU-Link TRG_RST → POR)은 이 경로에 쓰이지 않는다. 다만 `probe-rs reset` 뒤에 VCOM 출력이 사라지는 현상 자체는 여전하다. 원인 추정만 바뀐 것이다.
 
-### 확인 필요 — 손으로 눌러야 하는 시험
+### 버튼별 실측 — 손으로 눌러 확인
 
-- [ ] SW2 한 번 → SRSR 에 어떤 비트가 남는지 (`IPP_POR_B` 만인지, `POR_RST` 도 같이인지). PIN 으로 분류되고 빨간 LED 가 0.3 초 켜지는지
-- [ ] SW2 빠르게 두 번 → `reset_count : 2`
-- [ ] 전원 재인가 → POWER 로 분류되고 카운터가 0. GPR 과 시각이 지워지는지 (J11 DNP)
-- [ ] SW3 (POR_B 직접) 와 SW2 의 차이
+| 버튼 | 실제 동작 | SRSR | GPR · RTC | 판정 |
+|---|---|---|---|---|
+| **SW3** | POR_B 핀 리셋 | `0x0001_0001` | **유지** (`GPR7` 표식이 남고 RTC 계속 셈) | **PIN** |
+| **SW2** | **보드 전원 재인가.** MCU-Link 까지 꺼져 USB 시리얼이 잠시 사라진다 | `0x0001_0001` | **지워짐** (표식 0, RTC 0 부터) | **POWER** |
+| AIRCR, `probe-rs reset`, `reset reset` | SYSRESETREQ | `0x0000_0200` | 유지 | **SOFT** |
+
+UM 의 설명과도 맞는다. SW2 는 *"보드 전원을 껐다 켜는 파워 리셋 버튼"* 이고, SW3 는 *"BBSM 을 제외한 시스템 전원 리셋"* 이다. **리셋 더블클릭은 SW3 로 한다.**
+
+### 더블클릭 — 빨간 LED 를 보고 누른다
+
+| 누르는 법 | 결과 |
+|---|---|
+| SW3 를 마우스 더블클릭처럼 빠르게 두 번 | `reset_count : 1` 만 나온다. 두 번째 누름이 첫 리셋 도중에 묻힌다 |
+| SW3 → **빨간 LED 가 켜진 동안** 다시 SW3 | **`reset_count : 2`** (4 번 시도 모두 성공, 두 부팅 간격 약 0.5 초) |
+
+첫 부팅은 `resetInit()` 에서 GPR 에 카운트 1 을 저장한 뒤, 빨간 LED 를 켜고 300 ms 대기창을 연다. 두 번째 누름은 이 창 안에 들어와야 한다. 창보다 먼저 누르면 GPR 에는 아직 이전 값 0 이 남아 있다. 그래서 두 번째 부팅도 1 로 시작한다.
+
+### 남은 것
+
+- [ ] 부트 모드 플래그(`reset boot` → 다음 부팅에서 `MODE_BIT_BOOT`)는 부트로더가 생기면(로드맵 41) 그쪽에서 확인한다
 
 ## 7. 다음
 

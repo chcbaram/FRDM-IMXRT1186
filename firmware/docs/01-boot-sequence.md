@@ -23,7 +23,7 @@
 
 ## 2. 부트 모드 결정
 
-BootROM 은 `SBMR2[BOOT_MODE]` 를 읽는다. 이 값은 **POR_B 상승 에지에서 BOOT_MODE[2:0] 핀을 샘플**한 것이고, 그 뒤 핀을 바꿔도 변하지 않는다(RM 12.3.3.1). 즉 **딥스위치를 바꾼 뒤에는 POR 이 필요하다.** 이 보드는 SW2 리셋 버튼(J24 단락, 기본)과 MCU-Link 리셋(J26 단락, 기본)이 모두 MCU **power-on reset** 을 건다(UM12450 점퍼 표의 J24, J26). 그래서 **SW2 를 누르면** BOOT_MODE 를 다시 읽는다. 단 `probe-rs reset` 은 SWD 로 SYSRESETREQ 를 쓰는 소프트 리셋이라 J26 경로를 타지 않는다. 이 경우 BOOT_MODE 를 다시 샘플하지 않는다([24-rtc-reset.md](24-rtc-reset.md) 6절, SRSR 로 확인).
+BootROM 은 `SBMR2[BOOT_MODE]` 를 읽는다. 이 값은 **POR_B 상승 에지에서 BOOT_MODE[2:0] 핀을 샘플**한 것이고, 그 뒤 핀을 바꿔도 변하지 않는다(RM 12.3.3.1). 즉 **딥스위치를 바꾼 뒤에는 POR 이 필요하다.** 이 보드는 SW2 리셋 버튼(J24 단락, 기본)과 MCU-Link 리셋(J26 단락, 기본)이 모두 MCU **power-on reset** 을 건다(UM12450 점퍼 표의 J24, J26). 그래서 **SW2(보드 전원 재인가)나 SW3(POR_B 핀)를 누르면** BOOT_MODE 를 다시 읽는다. SW3 는 BBSM(RTC · GPR)을 살려 두고, SW2 는 MCU-Link 까지 껐다 켠다([24-rtc-reset.md](24-rtc-reset.md) 6절). 단 `probe-rs reset` 은 SWD 로 SYSRESETREQ 를 쓰는 소프트 리셋이라 J26 경로를 타지 않는다. 이 경우 BOOT_MODE 를 다시 샘플하지 않는다([24-rtc-reset.md](24-rtc-reset.md) 6절, SRSR 로 확인).
 
 | BOOT_MODE[2:0] | 동작 (RM Table 52) |
 |---|---|
@@ -182,7 +182,7 @@ ROM 이 직접 CM7 을 풀게 하는 방법도 있다. `RELEASE_M7_RST_STAT=1` �
 
 | 증상 | 확인 |
 |---|---|
-| 아무 반응 없음 | J60 이 `100` 인가, SW2 나 전원 재인가로 POR 을 걸었나 |
+| 아무 반응 없음 | J60 이 `100` 인가, SW3 · SW2 · 전원 재인가로 POR 을 걸었나 |
 | ROM 이 시리얼 다운로더로 빠짐 | FCB tag `FCFB` 위치(`+0x400`), 컨테이너 tag `0x87` 위치(`+0x1000`), 인스턴스 퓨즈 |
 | 디버거를 붙이고 싶은데 앱이 바로 죽음 | J60 을 `110`(Infinite Loop)으로 두고 POR → 디버거에서 RAM 로드 |
 | 실패 원인 추적 | `SRC GPR9[15:0]` BOOT_STAGE 를 디버거로 읽는다 (RM Table 56) |

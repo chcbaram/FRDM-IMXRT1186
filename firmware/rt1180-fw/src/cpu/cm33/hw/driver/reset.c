@@ -17,11 +17,16 @@
  *   - ECC 주소 : 32 bit 주소를 그대로 두고, 유효 표시는 따로 GPR 하나를 쓴다.
  *
  * SRSR → RESET_BIT 분류
- *   POWER  POR_RST (bit0)                       전원 인가
- *   PIN    IPP_POR_B (bit16)                    SW2, MCU-Link 리셋 (J24, J26 → POR_B)
+ *   POWER  POR_RST (bit0) 이면서 BBSM 도 새로 켜짐 (GPR 매직 없음)
+ *   PIN    IPP_POR_B (bit16)                    SW3 (POR_B 핀)
  *   SOFT   CM33_REQUEST, CM7_REQUEST, JTAG_SW   SYSRESETREQ, 디버거
  *   WDG    WDOG1~5
  *   ETC    lockup, EdgeLock, 온도센서, DCDC 과전압, ECAT
+ *
+ * POR_B 핀(SW3)을 눌러도 POR_RST 가 같이 세트된다 (실측 SRSR = 0x0001_0001).
+ * SRSR 만으로는 전원 인가와 구분되지 않는다. 그런데 POR_B 는 BBSM 도메인을 리셋하지
+ * 않아서 GPR 이 남는다. 그래서 "GPR 매직이 살아 있으면 BBSM 전원은 유지됐다 = 전원
+ * 인가가 아니다" 로 보고 POWER 를 지운다. (docs/24-rtc-reset.md 6절)
  */
 #define SRSR_POWER   (SRC_GENERAL_SRSR_POR_RST_MASK)
 #define SRSR_PIN     (SRC_GENERAL_SRSR_IPP_POR_B_MASK)
@@ -89,6 +94,20 @@ bool resetInit(void)
   if (reset_srsr & SRSR_WDG)   reset_bits |= (1<<RESET_BIT_WDG);
   if (reset_srsr & SRSR_SOFT)  reset_bits |= (1<<RESET_BIT_SOFT);
   if (reset_srsr & SRSR_ETC)   reset_bits |= (1<<RESET_BIT_ETC);
+
+  //-- BBSM 이 살아 있었는지 : 매 부팅마다 resetCntSave() 가 GPR 에 매직을 남긴다.
+  //   매직이 있으면 BBSM 전원은 끊기지 않았다. 그러면 POR_RST 는 POR_B 핀 리셋이 함께
+  //   올린 것이므로 POWER 로 보지 않는다.
+  //
+  {
+    uint32_t reg = 0;
+
+    rtcGetReg(HW_RTC_RESET_CNT, &reg);
+    if ((reg & 0xFFFF0000UL) == RESET_CNT_MAGIC)
+    {
+      reset_bits &= ~(1<<RESET_BIT_POWER);
+    }
+  }
 
   //-- 쓴 비트만 지워진다 (W1C). 지우지 않으면 다음 리셋 원인과 섞인다.
   //
