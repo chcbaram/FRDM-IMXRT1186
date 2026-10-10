@@ -1,112 +1,126 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 752" width="960" height="752" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 854" width="960" height="854" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
   <style>
     .b   { font-size: 13px; font-weight: 600; }
     .s   { font-size: 11.5px; fill: #6b7280; }
     .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
     .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
   </style>
-  <rect x="0" y="0" width="960" height="752" fill="#fbfbfd"/>
+  <rect x="0" y="0" width="960" height="854" fill="#fbfbfd"/>
 
   <text x="20" y="28" class="ttl">코어별 메모리 할당 맵 — 로드맵 25 기준</text>
-  <text x="20" y="48" class="s">각 코어가 자기 주소 순서로 본 메모리 · 색 = 소유 · ① CM7 이미지 경로 · ② 공유 블록 (두 코어 같은 주소)</text>
+  <text x="20" y="48" class="s">주소는 한 축 · 같은 행 = 같은 주소 · 색 = 소유 · ① CM7 이미지 경로 · ② 공유 블록 · 빈 칸 = 그 코어에서 매핑 없음</text>
 
-  <rect x="20" y="66" width="450" height="34" rx="6" fill="#eef2ff" stroke="#4f46e5"/>
-  <text x="245" y="88" class="b" text-anchor="middle" fill="#3730a3">CM33 (240 MHz) 이 본 주소</text>
-  <rect x="490" y="66" width="450" height="34" rx="6" fill="#fff7ed" stroke="#ea580c"/>
-  <text x="715" y="88" class="b" text-anchor="middle" fill="#c2410c">CM7 (792 MHz) 이 본 주소</text>
-  <text x="22" y="153" class="m">0x0400_0000</text>
-  <rect x="114" y="131" width="356" height="38" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
-  <text x="126" y="148" class="b" fill="#1e40af">QSPI 부트 슬롯 · 256 KB</text>
-  <text x="126" y="163" class="s">CM33 이미지 XIP — FCB · 컨테이너 · 코드</text>
-  <text x="22" y="197" class="m">0x0404_0000</text>
-  <rect x="114" y="175" width="356" height="38" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 3"/>
-  <text x="126" y="192" class="b" fill="#6b7280">QSPI 앱 영역 · 7.75 MB</text>
-  <text x="126" y="207" class="s">계획: 앱 TAG + CM33 앱 (41~42)</text>
-  <text x="22" y="241" class="m">0x0480_0000</text>
-  <rect x="114" y="219" width="356" height="38" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
-  <text x="126" y="236" class="b" fill="#c2410c">QSPI CM7 슬롯 · 4 MB</text>
-  <text x="126" y="251" class="s">CM7 이미지 보관 (헤더 + bin) ①</text>
-  <text x="22" y="285" class="m">0x04C0_0000</text>
-  <rect x="114" y="263" width="356" height="38" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 3"/>
-  <text x="126" y="280" class="b" fill="#6b7280">QSPI 데이터 · 4 MB</text>
-  <text x="126" y="295" class="s">계획: NVS · 업데이트</text>
-  <text x="22" y="329" class="m">0x0FFE_0000</text>
-  <rect x="114" y="307" width="356" height="38" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
-  <text x="126" y="324" class="b" fill="#1e40af">Code TCM · 128 KB</text>
-  <text x="126" y="339" class="s">.ram_function (비어 있음)</text>
-  <text x="22" y="373" class="m">0x2000_0000</text>
-  <rect x="114" y="351" width="356" height="38" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
-  <text x="126" y="368" class="b" fill="#1e40af">System TCM · 128 KB</text>
-  <text x="126" y="383" class="s">.data · .bss · 힙 4K · 스택 8K</text>
-  <text x="22" y="417" class="m">0x2048_0000</text>
-  <rect x="114" y="395" width="356" height="38" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
-  <text x="126" y="412" class="b" fill="#6b7280">OCRAM1 · 512 KB</text>
-  <text x="126" y="427" class="s">미할당</text>
-  <text x="22" y="461" class="m">0x2050_0000</text>
-  <rect x="114" y="439" width="356" height="38" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
-  <text x="126" y="456" class="b" fill="#15803d">OCRAM2 · 4 KB</text>
-  <text x="126" y="471" class="s">공유 블록 .shared ②</text>
-  <text x="22" y="505" class="m">0x2050_1000</text>
-  <rect x="114" y="483" width="356" height="38" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
-  <text x="126" y="500" class="b" fill="#6b7280">OCRAM2 · 252 KB</text>
-  <text x="126" y="515" class="s">미할당</text>
-  <text x="22" y="549" class="m">0x2800_0000</text>
-  <rect x="114" y="527" width="356" height="38" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
-  <text x="126" y="544" class="b" fill="#6b7280">HyperRAM · 8 MB</text>
-  <text x="126" y="559" class="s">미할당 (27)</text>
-  <text x="22" y="593" class="m">0x303C_0000</text>
-  <rect x="114" y="571" width="356" height="38" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
-  <text x="126" y="588" class="b" fill="#c2410c">CM7 ITCM alias · 256 KB</text>
-  <text x="126" y="603" class="s">① 을 여기로 복사 (cm7Load)</text>
-  <text x="22" y="637" class="m">0x3040_0000</text>
-  <rect x="114" y="615" width="356" height="38" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
-  <text x="126" y="632" class="b" fill="#c2410c">CM7 DTCM alias · 256 KB</text>
-  <text x="126" y="647" class="s">CM7 소유 — CM33 은 접근하지 않음</text>
-  <text x="492" y="153" class="m">0x0000_0000</text>
-  <rect x="584" y="131" width="356" height="38" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
-  <text x="596" y="148" class="b" fill="#c2410c">ITCM · 256 KB</text>
-  <text x="596" y="163" class="s">벡터 · 코드 · .data 초기값 ← ①</text>
-  <text x="492" y="197" class="m">0x0400_0000</text>
-  <rect x="584" y="175" width="356" height="38" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
-  <text x="596" y="192" class="b" fill="#6b7280">QSPI · 16 MB</text>
-  <text x="596" y="207" class="s">보이지만 쓰지 않는다</text>
-  <text x="492" y="241" class="m">0x2000_0000</text>
-  <rect x="584" y="219" width="356" height="38" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
-  <text x="596" y="236" class="b" fill="#c2410c">DTCM · 256 KB</text>
-  <text x="596" y="251" class="s">.data · .bss · 힙 4K · 스택 8K</text>
-  <text x="492" y="285" class="m">0x201E_0000</text>
-  <rect x="584" y="263" width="356" height="38" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
-  <text x="596" y="280" class="b" fill="#1e40af">CM33 Code TCM alias</text>
-  <text x="596" y="295" class="s">CM33 소유 — 접근하지 않음</text>
-  <text x="492" y="329" class="m">0x2020_0000</text>
-  <rect x="584" y="307" width="356" height="38" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
-  <text x="596" y="324" class="b" fill="#1e40af">CM33 System TCM alias</text>
-  <text x="596" y="339" class="s">CM33 소유 — 접근하지 않음</text>
-  <text x="492" y="373" class="m">0x2048_0000</text>
-  <rect x="584" y="351" width="356" height="38" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
-  <text x="596" y="368" class="b" fill="#6b7280">OCRAM1 · 512 KB</text>
-  <text x="596" y="383" class="s">미할당</text>
-  <text x="492" y="417" class="m">0x2050_0000</text>
-  <rect x="584" y="395" width="356" height="38" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
-  <text x="596" y="412" class="b" fill="#15803d">OCRAM2 · 4 KB</text>
-  <text x="596" y="427" class="s">공유 블록 .shared ②</text>
-  <text x="492" y="461" class="m">0x2050_1000</text>
-  <rect x="584" y="439" width="356" height="38" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
-  <text x="596" y="456" class="b" fill="#6b7280">OCRAM2 · 252 KB</text>
-  <text x="596" y="471" class="s">미할당</text>
-  <text x="492" y="505" class="m">0x2800_0000</text>
-  <rect x="584" y="483" width="356" height="38" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
-  <text x="596" y="500" class="b" fill="#6b7280">HyperRAM · 8 MB</text>
-  <text x="596" y="515" class="s">미할당 (27)</text>
-  <rect x="30" y="678" width="22" height="14" rx="3" fill="#dbeafe" stroke="#3b82f6"/>
-  <text x="60" y="690" class="s">CM33</text>
-  <rect x="180" y="678" width="22" height="14" rx="3" fill="#ffedd5" stroke="#ea580c"/>
-  <text x="210" y="690" class="s">CM7</text>
-  <rect x="330" y="678" width="22" height="14" rx="3" fill="#dcfce7" stroke="#16a34a"/>
-  <text x="360" y="690" class="s">공유</text>
-  <rect x="480" y="678" width="22" height="14" rx="3" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="5 3"/>
-  <text x="510" y="690" class="s">계획 (로드맵)</text>
-  <rect x="630" y="678" width="22" height="14" rx="3" fill="#f9fafb" stroke="#d1d5db"/>
-  <text x="660" y="690" class="s">미할당 · 안 씀</text>
-  <text x="30" y="724" class="s">0x0000_0000 · 0x2000_0000 은 두 코어에서 서로 다른 메모리다. 상대 코어의 TCM 은 alias 주소로만 보인다. 공유 데이터는 OCRAM2 에 둔다.</text>
+  <text x="24" y="114" class="b" fill="#374151">주소</text>
+  <rect x="128" y="66" width="400" height="34" rx="6" fill="#eef2ff" stroke="#4f46e5"/>
+  <text x="328" y="88" class="b" text-anchor="middle" fill="#3730a3">CM33 (240 MHz)</text>
+  <rect x="540" y="66" width="400" height="34" rx="6" fill="#fff7ed" stroke="#ea580c"/>
+  <text x="740" y="88" class="b" text-anchor="middle" fill="#c2410c">CM7 (792 MHz)</text>
+  <rect x="16" y="129" width="928" height="40" rx="6" fill="none" stroke="#f59e0b" stroke-width="1.6"/>
+  <text x="24" y="153" class="m">0x0000_0000</text>
+  <rect x="128" y="131" width="400" height="36" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.4"/>
+  <text x="140" y="147" class="b" fill="#4b5563">BootROM · 160 KB</text>
+  <text x="140" y="162" class="s">ROM — 부팅에만 쓴다</text>
+  <rect x="540" y="131" width="400" height="36" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="552" y="147" class="b" fill="#c2410c">ITCM · 256 KB</text>
+  <text x="552" y="162" class="s">벡터 · 코드 · .data 초기값 ← ①</text>
+  <text x="24" y="195" class="m">0x0400_0000</text>
+  <rect x="128" y="173" width="400" height="36" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="140" y="189" class="b" fill="#1e40af">QSPI 부트 슬롯 · 256 KB</text>
+  <text x="140" y="204" class="s">CM33 이미지 XIP</text>
+  <rect x="540" y="173" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="552" y="189" class="b" fill="#6b7280">QSPI</text>
+  <text x="552" y="204" class="s">보이지만 쓰지 않는다</text>
+  <text x="24" y="237" class="m">0x0404_0000</text>
+  <rect x="128" y="215" width="400" height="36" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="140" y="231" class="b" fill="#6b7280">QSPI 앱 영역 · 7.75 MB</text>
+  <text x="140" y="246" class="s">계획: 앱 TAG + 앱 (41~42)</text>
+  <rect x="540" y="215" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="552" y="231" class="b" fill="#6b7280">QSPI</text>
+  <text x="552" y="246" class="s">쓰지 않는다</text>
+  <text x="24" y="279" class="m">0x0480_0000</text>
+  <rect x="128" y="257" width="400" height="36" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="140" y="273" class="b" fill="#c2410c">QSPI CM7 슬롯 · 4 MB</text>
+  <text x="140" y="288" class="s">CM7 이미지 보관 ①</text>
+  <rect x="540" y="257" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="552" y="273" class="b" fill="#6b7280">QSPI</text>
+  <text x="552" y="288" class="s">쓰지 않는다</text>
+  <text x="24" y="321" class="m">0x04C0_0000</text>
+  <rect x="128" y="299" width="400" height="36" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="140" y="315" class="b" fill="#6b7280">QSPI 데이터 · 4 MB</text>
+  <text x="140" y="330" class="s">계획: NVS · 업데이트</text>
+  <rect x="540" y="299" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="552" y="315" class="b" fill="#6b7280">QSPI</text>
+  <text x="552" y="330" class="s">쓰지 않는다</text>
+  <text x="24" y="363" class="m">0x0FFE_0000</text>
+  <rect x="128" y="341" width="400" height="36" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="140" y="357" class="b" fill="#1e40af">Code TCM · 128 KB</text>
+  <text x="140" y="372" class="s">.ram_function (비어 있음)</text>
+  <rect x="540" y="341" width="400" height="36" rx="5" fill="none" stroke="#e5e7eb" stroke-dasharray="2 4"/>
+  <rect x="16" y="381" width="928" height="40" rx="6" fill="none" stroke="#f59e0b" stroke-width="1.6"/>
+  <text x="24" y="405" class="m">0x2000_0000</text>
+  <rect x="128" y="383" width="400" height="36" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="140" y="399" class="b" fill="#1e40af">System TCM · 128 KB</text>
+  <text x="140" y="414" class="s">.data · .bss · 힙 4K · 스택 8K</text>
+  <rect x="540" y="383" width="400" height="36" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="552" y="399" class="b" fill="#c2410c">DTCM · 256 KB</text>
+  <text x="552" y="414" class="s">.data · .bss · 힙 4K · 스택 8K</text>
+  <text x="24" y="447" class="m">0x201E_0000</text>
+  <rect x="128" y="425" width="400" height="36" rx="5" fill="none" stroke="#e5e7eb" stroke-dasharray="2 4"/>
+  <rect x="540" y="425" width="400" height="36" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="552" y="441" class="b" fill="#1e40af">CM33 Code TCM alias</text>
+  <text x="552" y="456" class="s">CM33 소유 — 접근 안 함</text>
+  <text x="24" y="489" class="m">0x2020_0000</text>
+  <rect x="128" y="467" width="400" height="36" rx="5" fill="none" stroke="#e5e7eb" stroke-dasharray="2 4"/>
+  <rect x="540" y="467" width="400" height="36" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="552" y="483" class="b" fill="#1e40af">CM33 System TCM alias</text>
+  <text x="552" y="498" class="s">CM33 소유 — 접근 안 함</text>
+  <text x="24" y="531" class="m">0x2048_0000</text>
+  <rect x="128" y="509" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="140" y="525" class="b" fill="#6b7280">OCRAM1 · 512 KB</text>
+  <text x="140" y="540" class="s">미할당</text>
+  <rect x="540" y="509" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="552" y="525" class="b" fill="#6b7280">OCRAM1 · 512 KB</text>
+  <text x="552" y="540" class="s">미할당</text>
+  <text x="24" y="573" class="m">0x2050_0000</text>
+  <rect x="128" y="551" width="400" height="36" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="140" y="567" class="b" fill="#15803d">OCRAM2 · 4 KB</text>
+  <text x="140" y="582" class="s">공유 블록 .shared ②</text>
+  <rect x="540" y="551" width="400" height="36" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="552" y="567" class="b" fill="#15803d">OCRAM2 · 4 KB</text>
+  <text x="552" y="582" class="s">공유 블록 .shared ②</text>
+  <text x="24" y="615" class="m">0x2050_1000</text>
+  <rect x="128" y="593" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="140" y="609" class="b" fill="#6b7280">OCRAM2 · 252 KB</text>
+  <text x="140" y="624" class="s">미할당</text>
+  <rect x="540" y="593" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="552" y="609" class="b" fill="#6b7280">OCRAM2 · 252 KB</text>
+  <text x="552" y="624" class="s">미할당</text>
+  <text x="24" y="657" class="m">0x2800_0000</text>
+  <rect x="128" y="635" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="140" y="651" class="b" fill="#6b7280">HyperRAM · 8 MB</text>
+  <text x="140" y="666" class="s">미할당 (27)</text>
+  <rect x="540" y="635" width="400" height="36" rx="5" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="552" y="651" class="b" fill="#6b7280">HyperRAM · 8 MB</text>
+  <text x="552" y="666" class="s">미할당 (27)</text>
+  <text x="24" y="699" class="m">0x303C_0000</text>
+  <rect x="128" y="677" width="400" height="36" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="140" y="693" class="b" fill="#c2410c">CM7 ITCM alias · 256 KB</text>
+  <text x="140" y="708" class="s">① 을 여기로 복사 (cm7Load)</text>
+  <rect x="540" y="677" width="400" height="36" rx="5" fill="none" stroke="#e5e7eb" stroke-dasharray="2 4"/>
+  <text x="24" y="741" class="m">0x3040_0000</text>
+  <rect x="128" y="719" width="400" height="36" rx="5" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="140" y="735" class="b" fill="#c2410c">CM7 DTCM alias · 256 KB</text>
+  <text x="140" y="750" class="s">CM7 소유 — 접근 안 함</text>
+  <rect x="540" y="719" width="400" height="36" rx="5" fill="none" stroke="#e5e7eb" stroke-dasharray="2 4"/>
+  <rect x="30" y="780" width="22" height="14" rx="3" fill="#dbeafe" stroke="#3b82f6"/>
+  <text x="60" y="792" class="s">CM33</text>
+  <rect x="180" y="780" width="22" height="14" rx="3" fill="#ffedd5" stroke="#ea580c"/>
+  <text x="210" y="792" class="s">CM7</text>
+  <rect x="330" y="780" width="22" height="14" rx="3" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="360" y="792" class="s">공유</text>
+  <rect x="480" y="780" width="22" height="14" rx="3" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="5 3"/>
+  <text x="510" y="792" class="s">계획 (로드맵)</text>
+  <rect x="630" y="780" width="22" height="14" rx="3" fill="#f9fafb" stroke="#d1d5db"/>
+  <text x="660" y="792" class="s">미할당 · 안 씀 · ROM</text>
+  <text x="30" y="826" class="s">노란 테두리 행: 같은 주소가 두 코어에서 서로 다른 메모리다. 상대 코어 TCM 은 alias 로만 보인다. 공유 데이터는 두 코어가 같은 주소로 보는 OCRAM2 에 둔다.</text>
 </svg>
