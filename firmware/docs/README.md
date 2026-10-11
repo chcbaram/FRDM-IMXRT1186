@@ -10,10 +10,10 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) · probe-rs 0.32 |
 | 펌웨어 | `firmware/rt1180-fw` — CM33 **LED · UART(LPUART1) · CLI · 로그 · 240 MHz · 버튼 · swtimer · RTC · reset** + **CM7 기동** (792 MHz) |
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
-| 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `clock info` 로 CCM 실측 ([22](22-clock.md)) |
-| SDK | MCUXpresso SDK 에서 150개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
+| 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `hwinfo clock` 로 CCM 실측 ([22](22-clock.md)) |
+| SDK | MCUXpresso SDK 에서 154개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
 | 빌드 | FLASH 44,360 B / 211 KB · DTCM 18,792 B / 128 KB |
-| 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `boot info` 로 부트 모드/퓨즈/클럭 확인 |
+| 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `hwinfo boot` 로 부트 모드/퓨즈/클럭 확인 |
 | CM7 | **기동 확인** — ELE kick-off, ITCM 실행, 공유 블록 핸드셰이크 ([25](25-cm7-boot.md)). `-DBUILD_CM7=ON` |
 
 ### 바로 다시 시작하기
@@ -87,7 +87,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | 번호 | 내용 | 상태 |
 |---|---|---|
 | [20](20-led.md) | **LED 점멸** — 부트 헤더, XIP, 200 MHz SysTick | ✅ |
-| [21](21-uart-cli.md) | **UART(LPUART1) + CLI + 로그** — 부팅 배너, `boot info` | ✅ |
+| [21](21-uart-cli.md) | **UART(LPUART1) + CLI + 로그** — 부팅 배너, `hwinfo boot` | ✅ |
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
 | [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · SW3 더블클릭 · 부팅 확인/폴트 카운터 | ✅ |

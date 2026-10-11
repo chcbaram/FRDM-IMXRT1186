@@ -51,7 +51,7 @@ static uart_hw_t uart_hw_tbl[UART_MAX_CH] =
 
 ### PLL3 은 ROM 이 켜 둔 것을 쓴다
 
-클럭 설정은 아직 하지 않았다(로드맵 22). 그런데 SysPll3Div2 를 고를 수 있는 것은 **ROM 이 FlexSPI 클럭(PLL3_PFD2) 때문에 PLL3 을 켜 두었기 때문**이다. 실제로 `boot info` 의 `Clock LPUART1 : 24000000 Hz` 로 확인했다. 로드맵 22 에서 PLL 을 다시 잡을 때 이 의존을 끊지 않도록 주의한다.
+클럭 설정은 아직 하지 않았다(로드맵 22). 그런데 SysPll3Div2 를 고를 수 있는 것은 **ROM 이 FlexSPI 클럭(PLL3_PFD2) 때문에 PLL3 을 켜 두었기 때문**이다. 실제로 `hwinfo boot` 의 `Clock LPUART1 : 24000000 Hz` 로 확인했다. 로드맵 22 에서 PLL 을 다시 잡을 때 이 의존을 끊지 않도록 주의한다.
 
 ### printf 도 콘솔로 간다
 
@@ -59,7 +59,7 @@ static uart_hw_t uart_hw_tbl[UART_MAX_CH] =
 
 ## 4. hw.c — 부팅 배너와 `boot` 명령
 
-초기화 순서는 titan-mini 와 같다. `cliInit` 과 `logInit` 을 먼저 부른다(버퍼만 잡는다). 그 뒤 `ledInit`, `uartInit`, `uartOpen`, `logOpen`, 배너, `cliOpen` 순이다.
+초기화 순서는 titan-mini 와 같다. `cliInit` 과 `logInit` 을 먼저 부른다(버퍼만 잡는다). 그 뒤 `uartInit`, `uartOpen`, `logOpen`, 배너, 각 드라이버 Init 순이다. `cliOpen` 은 `hwInit` 이 아니라 `apInit` 에서 부른다(NUCLEO-C5A3ZG 와 같다). CLI 를 열지 말지는 앱이 정한다.
 
 배너는 다음과 같다.
 
@@ -71,10 +71,10 @@ Booting..Clock 		: 200 MHz
 Booting..Mode  		: 0x0C000000
 ```
 
-**`boot info`** 는 이 칩을 배우면서 디버거로 하나씩 읽던 값을 펌웨어가 직접 보여 주는 명령이다. 출력은 [01-boot-sequence.md](01-boot-sequence.md) 의 표와 같아야 한다.
+**`hwinfo boot`** 는 이 칩을 배우면서 디버거로 하나씩 읽던 값을 펌웨어가 직접 보여 주는 명령이다. 출력은 [01-boot-sequence.md](01-boot-sequence.md) 의 표와 같아야 한다.
 
 ```
-cli# boot info
+cli# hwinfo boot
 SBMR2        : 0x0C000000
   BOOT_MODE  : 100  FlexSPI NOR
   boot core  : CM33
@@ -105,7 +105,7 @@ Clock LPUART1 : 24000000 Hz
 | `md addr [len]` | cli.c | 메모리 덤프 |
 | `log info` / `log boot` / `log list` | log.c | 로그 버퍼 |
 | `uart info` / `uart test ch` | uart.c | 속도, 클럭, 송수신 바이트 수 / 에코 |
-| `boot info` | hw.c | 부트 모드, 리셋 원인, 퓨즈, 클럭 루트 |
+| `hwinfo boot` · `hwinfo clock` | hw_info.c | 부트 모드, 리셋 원인, 퓨즈 · PLL과 클럭 루트 실측 |
 
 ```
 cli# uart info
@@ -118,7 +118,7 @@ baram-term 이 포트를 잡고 있지 않을 때는 스크립트로 확인한�
 
 1. AIRCR SYSRESETREQ 로 리셋한다(`probe-rs write --chip MIMXRT1180 b32 0xE000ED0C 0x05FA0004`). `probe-rs reset` 은 리셋 동안의 VCOM 출력을 버린다([22-clock.md](22-clock.md) 5절).
 2. 1.5 초 동안 받아 배너를 확인한다.
-3. `help`, `boot info`, `uart info` 를 보내 응답을 확인한다.
+3. `help`, `hwinfo boot`, `uart info` 를 보내 응답을 확인한다.
 
 위 4~5절의 출력이 그 결과다. LED 는 그대로 500 ms 마다 토글된다. `ap.c` 는 루프에서 `cliMain()` 을 같이 부른다.
 

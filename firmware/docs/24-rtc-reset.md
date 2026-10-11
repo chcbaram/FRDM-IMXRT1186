@@ -87,7 +87,7 @@ if ((reg & 0xFFFF0000UL) == RESET_CNT_MAGIC)   // BBSM 전원 유지 = 전원 �
   reset_bits &= ~(1<<RESET_BIT_POWER);
 ```
 
-**SRSR 은 POR 에서만 지워지고 나머지 리셋에서는 비트가 쌓인다.** 처음 `boot info` 에서 본 `0x0001_0201` 이 쌓인 상태였다. `resetInit()` 은 읽은 값을 그대로 다시 써서 지운다(W1C).
+**SRSR 은 POR 에서만 지워지고 나머지 리셋에서는 비트가 쌓인다.** 처음 `hwinfo boot` 에서 본 `0x0001_0201` 이 쌓인 상태였다. `resetInit()` 은 읽은 값을 그대로 다시 써서 지운다(W1C).
 
 ### GPR 배치 (`hw_def.h`)
 

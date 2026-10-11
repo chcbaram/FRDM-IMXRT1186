@@ -144,7 +144,36 @@ SDK 드라이버의 `assert()` → `__assert_func` → `fiprintf` 가 stdio 를 
 
 5절에 적었다. 퓨즈를 읽지 않았다면 SysTick 주기가 왜 1.2 ms 인지 한참 헤맸을 것이다.
 
-## 9. 다음
+## 9. 추가 — 녹색 LED 밝기 (FlexPWM)
+
+LED 가 너무 밝아서 녹색을 PWM 으로 바꿨다. 세 LED 핀 모두 FlexPWM 출력 기능이 있다(`fsl_iomuxc.h`).
+
+| LED | 핀 | PWM | 지금 |
+|---|---|---|---|
+| RED | `GPIO_EMC_B1_09` | `FLEXPWM2_PWMA03` | GPIO |
+| GREEN | `GPIO_EMC_B1_11` | `FLEXPWM3_PWMA03` | **PWM** |
+| BLUE | `GPIO_EMC_B1_39` | `FLEXPWM1_PWMA03` (또는 `QTIMER2_TIMER1`) | GPIO |
+
+**층 나누기.** `pwm.c` 가 FlexPWM 을 맡고(stm32h5-bd 의 pwm.c 와 같은 API: `pwmWrite` / `pwmRead` / `pwmGetMax`, `pwm info/set/get`), `led.c` 는 그것을 가져다 쓴다. LED 테이블에 채널마다 `LED_TYPE_GPIO` / `LED_TYPE_PWM` 을 적고, 켜고 끄기를 그에 따라 처리한다.
+
+| API | GPIO 채널 | PWM 채널 |
+|---|---|---|
+| `ledOn` / `ledOff` / `ledToggle` | 핀 High / Low | 저장된 밝기 / 듀티 0 |
+| `ledSetDuty(ch, 0~100)` | 0 이면 끄고 그 외 켠다 | 밝기 저장, 켜져 있으면 바로 반영 |
+
+- 기본 밝기는 `HW_LED_DEF_DUTY`(10 %)다. 보드에서 눈으로 보고 정했다.
+- 눈은 밝기를 선형으로 느끼지 않으므로 % 를 제곱해서 듀티로 바꾼다(감마 2). 10 % → 듀티 10/1000, 30 % → 90/1000.
+- 숨쉬기 같은 효과는 드라이버가 아니라 상위(ap)에서 `ledSetDuty()` 를 주기적으로 불러 만든다. 드라이버는 "이 밝기로" 하나만 제공한다.
+
+**FlexPWM 설정에서 확인한 것**
+
+- 클럭: FlexPWM1~4 는 `bus_wakeup_clk_root`(RM CCM 표, LPCG123~126)를 쓴다. SDK 예제는 `Bus_Aon` 으로 계산하지만 우리 설정에서는 둘 다 132 MHz 다. 코드는 RM 을 따른다.
+- 20 kHz, 프리스케일 1 → 한 주기 6600 틱. 듀티는 0~1000 으로 받아 `PWM_UpdatePwmDutycycleHighAccuracy`(0~65535)로 쓴다.
+- **fault**: `SMxDISMAP0` 리셋값이 `FFFFh` 라 그대로 두면 fault 입력이 출력을 끈다. SDK 예제는 XBAR 로 fault 입력을 High 에 묶는다. 여기서는 fault 를 쓰지 않으므로 `DISMAP` 을 0 으로 두고 XBAR 드라이버를 들여오지 않았다.
+- 듀티 0 으로 타이머를 돌린 뒤에 핀 mux 를 넘긴다. 켜지는 순간 번쩍이지 않는다.
+- `pwmInit()` 은 로그를 남기므로 `logOpen` 뒤에 부른다. LED 가 pwm 을 쓰므로 `ledInit()` 은 그다음이다.
+
+## 10. 다음
 
 - [x] 21 — LPUART1(VCOM) + CLI + 부팅 배너, `_write` → UART ([21-uart-cli.md](21-uart-cli.md))
 - [ ] 22 — PLL: CM33 300 MHz (여기서 `SystemCoreClock` 을 CCM 에서 읽는 방식이 그대로 쓰인다)

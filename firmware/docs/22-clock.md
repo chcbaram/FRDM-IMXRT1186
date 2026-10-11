@@ -25,7 +25,7 @@
 
 ## 2. ROM 이 남긴 클럭 — 먼저 측정했다
 
-`clock info` 명령을 먼저 만들고, 클럭을 바꾸지 않은 상태(`CLOCK_APPLY 0`)로 읽었다. **calc** 는 CCM 레지스터로 계산한 값이다. **meas** 는 CCM OBSERVE 가 하드웨어로 센 값이다(`CLOCK_GetFreqFromObs`).
+`hwinfo clock` 명령을 먼저 만들고, 클럭을 바꾸지 않은 상태(`CLOCK_APPLY 0`)로 읽었다. **calc** 는 CCM 레지스터로 계산한 값이다. **meas** 는 CCM OBSERVE 가 하드웨어로 센 값이다(`CLOCK_GetFreqFromObs`).
 
 ```
 OSC 24M      : on (stable)

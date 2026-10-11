@@ -24,7 +24,7 @@ ele resp   : 0xE1D20206 0x000000D6 (err 0)
 alive      : 249  (+52 / 500ms)
 ```
 
-`clock info` 의 M7 루트 실측은 **792.05 MHz** 다. CM33 은 그대로 240 MHz 다.
+`hwinfo clock` 의 M7 루트 실측은 **792.05 MHz** 다. CM33 은 그대로 240 MHz 다.
 
 ## 2. 구조
 

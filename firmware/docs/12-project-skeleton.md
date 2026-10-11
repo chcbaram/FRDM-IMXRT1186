@@ -24,7 +24,7 @@ firmware/rt1180-fw/
     ├── common/                 포터블 코드. 벤더 금지
     │   ├── def.h  err_code.h  evt_code.h
     │   ├── core/               qbuffer, util_core
-    │   └── hw/include/         드라이버 공개 헤더 (led · uart · cli · log)
+    │   └── hw/include/         드라이버 공개 헤더 (led · pwm · uart · cli · log …)
     ├── cpu/
     │   ├── cm33/               부트 코어
     │   │   ├── main.c          bspInit → hwInit → apInit → apMain
@@ -32,7 +32,7 @@ firmware/rt1180-fw/
     │   │   ├── bsp/            bsp.c (SysTick, delay, millis), syscalls.c
     │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너
     │   │   │   └── ldscript/   rt1180-fw-cm33.ld
-    │   │   └── hw/             hw.c (배너, boot 명령), hw_def.h (_USE_HW_*), driver/ led · uart · cli · log
+    │   │   └── hw/             hw.c (초기화 순서, 배너), hw_def.h (_USE_HW_*), driver/ led · pwm · uart · cli · log · hw_info …
     │   ├── cm7/                로드맵 25
     │   └── shared/             (로드맵 25) 코어 간 규약
     └── lib/
