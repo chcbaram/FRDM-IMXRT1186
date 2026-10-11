@@ -35,7 +35,8 @@
           "-B",
           "build",
           "-G",
-          "Ninja"
+          "Ninja",
+          "-DBUILD_CM7=ON"
         ],
         "problemMatcher": [],
         "options": {
@@ -98,6 +99,38 @@
   },
   "launch": {
     "version": "0.2.0",
-    "configurations": []
+    "configurations": [
+      {
+        "name": "Flash + Attach CM7",
+        "type": "probe-rs-debug",
+        "request": "attach",
+        "cwd": "${workspaceFolder}",
+        "chip": "MIMXRT1186",
+        "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
+        "preLaunchTask": "flash",
+        "coreConfigs": [
+          {
+            "coreIndex": 1,
+            "programBinary": "${workspaceFolder}/build/cm7/rt1180-fw-cm7.elf",
+            "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm7.xml"
+          }
+        ]
+      },
+      {
+        "name": "Attach CM7",
+        "type": "probe-rs-debug",
+        "request": "attach",
+        "cwd": "${workspaceFolder}",
+        "chip": "MIMXRT1186",
+        "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
+        "coreConfigs": [
+          {
+            "coreIndex": 1,
+            "programBinary": "${workspaceFolder}/build/cm7/rt1180-fw-cm7.elf",
+            "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm7.xml"
+          }
+        ]
+      }
+    ]
   }
 }

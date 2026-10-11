@@ -1,14 +1,11 @@
 #include "ap.h"
 
 
-static button_input_t button_input;
 
 
 void apInit(void)
 {
   cliOpen(HW_UART_CH_CLI, 115200);
-
-  buttonInputInit(&button_input);
 }
 
 void apMain(void)
@@ -23,18 +20,6 @@ void apMain(void)
     {
       pre_time = millis();
       ledToggle(_DEF_LED2);
-    }
-
-    //-- SW4 : 누를 때마다 파란 LED 토글, 1초 이상 누르면 빨간 LED 토글
-    //
-    buttonInputUpdate(&button_input);
-    if (buttonInputGetPressed(&button_input, _DEF_BUTTON1))
-    {
-      ledToggle(_DEF_LED3);
-    }
-    if (buttonInputGetHold(&button_input, _DEF_BUTTON1, 1000))
-    {
-      ledToggle(_DEF_LED1);
     }
 
     cliMain();
