@@ -41,7 +41,6 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 | 과제 | 왜 중요한가 | 언제 |
 |---|---|---|
-| probe-rs 에 CM7 코어 정의가 없다 | CM7 을 디버깅하려면 커스텀 타깃 yaml(AP 2)이 필요하다 | 25 |
 | VSCode 에서 main 자동 정지 | probe-rs 확장에 `runToEntryPoint` 가 없다. 지금은 브레이크포인트를 걸고 ROM 에서 F5. cortex-debug + `probe-rs gdb` 조합을 검토 중 | 21 전후 |
 | Windows / Linux 환경 미검증 | 절차만 적어 두었다 ([13](13-os-setup.md)) | 다른 PC 를 쓸 때 |
 | TRDC 권한 | SDK 예제는 시작할 때 TRDC 를 연다. GPIO 에는 필요 없었지만 DMA/CM7/NETC 에서는 필요할 수 있다 | 24~25 |
@@ -81,6 +80,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [11-sdk-vendoring](11-sdk-vendoring.md) | SDK 파일 고정 방식과 목록 | ✅ |
 | [12-project-skeleton](12-project-skeleton.md) | 디렉터리, 계층 규칙, 링크 배치, VSCode | ✅ |
 | [13-os-setup](13-os-setup.md) | macOS / Windows / Linux 구축 절차 | ✅ (macOS 만 검증) |
+| [14-cm7-debug](14-cm7-debug.md) | CM7 디버그 — probe-rs 타깃에 CM7(AP 2) 추가, VSCode attach, 스텝 한계 | ✅ |
 
 ### 로드맵
 
@@ -91,7 +91,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
 | [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · SW3 더블클릭 · 부팅 확인/폴트 카운터 | ✅ |
-| [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b: CM7 디버그 · 캐시/MPU · MU 남음) |
+| [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b: 캐시/MPU · MU 남음, CM7 디버그 완료) |
 | 26 | QSPI NOR 드라이버 (TCM 실행 지우기/쓰기) | 예정 |
 | 27 | HyperRAM (FlexSPI1) | 예정 |
 | 28 | FreeRTOS | 예정 |
@@ -144,6 +144,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | ![](images/cm7-boot.svg) | [25](25-cm7-boot.md) CM7 기동 순서 |
 | ![](images/core-memory-map.svg) | [25](25-cm7-boot.md) 코어별 메모리 할당 |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
+| ![](images/cm7-debug-path.svg) | [14](14-cm7-debug.md) CM7 디버그 경로 |
 
 그림은 전부 손으로 쓴 SVG 다. 코드블록 ASCII 아트는 한글이 2칸 폭이라 정렬이 깨진다. 아래 두 스크립트로 검사한다.
 

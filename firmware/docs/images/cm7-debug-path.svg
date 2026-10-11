@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" width="960" height="660" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="660" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">CM7 디버그 경로 — 디버거 하나, AP 두 개</text>
+  <text x="20" y="48" class="s">tools/probe-rs/MIMXRT1186.yaml · AP 번호는 RM 8.2.3 Table 35 (DAPBUSIC_AP_SEL)</text>
+  <rect x="16" y="66" width="928" height="164" rx="8" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="30" y="86" class="b" text-anchor="start">PC</text>
+  <rect x="40" y="96" width="300" height="58" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="190.0" y="116" class="b" text-anchor="middle" fill="#3730a3">VSCode · probe-rs-debugger 확장</text>
+  <text x="190.0" y="134" class="s" text-anchor="middle">rt1180-fw-cm7.code-workspace</text>
+  <rect x="40" y="162" width="300" height="58" rx="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4"/>
+  <text x="190.0" y="182" class="b" text-anchor="middle" fill="#374151">arm-none-eabi-gdb</text>
+  <text x="190.0" y="200" class="m" text-anchor="middle">:1337 CM7 · :1338 CM33</text>
+  <rect x="560" y="112" width="370" height="90" rx="6" fill="#ecfdf5" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="745.0" y="132" class="b" text-anchor="middle" fill="#15803d">probe-rs 0.32.0</text>
+  <text x="745.0" y="150" class="m" text-anchor="middle">dap-server / gdb / read · write</text>
+  <text x="745.0" y="166" class="m" text-anchor="middle">--chip-description-path</text>
+  <text x="745.0" y="182" class="m" text-anchor="middle">tools/probe-rs/MIMXRT1186.yaml</text>
+  <line x1="342" y1="125" x2="558" y2="145" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="450" y="124" class="s" text-anchor="middle">DAP</text>
+  <line x1="342" y1="191" x2="558" y2="175" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="450" y="198" class="s" text-anchor="middle">GDB remote</text>
+  <rect x="560" y="250" width="370" height="58" rx="6" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.4"/>
+  <text x="745.0" y="270" class="b" text-anchor="middle" fill="#374151">MCU-Link (온보드, CMSIS-DAP v2)</text>
+  <text x="745.0" y="288" class="m" text-anchor="middle">USB 1FC9:0143 · SWD 1 MHz</text>
+  <line x1="745" y1="204" x2="745" y2="248" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="16" y="330" width="928" height="314" rx="8" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="30" y="350" class="b" text-anchor="start">MIMXRT1186</text>
+  <rect x="560" y="340" width="370" height="52" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="745.0" y="360" class="b" text-anchor="middle" fill="#374151">SWJ-DP → DAPBUSIC</text>
+  <text x="745.0" y="378" class="s" text-anchor="middle">DP SELECT 의 APSEL [31:24] 로 AP 를 고른다</text>
+  <line x1="745" y1="310" x2="745" y2="338" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="30" y="420" width="130" height="62" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.2"/>
+  <text x="95.0" y="440" class="b" text-anchor="middle" fill="#6b7280">AP 0 · AHB-AP</text>
+  <text x="95.0" y="458" class="s" text-anchor="middle">시스템 버스</text>
+  <rect x="170" y="420" width="130" height="62" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.2"/>
+  <text x="235.0" y="440" class="b" text-anchor="middle" fill="#6b7280">AP 1 · APB-AP</text>
+  <text x="235.0" y="458" class="s" text-anchor="middle">CoreSight</text>
+  <rect x="340" y="420" width="170" height="62" rx="6" fill="#ffedd5" stroke="#ea580c" stroke-width="1.8"/>
+  <text x="425.0" y="440" class="b" text-anchor="middle" fill="#c2410c">AP 2 · CM7</text>
+  <text x="425.0" y="458" class="s" text-anchor="middle">armv7em · 792 MHz</text>
+  <rect x="530" y="420" width="170" height="62" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.8"/>
+  <text x="615.0" y="440" class="b" text-anchor="middle" fill="#1e40af">AP 3 · CM33</text>
+  <text x="615.0" y="458" class="s" text-anchor="middle">armv8m · 240 MHz</text>
+  <rect x="720" y="420" width="200" height="62" rx="6" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.2"/>
+  <text x="820.0" y="440" class="b" text-anchor="middle" fill="#6b7280">AP 4 · ELE RISC-V</text>
+  <text x="820.0" y="458" class="s" text-anchor="middle">접근하지 않는다</text>
+  <line x1="650" y1="394" x2="425" y2="418" stroke="#ea580c" stroke-width="1.6" marker-end="url(#a)"/>
+  <line x1="745" y1="394" x2="615" y2="418" stroke="#3b82f6" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="340" y="502" width="170" height="124" rx="6" fill="#ffffff" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="425.0" y="522" class="b" text-anchor="middle" fill="#c2410c">CM7 이 보는 주소</text>
+  <text x="425.0" y="540" class="m" text-anchor="middle">ITCM  0x0000_0000</text>
+  <text x="425.0" y="556" class="m" text-anchor="middle">DTCM  0x2000_0000</text>
+  <text x="425.0" y="572" class="m" text-anchor="middle">OCRAM 0x2048_4000~</text>
+  <text x="425.0" y="588" class="s" text-anchor="middle">core 1 · attach 만</text>
+  <rect x="530" y="502" width="170" height="124" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="615.0" y="522" class="b" text-anchor="middle" fill="#1e40af">CM33 이 보는 주소</text>
+  <text x="615.0" y="540" class="m" text-anchor="middle">QSPI 0x0400_0000</text>
+  <text x="615.0" y="556" class="m" text-anchor="middle">CTCM 0x0FFE_0000</text>
+  <text x="615.0" y="572" class="m" text-anchor="middle">STCM 0x2000_0000</text>
+  <text x="615.0" y="588" class="s" text-anchor="middle">core 0 · 플래시 알고리즘</text>
+  <line x1="425" y1="484" x2="425" y2="500" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="615" y1="484" x2="615" y2="500" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="36" y="524" class="s" text-anchor="start">같은 0x2000_0000 이라도</text>
+  <text x="36" y="542" class="s" text-anchor="start">AP 2 로 읽으면 CM7 DTCM,</text>
+  <text x="36" y="560" class="s" text-anchor="start">AP 3 로 읽으면 CM33 System TCM.</text>
+  <text x="36" y="596" class="s" text-anchor="start">yaml 의 memory_map 은</text>
+  <text x="36" y="614" class="s" text-anchor="start">코어마다 따로 적는다.</text>
+  <text x="720" y="524" class="s" text-anchor="start">플래시 기록은 원본처럼</text>
+  <text x="720" y="542" class="s" text-anchor="start">CM33(AP 3)으로만 한다.</text>
+  <text x="720" y="578" class="s" text-anchor="start">CM7 이미지도 CM33 이</text>
+  <text x="720" y="596" class="s" text-anchor="start">QSPI 0x0480_0000 에 쓰고,</text>
+  <text x="720" y="614" class="s" text-anchor="start">CM33 펌웨어가 ITCM 으로</text>
+  <text x="720" y="632" class="s" text-anchor="start">복사해 CM7 을 깨운다.</text>
+</svg>

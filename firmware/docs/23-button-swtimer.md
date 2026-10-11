@@ -69,6 +69,8 @@ swtimerStart(h);
 - 오래된 이벤트가 남지 않는다.
 - 같은 루프 안에서는 엣지와 시간이 같은 시점의 값이다.
 
+사용 예:
+
 ```c
 static button_input_t button_input;                 // 소비자마다 하나
 
@@ -100,7 +102,7 @@ if (buttonInputGetHold(&button_input, _DEF_BUTTON1, 1000))  ledToggle(_DEF_LED1)
 
 ### 확인 필요
 
-- [ ] **SW4 를 실제로 눌렀을 때** `PDIR` bit 12 가 0 이 되는지, 파란 LED(눌림)와 빨간 LED(1 초 홀드)가 토글되는지. 30 초 모니터를 돌렸지만 그동안 누르지 않아 아직 확인하지 못했다.
+- [ ] **SW4 를 실제로 눌렀을 때** `PDIR` bit 12 가 0 이 되는지. 위 사용 예(파랑/빨강 토글)는 처음에 `ap.c` 에 넣었다가 뺐다. 이제는 `button` CLI 로 확인한다.
 
 ## 7. 다음
 

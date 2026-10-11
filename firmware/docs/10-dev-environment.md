@@ -38,7 +38,7 @@ python3 tools/setup_tools.py        # 도구 버전 점검 + 프로브 확인 + 
 
 ### probe-rs 의 한계 (지금 알고 있는 것)
 
-- 타깃 정의에 **CM33 코어만 있다.** CM7 은 AP 2 에 있는데(DFP 팩 `__ap="2"`) 정의되어 있지 않다. CM7 을 디버깅하는 단계(로드맵 25)에서 커스텀 타깃 yaml 을 만든다.
+- 타깃 정의에 **CM33 코어만 있다.** CM7 은 AP 2 에 있다(RM Table 35, DFP 팩 `__ap="2"`). CM7 을 더한 타깃 파일 `tools/probe-rs/MIMXRT1186.yaml` 을 저장소에 두고 `--chip-description-path` 로 쓴다([14-cm7-debug.md](14-cm7-debug.md)).
 - VSCode 에서는 **DAP 서버**(`probe-rs dap-server`)를 쓰는 `probe-rs-debugger` 확장으로 디버깅한다. `probe-rs gdb` 로 GDB 서버도 띄울 수 있어서, `arm-none-eabi-gdb` 를 직접 붙이는 길도 열려 있다.
 
 ## 2. SDK 는 설치하지 않고 골라 온다

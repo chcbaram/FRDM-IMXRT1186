@@ -1,7 +1,7 @@
 # 25. CM7 기동
 
 > 퓨즈를 굽지 않고 CM33 이 CM7 을 깨운 기록. CM7 이미지 형식, 오버드라이브 전압과 ARM PLL, EdgeLock(ELE) kick-off 명령, 공유 블록 핸드셰이크를 다룬다.
-> 관련: [01-boot-sequence.md](01-boot-sequence.md) 6절 · [02-memory-map.md](02-memory-map.md) 1절, 5절 · [22-clock.md](22-clock.md)
+> 관련: [14-cm7-debug.md](14-cm7-debug.md) · [01-boot-sequence.md](01-boot-sequence.md) 6절 · [02-memory-map.md](02-memory-map.md) 1절, 5절 · [22-clock.md](22-clock.md)
 >
 > 출처: SDK `system_MIMXRT1186_cm33.c` (`Prepare_CM7`), `mcux-mcmgr` `src/mcmgr_internal_core_api_imxrt1180.c` (`mcmgr_start_core_internal`), `frdmimxrt1186/multicore_examples` (`hello_world`, `clock_config.c`), `board.c` (`DCDC_SetVoltage`), IMXRT1180EC 데이터시트 (Over Drive Run).
 
@@ -180,9 +180,13 @@ VSCode 태스크의 `build-configure` 는 `-DBUILD_CM7` 을 넘기지 않는다.
 - **CM7 D-cache 는 아직 꺼져 있다.** CM7 `SystemInit()` 은 캐시를 켜지 않는다. 그래서 공유 블록 일관성 문제가 없다. 캐시를 켜면 MPU 로 OCRAM2 공유 구간을 non-cacheable 로 잡아야 한다.
 - **`Prepare_CM7` 의 TCM 채우기 원본은 OCRAM1 `0x2048_4000` 의 한 워드다.** SOFF 0 으로 같은 값을 반복해서 쓴다. 0 이 아닐 수도 있지만 ECC 만 맞으면 되고, 이미지 복사와 CM7 startup 의 `.bss` 클리어가 덮어쓴다.
 
-## 8. 다음 (25b)
+## 8. CM7 디버그
 
-- [ ] probe-rs 에 CM7 코어 정의 추가 (AP 2) — 커스텀 타깃 yaml, `rt1180-fw-cm7.code-workspace` 의 디버그 구성
+probe-rs 에 CM7 코어를 더한 타깃 파일, VSCode attach 구성, 디버거가 AP 2 로 CM7 에 닿는 방식, 스텝 한계는 [14-cm7-debug.md](14-cm7-debug.md) 에 따로 정리했다.
+
+## 9. 다음 (25b)
+
+- [x] probe-rs 에 CM7 코어 정의 추가 (AP 2) — `tools/probe-rs/MIMXRT1186.yaml`, CM7 워크스페이스 디버그 구성 ([14](14-cm7-debug.md))
 - [ ] CM7 캐시 켜기 + MPU 로 공유 구간 non-cacheable
 - [ ] MU(Message Unit) 로 코어 간 메시지/인터럽트
-- [ ] 전원 재인가(SW2)에서도 CM7 이 기동하는지 확인 — 지금은 소프트 리셋으로만 확인했다
+- [ ] 전원 재인가(SW2)에서도 CM7 이 기동하는지 확인 — 소프트 리셋과 SW3(POR_B)에서는 확인했다
