@@ -8,6 +8,7 @@ extern "C" {
 #include "hw_def.h"
 
 #include "led.h"
+#include "pwm.h"
 #include "swtimer.h"
 #include "button.h"
 #include "rtc.h"
@@ -16,6 +17,7 @@ extern "C" {
 #include "uart.h"
 #include "cli.h"
 #include "log.h"
+#include "hw_info.h"
 
 
 bool hwInit(void);

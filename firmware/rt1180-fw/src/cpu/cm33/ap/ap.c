@@ -6,6 +6,8 @@ static button_input_t button_input;
 
 void apInit(void)
 {
+  cliOpen(HW_UART_CH_CLI, 115200);
+
   buttonInputInit(&button_input);
 }
 

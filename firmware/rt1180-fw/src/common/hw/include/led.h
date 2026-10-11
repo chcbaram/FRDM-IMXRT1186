@@ -15,6 +15,8 @@ bool ledInit(void);
 void ledOn(uint8_t ch);
 void ledOff(uint8_t ch);
 void ledToggle(uint8_t ch);
+void ledSetDuty(uint8_t ch, uint8_t duty);    // 0 ~ 100 %
+uint8_t ledGetDuty(uint8_t ch);
 
 #endif
 
