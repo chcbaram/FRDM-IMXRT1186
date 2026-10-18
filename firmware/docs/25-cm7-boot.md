@@ -177,16 +177,80 @@ VSCode 태스크의 `build-configure` 는 `-DBUILD_CM7` 을 넘기지 않는다.
 ## 7. 걸렸던 것 / 확인한 것
 
 - **TRDC 는 필요 없었다.** SDK 예제는 시작할 때 `BOARD_CommonSetting()` 으로 TRDC 권한을 연다. 그런데 CM7 이 OCRAM2 공유 블록에 쓰는 데는 따로 열 필요가 없었다. 주변장치를 CM7 이 쓸 때 다시 본다.
-- **CM7 D-cache 는 아직 꺼져 있다.** CM7 `SystemInit()` 은 캐시를 켜지 않는다. 그래서 공유 블록 일관성 문제가 없다. 캐시를 켜면 MPU 로 OCRAM2 공유 구간을 non-cacheable 로 잡아야 한다.
+- **CM7 캐시는 9절에서 켰다.** CM7 `SystemInit()` 은 캐시를 켜지 않는다. 처음에는 꺼진 채로 기동을 확인했고, 그 뒤 MPU 로 공유 구간을 non-cacheable 로 잡고 켰다.
 - **`Prepare_CM7` 의 TCM 채우기 원본은 OCRAM1 `0x2048_4000` 의 한 워드다.** SOFF 0 으로 같은 값을 반복해서 쓴다. 0 이 아닐 수도 있지만 ECC 만 맞으면 되고, 이미지 복사와 CM7 startup 의 `.bss` 클리어가 덮어쓴다.
 
 ## 8. CM7 디버그
 
 probe-rs 에 CM7 코어를 더한 타깃 파일, VSCode attach 구성, 디버거가 AP 2 로 CM7 에 닿는 방식, 스텝 한계는 [14-cm7-debug.md](14-cm7-debug.md) 에 따로 정리했다.
 
-## 9. 다음 (25b)
+## 9. CM7 캐시와 MPU — `cm7/bsp/mpu.c`
+
+CM7 I-cache 와 D-cache 를 켜고, MPU 로 공유 블록만 non-cacheable 로 잡았다. SDK `frdmimxrt1186/board.c` 의 `BOARD_EarlyConfigMPU()` 를 줄인 것이다.
+
+### 언제 켜나
+
+CM7 `SystemInit()` 이 `.data` 복사와 `.bss` 클리어 **전에** `BOARD_EarlyInit()` 을 부른다(`system_MIMXRT1186_cm7.c`). SDK 와 같이 이 훅에서 MPU 를 잡고 캐시를 켠다. 아직 C 런타임이 준비되기 전이라 이 함수에서는 전역/정적 변수를 쓰면 안 된다.
+
+### MPU 영역 (CM7 이 보는 주소, 번호가 클수록 우선)
+
+| # | 주소 | 크기 | 속성 | 용도 |
+|---|---|---|---|---|
+| 0 | `0x0000_0000` | 4 GB | 접근 금지, XN | Arm 에라타 1013783(추측 접근) 회피. 필요한 곳만 위에서 연다 |
+| 1 | `0x8000_0000` | 512 MB | Device, XN | SEMC |
+| 2 | `0x0000_0000` | 2 GB | Device, XN | 주변장치 `0x4000_0000~` 포함. 메모리는 3~7 이 덮는다 |
+| 3 | `0x0000_0000` | 256 KB | Normal WB | ITCM |
+| 4 | `0x2000_0000` | 256 KB | Normal WB | DTCM |
+| 5 | `0x2048_0000` | 512 KB | Normal WB | OCRAM1 |
+| 6 | `0x2050_0000` | 256 KB | Normal WB | OCRAM2 |
+| **7** | **`0x2050_0000`** | **4 KB** | **Normal, non-cacheable** (TEX=1 C=0 B=0) | **공유 블록** |
+
+- TCM 은 L1 캐시를 거치지 않는다. 3, 4 번은 Normal 속성만 준다.
+- QSPI 와 HyperRAM 은 CM7 이 쓰지 않아 열지 않았다(2 번의 Device 로 남는다). HyperRAM 을 CM7 이 쓰게 되면(로드맵 27) 영역을 더한다.
+- MPU 영역은 크기가 2^N 이고 주소가 크기의 배수여야 한다. `shared.h` 에 `SHARED_BLOCK_SIZE`(4 KB)를 두고 `_Static_assert` 로 막았다.
+- CM33 쪽은 손대지 않았다. CM33 `SystemInit()` 은 코드 버스 캐시(`XCACHE_PC`)만 켜고, 시스템 버스 캐시(`XCACHE_PS`)는 꺼져 있다(`0x5440_0800` = 0). OCRAM2 는 시스템 버스라 CM33 은 공유 블록을 캐시하지 않는다. `XCACHE_PS` 를 켜게 되면 CM33 MPU 도 같은 구간을 non-cacheable 로 잡아야 한다.
+
+### 확인
+
+```bash
+$ probe-rs read ... --core 1 b32 0xE000ED14 1     # SCB->CCR
+e000ed14: 00070210                                # DC(16) IC(17) BP(18) = 1
+$ probe-rs read ... --core 1 b32 0xE000ED94 1     # MPU->CTRL
+e000ed94: 00000007                                # ENABLE | HFNMIENA | PRIVDEFENA
+```
+
+`ipc info` 는 그대로 `RUNNING`, alive `+52 / 500ms`, `running : yes` 다.
+
+### 공유 블록을 캐시하면 어떻게 되나 (임시 실험)
+
+7 번 영역을 일부러 write-back(TEX=0 C=1 B=1)으로 바꿔 올렸다.
+
+```
+[OK] CM7 RUNNING (10 ms)          ← 기동 판정은 통과한다
+alive      : 0  (+0 / 500ms)      ← 그 뒤로 CM33 에는 0 만 보인다
+running    : no
+```
+
+이 속성은 write-back 이지만 **쓰기 미스에 캐시 줄을 잡지 않는다**(no write allocate). 그래서 `ipcInit()` 의 첫 쓰기(이름, 버전, magic)는 캐시에 줄이 없어 메모리로 바로 나간다. 기동 판정이 통과하는 이유다. 그런데 `peer_alive++` 는 먼저 **읽는다**. 이때 줄이 캐시에 들어오고, 그 뒤의 쓰기는 CM7 D-cache 에만 머문다. CM33 은 메모리에 남은 0 을 계속 본다.
+
+기동이 된다고 해서 공유가 되는 것은 아니다. **공유 블록은 반드시 non-cacheable 로 둔다.**
+
+### 캐시 효과 (임시 측정)
+
+CM7 에서 16 KB(4096 워드)를 읽어 더하는 시간을 DWT `CYCCNT` 로 쟀다(792 MHz). 측정 코드는 남기지 않았다.
+
+| 경우 | 사이클 | 시간 | 캐시 끔 대비 |
+|---|---|---|---|
+| OCRAM1, 캐시 켬, 첫 회 (미스) | 28,623 | 36.1 µs | 4.7 배 |
+| OCRAM1, 캐시 켬, 두 번째 (히트) | 12,302 | 15.5 µs | 11 배 |
+| OCRAM1, 캐시 끔 | 135,182 | 170.7 µs | 1 |
+| DTCM (캐시 무관) | 12,302 | 15.5 µs | — |
+
+캐시에 들어온 OCRAM 은 DTCM 과 같은 속도다. 지금 CM7 의 코드와 데이터는 전부 TCM 에 있어서 이번 변경으로 당장 빨라지는 곳은 없다. OCRAM 이나 HyperRAM 에 큰 버퍼를 둘 때 차이가 난다.
+
+## 10. 다음 (25b)
 
 - [x] probe-rs 에 CM7 코어 정의 추가 (AP 2) — `tools/probe-rs/MIMXRT1186.yaml`, CM7 워크스페이스 디버그 구성 ([14](14-cm7-debug.md))
-- [ ] CM7 캐시 켜기 + MPU 로 공유 구간 non-cacheable
+- [x] CM7 캐시 켜기 + MPU 로 공유 구간 non-cacheable (9절)
 - [ ] MU(Message Unit) 로 코어 간 메시지/인터럽트
 - [ ] 전원 재인가(SW2)에서도 CM7 이 기동하는지 확인 — 소프트 리셋과 SW3(POR_B)에서는 확인했다
