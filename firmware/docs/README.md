@@ -56,6 +56,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | `30~39` | 주변장치 |
 | `40~49` | 부트로더 · 업데이트 |
 | `50~59` | 네트워크 (Ethernet · EtherCAT) |
+| `90~99` | 설계 메모 · TODO — 아직 구현하지 않은 것. 구현하면 해당 대역의 정식 문서로 옮긴다 |
 
 확인하지 못한 것은 확인하지 못했다고 적는다. 각 문서 끝의 "확인 필요" 에 남긴다.
 
@@ -111,6 +112,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | 55 | EtherCAT ESC 기초 — 레지스터, SII EEPROM | 예정 |
 | 56 | EtherCAT 서브디바이스 스택 (SOES) — PC 마스터(SOEM)에서 OP 진입 | 예정 |
 | 57 | Ethernet + EtherCAT 동시 운용 | 예정 |
+| [90](90-todo-cm7-remote-cli.md) | **TODO** — CM33 을 통해 CM7 CLI 쓰기 (SSH 같은 원격 터미널). 통로: 패킷 · 별도 스트림 · CLI 전용 패킷 채널 비교 | 설계만 |
 
 ### 구현에서 제외한 것
 
@@ -145,6 +147,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | ![](images/ipc-stream.svg) | [25](25-cm7-boot.md) 코어 간 패킷 통신 |
 | ![](images/qspi-xip-write.svg) | [26](26-qspi-nor.md) XIP 로 돌면서 QSPI 쓰기 |
 | ![](images/hyperram-xmcd.svg) | [27](27-hyperram.md) HyperRAM 과 두 코어의 캐시 |
+| ![](images/cm7-remote-cli.svg) | [90](90-todo-cm7-remote-cli.md) CM7 원격 CLI 통로 세 안 (TODO) |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 | ![](images/cm7-debug-path.svg) | [14](14-cm7-debug.md) CM7 디버그 경로 |
 
