@@ -31,7 +31,7 @@ firmware/rt1180-fw/
     │   ├── cm33/               부트 코어
     │   │   ├── main.c          bspInit → hwInit → apInit → apMain
     │   │   ├── ap/             애플리케이션. 벤더 금지
-    │   │   │   └── modules/    module.c (MODULE_DEF) · cmd/ cmd_task.c · driver/drv_ipc.c · process/cmd_peer.c (N657X0 와 같은 배치)
+    │   │   │   └── modules/    module.c (MODULE_DEF) · common/cli · common/cmd (cmd_task.c · driver/drv_ipc.c · process/cmd_peer.c)
     │   │   ├── bsp/            bsp.c (delay, millis, micros), mpu.c, clock.c, syscalls.c
     │   │   │   ├── rtos/       FreeRTOSConfig.h, rtos.c (훅) — docs/28
     │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너

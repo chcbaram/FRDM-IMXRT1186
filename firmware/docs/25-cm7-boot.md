@@ -316,13 +316,13 @@ GP 인터럽트는 데이터 없이 비트만 세운다. 이미 서 있으면 �
 
 | 층 | 파일 (두 코어 모두) | 하는 일 |
 |---|---|---|
-| 명령 처리 | `ap/modules/cmd/process/cmd_peer.c` | CM7: `PEER_INFO` · `ECHO` 응답 / CM33: CLI `peer` |
+| 명령 처리 | `ap/modules/(common/)cmd/process/cmd_peer.c` | CM7: `PEER_INFO` · `ECHO` 응답 / CM33: CLI `peer` |
 | 채널 | `ap/modules/cmd/cmd_task.c` | 채널마다 `cmd_t` + `cmd_driver_t`. 지금은 ipc 채널 하나 |
 | 전송 바인딩 | `ap/modules/cmd/driver/drv_ipc.c` | `cmd_driver_t` 의 open/available/read/write → ipc 스트림. N657X0 `drv_uart.c` 자리 |
 | 패킷 | `common/hw/src/cmd.c` | STX `02 FD`, type, cmd, err, len, data, checksum. **두 코어가 같은 파일** (벤더 코드 없음) |
 | 스트림 | `hw/driver/ipc.c` | `ipcStreamWrite/Read/Available/Flush` — 공유 링 버퍼 + MU GP0 |
 
-배치는 N657X0 의 `ap/modules/cmd/{cmd_task, driver, process}` 와 같다. 모듈 등록(`MODULE_DEF`)은 로드맵 29 에서 들여오므로, 그 전까지는 `ap.c` 가 `cmdTaskInit()` / `cmdTaskUpdate()` 를 부른다.
+배치는 N657X0 의 `ap/modules/cmd/{cmd_task, driver, process}` 와 같다. CM33 은 로드맵 28 에서 모듈 구조(`MODULE_DEF`)를 들이면서 cli 와 함께 `ap/modules/common/cmd` 로 옮겼다([28](28-freertos.md)). CM7 은 아직 `ap/modules/cmd` 이고 `ap.c` 가 `cmdTaskInit()` / `cmdTaskUpdate()` 를 부른다.
 
 ### 스트림 (`shared.h` 4절)
 
