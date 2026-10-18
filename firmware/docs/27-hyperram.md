@@ -24,7 +24,7 @@ full 8192 KB (addr, ~addr) : OK  (0 words differ)
   memcpy 1 MB        :  172420 us  (5938 KB/s)
 ```
 
-- 8 MB 전체를 주소 값과 그 반전으로 두 번 채워 비교했다. 불일치는 0 이다.
+- 8 MB 전체를 주소 값과 그 반전으로 두 번 채워 비교했다. 불일치는 0 이다. (5절에서 코어별로 나눈 뒤로 `psram test` 는 CM33 몫만 시험한다.)
 - FlexSPI1 루트 클럭은 332 MHz 다. HyperRAM 은 DDR 이라 166 MHz 로 돈다.
 
 ## 2. 왜 XMCD 인가
@@ -103,16 +103,68 @@ CM7 이 직접 읽도록 cmd 명령 `SHARED_CMD_MEM_READ` 와 CLI `peer read add
 
 코어 간 신호와 작은 데이터는 지금처럼 OCRAM2 공유 블록(non-cacheable)과 cmd 패킷으로 하고, HyperRAM 에는 큰 버퍼를 두고 위치만 패킷으로 넘긴다([25](25-cm7-boot.md) 11절).
 
-## 5. CLI
+## 5. 두 코어의 몫과 `.psram_bss` 섹션
+
+### SDK 는 어떻게 하나
+
+SDK 는 섹션을 따로 두지 않는다. **링커 스크립트를 통째로 바꾼 빌드 변형** `*_flexspi_nor_hyperram.ld` 가 있고, 일반판과의 차이는 `m_data`(`.data` `.bss` 힙 스택) 전체를 TCM 대신 HyperRAM 으로 옮기는 것뿐이다. 빠르게 써야 하는 것만 `DataQuickAccess` 로 TCM 에 남긴다. `.data` 초기값을 startup 이 HyperRAM 으로 복사하므로 XMCD 로 ROM 이 미리 열어 두는 것이 전제다.
+
+| 코어 | SDK 링커 | |
+|---|---|---|
+| CM7 | `m_hyperram_start = 0x2800_0000`, `size = 6 MB` | *"Reserved 2M for CM33 usage"* |
+| CM33 | `0x2860_0000`, 2 MB (dual image) / 8 MB 전체 (단일 코어) | |
+
+### 여기서는 섹션으로 큰 버퍼만 둔다
+
+TCM 이 충분하고 CM33 은 HyperRAM 을 캐시하지 않아 느리다(32 bit 읽기 39 MB/s). 그래서 SDK 처럼 변수와 스택을 통째로 옮기지 않고, **표시한 큰 버퍼만** HyperRAM 에 둔다. 나누는 비율은 SDK 와 같게 했다(나중에 SDK 코드를 가져올 때 주소가 맞는다).
+
+| 코어 | 링커 `PSRAM` 영역 | 섹션 |
+|---|---|---|
+| CM7 | `0x2800_0000`, 6 MB | `.psram_bss` |
+| CM33 | `0x2860_0000`, 2 MB | `.psram_bss` |
+
+```c
+#include "psram.h"
+
+static uint8_t frame_buf[512 * 1024] PSRAM_BSS;    // section(".psram_bss"), aligned(32)
+```
+
+- **NOLOAD.** 기록할 때 probe-rs 가 이 구간을 건드리지 않는다. 리셋 뒤 ROM 이 다시 열기 전에는 HyperRAM 에 접근할 수 없으므로 중요하다.
+- **0 채우기는 `psramInit()` 이 확인한 뒤**에 한다. startup 의 `.bss` 클리어는 TCM 만 지운다. startup 에서 HyperRAM 을 지우면 ROM 이 열지 않았을 때 로그도 남기기 전에 멈춘다. 그래서 **PSRAM_BSS 변수는 `hwInit()` 의 `psramInit()` 이후에 쓴다.**
+- **32 B 정렬.** CM7 캐시 줄 단위라 clean / invalidate 를 다른 변수와 나눠 하지 않는다.
+- 초기값이 있는 `.data` 는 두지 않는다(플래시에서 복사하는 코드가 따로 필요하다).
+- CM7 도 같은 API 의 작은 `psram.c` 가 FlexSPI1 이 켜졌는지만 보고 자기 섹션을 0 으로 채운다.
+- `psramGetAddr()` · `psramGetLength()` 는 이제 **이 코어 몫**이다.
+
+### 확인
+
+임시로 두 코어에 `PSRAM_BSS` 변수를 하나씩 두고 확인했다(확인 뒤 지웠다).
+
+| 확인 | CM33 | CM7 |
+|---|---|---|
+| 변수 주소 (맵) | `0x2860_0000` | `0x2800_0000` |
+| 리셋 전에 디버거로 `0xAA` 채움 | `aaaaaaaa` | `aaaaaaaa` |
+| 부팅 뒤 | `00000000` | `00000000` |
 
 ```
-psram info     init, 주소, 크기(FLSHB1CR0), FlexSPI1 MCR0 · 루트 클럭
-psram test     데이터 버스, 주소 버스, 8 MB 전체 비교, 속도  ← 8 MB 를 덮어쓴다
+[OK] psramInit()
+     HyperRAM  8192 KB, CM33 2048 KB @ 0x28600000 (bss 4096 B)
+cli# psram test
+full 2044 KB (addr, ~addr) : OK  (0 words differ)
+```
+
+`psram test` 는 CM33 몫에서 **bss 뒤만** 덮어쓴다. 시험 뒤에도 bss 첫 워드(`0x2860_0000`)와 CM7 몫의 마지막 워드(`0x285F_FFFC`)에 넣어 둔 값이 그대로 남았다.
+
+## 6. CLI
+
+```
+psram info     init, 칩 크기(FLSHB1CR0), CM33 몫, bss 구간, FlexSPI1 MCR0 · 루트 클럭
+psram test     데이터 버스, 주소 버스, CM33 몫 전체 비교, 속도  ← CM33 몫의 bss 뒤를 덮어쓴다
 peer read addr CM7 이 그 주소를 읽는다 (CM7 의 캐시를 거친다)
 ```
 
-## 6. 다음
+## 7. 다음
 
 - [ ] CM33 `XCACHE_PS` 를 켤지 정한다. 켜면 HyperRAM 이 빨라지지만 OCRAM2 공유 블록도 캐시되므로, CM33 MPU 로 공유 구간을 non-cacheable 로 먼저 잡아야 한다
 - [ ] newlib-nano 대신 워드 단위 `memcpy` · `memset` 을 쓸지 정한다 (HyperRAM · OCRAM 같은 느린 메모리에서 차이가 크다)
-- [ ] 링커에 HyperRAM 섹션(`.psram`, NOLOAD)을 둔다. 큰 버퍼를 이름으로 놓을 수 있게 (28 RTOS 힙, 50 번대 네트워크 버퍼)
+- [x] 링커에 HyperRAM 섹션(`.psram_bss`, NOLOAD)을 둔다 — 5절. CM7 6 MB / CM33 2 MB

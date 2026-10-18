@@ -60,7 +60,9 @@ titan-mini 의 CPU1 기동과 같은 틀이다. 공유 블록 핸드셰이크, `
 | CM7 ITCM 256 KB | `0x303C_0000` | `0x0000_0000` | cm7 `ITCM` | 벡터 · 코드 · `.data` 초기값 |
 | CM7 DTCM 256 KB | `0x3040_0000` | `0x2000_0000` | cm7 `DTCM` | `.data` `.bss` 힙 4K 스택 8K |
 | OCRAM2 앞 4 KB | `0x2050_0000` | `0x2050_0000` | cm33 · cm7 `SHARED` | `.shared` (`shared_t`) |
-| OCRAM1, OCRAM2 나머지, HyperRAM | | | — | 미할당 |
+| HyperRAM 앞 6 MB | `0x2800_0000` | `0x2800_0000` | cm7 `PSRAM` | `.psram_bss` (CM7 이 캐시, [27](27-hyperram.md)) |
+| HyperRAM 뒤 2 MB | `0x2860_0000` | `0x2860_0000` | cm33 `PSRAM` | `.psram_bss` (CM33 은 캐시 안 함) |
+| OCRAM1, OCRAM2 나머지 | | | — | 미할당 |
 
 QSPI 의 앱 영역(`0x0404_0000`)과 데이터 영역(`0x04C0_0000`)은 파티션 계획만 있다([02](02-memory-map.md) 5절).
 

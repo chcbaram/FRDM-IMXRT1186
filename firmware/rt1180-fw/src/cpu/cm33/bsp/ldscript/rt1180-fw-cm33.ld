@@ -3,12 +3,14 @@
  *
  * 근거: docs/01-boot-sequence.md 4절, docs/02-memory-map.md 4~5절
  * SDK 의 MIMXRT1186xxxxx_cm33_flexspi_nor.ld 를 바탕으로 쓰지 않는 영역
- * (HyperRAM, rpmsg, core1 이미지, non-cacheable)을 걷어냈다.
+ * (rpmsg, core1 이미지, non-cacheable)을 걷어냈다. HyperRAM 은 SDK 처럼 .data 를 옮기지 않고
+ * .psram_bss 로 큰 버퍼만 둔다.
  *
  *   0x0400_0400  FCB        .boot_hdr.conf       ROM 이 FlexSPI 설정을 읽는다
  *   0x0400_0800  XMCD       .boot_hdr.xmcd_data  ROM 이 HyperRAM 을 설정한다 (docs/27)
  *   0x0400_1000  컨테이너   .boot_hdr.container  ROM/ELE 가 이미지 위치를 읽는다
  *   0x0400_B000  벡터 테이블 → 코드 → .data 초기값
+ *   0x2860_0000  HyperRAM 뒤 2 MB → .psram_bss (CM7 몫은 앞 6 MB, docs/27)
  *
  * 이미지는 파티션 계획의 첫 256 KB(부트로더 자리) 안에 있어야 한다.
  * 넘치면 링크 단계에서 멈춘다.
@@ -38,6 +40,7 @@ MEMORY
   ITCM       (RWX) : ORIGIN = 0x0FFE0000, LENGTH = 128K    /* CM33 Code TCM   */
   DTCM       (RW)  : ORIGIN = 0x20000000, LENGTH = 128K    /* CM33 System TCM */
   SHARED     (RW)  : ORIGIN = 0x20500000, LENGTH = 4K      /* OCRAM2 앞 4 KB : 코어 간 공유 블록 (cpu/shared/shared.h) */
+  PSRAM      (RW)  : ORIGIN = 0x28600000, LENGTH = 2M      /* HyperRAM 뒤 2 MB : CM33 몫 (SDK 와 같은 분할) */
 }
 
 /* 컨테이너 이미지 엔트리가 쓰는 값 (bsp/boot/boot_hdr.c) */
@@ -201,6 +204,21 @@ SECTIONS
     KEEP(*(.shared))
     . = ALIGN(4);
   } > SHARED
+
+  /* HyperRAM 의 이 코어 몫 (docs/27). NOLOAD 라 기록 · startup 이 건드리지 않는다.
+     ROM 이 XMCD 로 HyperRAM 을 연 뒤 psramInit() 이 0 으로 채운다. 32 B = CM7 캐시 줄. */
+  .psram_bss (NOLOAD) :
+  {
+    . = ALIGN(32);
+    __psram_bss_start__ = .;
+    *(.psram_bss)
+    *(.psram_bss*)
+    . = ALIGN(32);
+    __psram_bss_end__ = .;
+  } > PSRAM
+
+  __psram_region_start = ORIGIN(PSRAM);
+  __psram_region_size  = LENGTH(PSRAM);
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }

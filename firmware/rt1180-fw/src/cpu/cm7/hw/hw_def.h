@@ -9,6 +9,8 @@
 #define _DEF_BOARD_NAME           "FRDM-IMXRT1186-CM7"
 
 
+#define _USE_HW_PSRAM
+
 #define _USE_HW_IPC
 #define      HW_IPC_MSG_Q_MAX       16
 
