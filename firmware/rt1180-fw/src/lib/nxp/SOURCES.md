@@ -55,6 +55,8 @@
 | `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.h` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/portasm.h` | `60b8c74c7c73` |
 | `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portmacro.h` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/portmacro.h` | `b6e07a01d7b0` |
 | `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portmacrocommon.h` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/portmacrocommon.h` | `d6874ec28d30` |
+| `freertos/portable/GCC/ARM_CM4F/port.c` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM4F/port.c` | `cb2ce141eb03` |
+| `freertos/portable/GCC/ARM_CM4F/portmacro.h` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM4F/portmacro.h` | `e870959ed8a2` |
 | `freertos/portable/MemMang/heap_4.c` | FreeRTOS/FreeRTOS-Kernel | `portable/MemMang/heap_4.c` | `8f7516b63745` |
 | `freertos/queue.c` | FreeRTOS/FreeRTOS-Kernel | `queue.c` | `e66b73eb6dd7` |
 | `freertos/stream_buffer.c` | FreeRTOS/FreeRTOS-Kernel | `stream_buffer.c` | `f2041618919a` |

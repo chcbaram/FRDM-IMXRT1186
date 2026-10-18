@@ -95,6 +95,8 @@ FILES = [
         *[f'portable/GCC/ARM_CM33_NTZ/non_secure/{f}' for f in [
             'port.c', 'portasm.c', 'portasm.h', 'portmacro.h', 'portmacrocommon.h', 'mpu_wrappers_v2_asm.c',
         ]],
+        #-- CM7 (r1p2). FreeRTOS 의 ARM_CM7/r0p1 은 r0p1 이하용이라 ARM_CM4F 를 쓴다
+        'portable/GCC/ARM_CM4F/port.c', 'portable/GCC/ARM_CM4F/portmacro.h',
     ]],
 ]
 

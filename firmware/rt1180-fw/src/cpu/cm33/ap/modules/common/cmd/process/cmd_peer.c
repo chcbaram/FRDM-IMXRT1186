@@ -69,6 +69,41 @@ void cliPeer(cli_args_t *args)
     ret = true;
   }
 
+  if (args->argc == 1 && args->isStr(0, "cpu"))
+  {
+    //-- CM7 의 idle 비율. 1 초 간격으로 두 번 받아 런타임 카운터 차이로 구한다.
+    //   (CM7 은 이 1 초 동안 cmd 스레드가 이 명령 둘을 처리하는 것 말고는 하는 일이 거의 없다)
+    cmd_packet_t *p_packet = &p_cmd->packet;
+    uint32_t      c0[2], c1[2];
+    bool          ok;
+
+    ok  = cmdSendCmdRxResp(p_cmd, SHARED_CMD_PEER_CPU, NULL, 0, CMD_PEER_RESP_TIMEOUT) &&
+          p_packet->err_code == CMD_OK && p_packet->length == 8;
+    if (ok) memcpy(c0, p_packet->data, 8);
+    cmdTaskUnlock();
+    delay(1000);
+    cmdTaskLock(1000);
+    ok &= cmdSendCmdRxResp(p_cmd, SHARED_CMD_PEER_CPU, NULL, 0, CMD_PEER_RESP_TIMEOUT) &&
+          p_packet->err_code == CMD_OK && p_packet->length == 8;
+    if (ok)
+    {
+      memcpy(c1, p_packet->data, 8);
+      uint32_t idle  = c1[0] - c0[0];
+      uint32_t total = c1[1] - c0[1];
+
+      cliPrintf("CM7 idle : %d.%d %%  (1 s, busy %d.%d %%)\n",
+                total ? (int)((uint64_t)idle * 100 / total) : 0,
+                total ? (int)((uint64_t)idle * 1000 / total % 10) : 0,
+                total ? (int)((uint64_t)(total - idle) * 100 / total) : 0,
+                total ? (int)((uint64_t)(total - idle) * 1000 / total % 10) : 0);
+    }
+    else
+    {
+      cliPrintf("E_ err 0x%04X\n", p_packet->err_code);
+    }
+    ret = true;
+  }
+
   if (args->argc == 2 && args->isStr(0, "read"))
   {
     cmd_packet_t *p_packet = &p_cmd->packet;
@@ -149,6 +184,7 @@ void cliPeer(cli_args_t *args)
   {
     cliPrintf("peer info\n");
     cliPrintf("peer read addr        (CM7 이 읽는다)\n");
+    cliPrintf("peer cpu              (CM7 idle 비율, 1 초)\n");
     cliPrintf("peer echo 0~%d [count]\n", CMD_MAX_DATA_LENGTH);
   }
 

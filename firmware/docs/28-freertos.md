@@ -1,9 +1,9 @@
-# 28. FreeRTOS — CM33 (+ thread · module)
+# 28. FreeRTOS — CM33 · CM7 (+ thread · module)
 
-> CM33 에 FreeRTOS 를 올리고, titan-mini 의 `thread`(스레드 등록 · `thread info/cpu`)와 N657X0 의 `module`(MODULE_DEF 자기 등록)을 들였다. CM7 은 아직 bare-metal 이다 — 네트워크(50 번대)를 CM7 에 둘 계획이라 다음에 CM7 도 올린다.
+> 두 코어에 FreeRTOS 를 올렸다. CM33 에는 titan-mini 의 `thread`(스레드 등록 · `thread info/cpu`)와 N657X0 의 `module`(MODULE_DEF 자기 등록)을 들였다. CM7 은 cmd 스레드가 doorbell 에 깨어 패킷을 처리한다 — 네트워크(50 번대)를 CM7 에 둘 준비다.
 > 관련: [25-cm7-boot.md](25-cm7-boot.md) 10 · 11절 (doorbell, 패킷) · [26-qspi-nor.md](26-qspi-nor.md) 6절 (인터럽트 정지) · [12-project-skeleton.md](12-project-skeleton.md)
 >
-> 출처: FreeRTOS-Kernel `V11.1.0` (`portable/GCC/ARM_CM33_NTZ`), titan-mini `bsp/rtos` · `osal/thread`, NUCLEO-N657X0 `ap/modules/module.c`.
+> 출처: FreeRTOS-Kernel `V11.1.0` (`portable/GCC/ARM_CM33_NTZ`, `portable/GCC/ARM_CM4F`), titan-mini `bsp/rtos` · `osal/thread`, NUCLEO-N657X0 `ap/modules/module.c`.
 
 ---
 
@@ -88,10 +88,49 @@ main()
 - **QSPI 지우기 동안 틱을 잃는다.** `qspi` 는 ROM 호출 동안 인터럽트를 막는다(섹터 46 ms, 블록 254 ms). 그만큼 RTOS 틱이 밀린다([26](26-qspi-nor.md) 6 · 7절).
 - cmd 태스크를 첫 모듈로 바꿨다(`MODULE_DEF(cmd)`, 우선순위 LOWEST, `update` 로 수신 처리). CM7 을 빌드하지 않아도 채널은 연다. ipc 스트림이 열리지 않았으면 아무것도 오가지 않는다.
 
-## 5. 다음
+## 5. CM7
 
-- [ ] **CM7 FreeRTOS** — 포트는 `ARM_CM4F`. CM7 은 r1p2 다(CPUID `0x411FC272`). FreeRTOS 의 `ARM_CM7/r0p1` 은 r0p1 이하용이다. 네트워크(lwIP · NETC)를 CM7 에 둘 계획이다.
-  - FreeRTOS 의 idle 은 `WFI` 를 하지 않고(틱리스 끔) SysTick 이 계속 돈다. 25 10절의 "WFI 에서 SysTick 이 멈춘다" 문제는 생기지 않는다.
-  - CM7 cmd 태스크는 doorbell ISR 에서 세마포어를 주고 스레드가 깨어 처리한다(지금은 계속 도는 루프).
+| 항목 | 값 |
+|---|---|
+| 포트 | **`ARM_CM4F`**. CM7 은 r1p2 다(CPUID `0x411FC272`). FreeRTOS 의 `ARM_CM7/r0p1` 은 r0p0 · r0p1 에라타 회피용이고 그 뒤 리비전은 `ARM_CM4F` 를 쓰라고 한다 |
+| 핸들러 | 포트 이름(`vPortSVCHandler` · `xPortPendSVHandler` · `xPortSysTickHandler`)을 `FreeRTOSConfig.h` 에서 벡터 이름으로 바꾼다 |
+| 우선순위 | NVIC 4 bit (0~15). `FromISR` 는 2 이상. MU 는 5 |
+| 힙 | 32 KB (DTCM, heap_4) |
+| 구조 | CM33 과 같은 main 스레드. 그 위에 **cmd 스레드**(pri 3, 4 KB) |
+| 훅 | CM7 에는 로그가 없다. 디버거가 붙어 있으면 BKPT, 아니면 멈춘다. CM33 은 alive 가 멈춘 것으로 안다 |
+
+CM7 은 아직 `module` · `thread` 를 들이지 않았다. 두 파일이 `logPrintf` · `cliAdd` 를 쓰는데 CM7 에는 로그 · CLI 드라이버가 없다. CM7 로그 경로(예: IPC 로 CM33 에 보내기)가 생기면 같은 구조로 맞춘다.
+
+### cmd 가 이벤트로 깨어난다
+
+처음에 정한 구조 그대로다 — **버퍼(링)에 쓰고, 이벤트(MU GP0)로 알리고, 받는 쪽은 이벤트에 깨어 처리한다**([25](25-cm7-boot.md) 11절).
+
+```
+CM33 ipcStreamWrite → 링 m2p → MU GP0 ─IRQ→ CM7 MU1_IRQHandler
+                                              xSemaphoreGiveFromISR(stream_sem)
+                                              portYIELD_FROM_ISR
+                     cmd 스레드 ipcStreamWait(100) 에서 깨어남 → 패킷을 다 처리 → 다시 잠듦
+```
+
+- 새 API `ipcStreamWait(timeout_ms)` (두 코어 공통): 이미 받을 것이 있으면 바로, 없으면 doorbell 세마포어를 `timeout_ms` 만 기다린다. RTOS 가 없으면 기다리지 않는다.
+- 세마포어는 MU 인터럽트를 켜기 전에 만든다.
+- 100 ms 마다는 doorbell 이 없어도 한 번 본다.
+
+| | bare-metal (전) | RTOS + doorbell (후) |
+|---|---|---|
+| CM7 이 기다리는 방법 | 루프가 계속 링을 본다 | cmd 스레드가 세마포어에서 잔다 |
+| CM7 idle (`peer cpu`, 1 초) | 0 % (바쁜 루프) | **99.9 %** |
+| `peer echo 0` 왕복 | 14 µs | 17 µs |
+| `peer echo 512` 왕복 | 537 µs | 593 µs |
+| `ipc ping` (ISR 에서 응답) | 4 µs | 5 µs |
+
+깨우는 몇 µs 를 내고 CPU 를 거의 전부 돌려받았다. CM7 은 FreeRTOS idle 에서 `WFI` 를 하지 않으므로(틱리스 끔) 25 10절의 "WFI 에서 SysTick 이 멈춘다" 는 생기지 않는다.
+
+`peer cpu` 는 이번에 더한 cmd 명령 `SHARED_CMD_PEER_CPU` 다. CM7 이 `ulTaskGetIdleRunTimeCounter()` 와 런타임 카운터를 돌려주면 CM33 이 1 초 간격으로 두 번 받아 비율을 낸다.
+
+## 6. 다음
+
+- [x] **CM7 FreeRTOS** — 5절
+- [ ] CM7 에 `module` · `thread` (로그 경로가 생긴 뒤)
 - [ ] 버튼을 1 ms 스레드로 (원본과 같이)
 - [ ] event 모듈 (`eventPub` / `eventSub`, titan-mini · N657X0)

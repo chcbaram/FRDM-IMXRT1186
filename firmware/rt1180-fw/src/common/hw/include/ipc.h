@@ -87,6 +87,10 @@ uint32_t     ipcStreamWrite(uint8_t *p_data, uint32_t length, uint32_t timeout_m
 void         ipcStreamFlush(void);
 uint32_t     ipcStreamGetEventCnt(void);   // 받은 doorbell 수
 
+//-- 받을 것이 생길 때까지 기다린다. 이미 있으면 바로, 없으면 doorbell 이 올 때까지
+//   timeout_ms 만 잔다 (RTOS 세마포어). RTOS 가 없으면 기다리지 않는다. 받을 것이 있으면 true.
+bool         ipcStreamWait(uint32_t timeout_ms);
+
 //-- 왕복 시간 측정. 상대 코어가 ping 에 답하면 true 와 왕복 시간(us)을 돌려준다.
 //   주 코어 쪽에서만 구현한다. 상대 코어 드라이버는 ping 에 답만 한다.
 bool         ipcPing(uint32_t timeout_ms, uint32_t *p_rtt_us);

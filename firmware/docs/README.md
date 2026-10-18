@@ -33,7 +33,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **28 CM7 FreeRTOS** (`ARM_CM4F` 포트, doorbell → 세마포어로 cmd 태스크 깨우기) → **29 event** · 버튼 스레드
+1. **29 event** · 버튼 1 ms 스레드 · CM7 로그 경로 → **30~33** 주변장치 → **40~** 부트로더
 3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절)
 
 ### 미해결 과제
@@ -93,7 +93,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b 까지 완료: CM7 디버그 · 캐시/MPU · MU · 코어 간 cmd 패킷 · 전원 재인가) |
 | [26](26-qspi-nor.md) | **QSPI NOR** — XIP 로 돌면서 ROM API 로 지우기/쓰기, `qspi` CLI, 섹터 46 ms · 쓰기 4 KB 10.7 ms · 읽기 28.5 MB/s | ✅ |
 | [27](27-hyperram.md) | **HyperRAM 8 MB** — XMCD 로 ROM 이 설정, `psram test` 8 MB OK, CM7 캐시 규칙 | ✅ |
-| [28](28-freertos.md) | **FreeRTOS (CM33)** — V11.1.0 `ARM_CM33_NTZ` (Secure only), main 스레드 구조, `thread info/cpu` | ✅ (CM7 남음) |
+| [28](28-freertos.md) | **FreeRTOS** — CM33 `ARM_CM33_NTZ` (Secure only) · CM7 `ARM_CM4F`, thread · module, CM7 cmd 가 doorbell 에 깨어남 (idle 99.9 %) | ✅ |
 | 29 | 로그 / 모듈 / 이벤트 — `module` 은 28 에서 먼저 들였다 (cmd 가 첫 모듈) | 일부 |
 | 30~33 | USB(tinyusb CDC) · CAN-FD · I2C · SPI | 예정 |
 | 40 | 부트 아키텍처 — 부트로더/앱 분리, 파티션 확정, 진입 조건 (24 의 부트 모드 플래그 · 더블클릭) | 예정 |

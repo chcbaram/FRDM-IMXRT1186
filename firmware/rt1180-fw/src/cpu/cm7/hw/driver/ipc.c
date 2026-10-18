@@ -31,6 +31,9 @@ static qbuffer_t msg_q;
 static shared_ring_t * const p_tx = &shared.p2m;
 static shared_ring_t * const p_rx = &shared.m2p;
 static volatile uint32_t stream_event_cnt = 0;
+#ifdef _USE_HW_RTOS
+static SemaphoreHandle_t stream_sem = NULL;      // doorbell → 기다리는 스레드
+#endif
 static ipc_msg_t msg_q_buf[HW_IPC_MSG_Q_MAX];
 
 
@@ -184,6 +187,24 @@ uint32_t ipcStreamGetEventCnt(void)
   return stream_event_cnt;
 }
 
+bool ipcStreamWait(uint32_t timeout_ms)
+{
+  if (ipcStreamAvailable() > 0)
+    return true;
+
+#ifdef _USE_HW_RTOS
+  if (stream_sem != NULL && rtosIsRunning())
+  {
+    //-- 세마포어는 doorbell 하나에 하나다. 앞에서 남은 것은 위 available 검사가 먼저 걸러 낸다.
+    //
+    xSemaphoreTake(stream_sem, pdMS_TO_TICKS(timeout_ms));
+  }
+#else
+  (void)timeout_ms;
+#endif
+  return (ipcStreamAvailable() > 0);
+}
+
 //-- 링 복사. 끝에서 넘어가면 두 번에 나눈다. 공유 블록은 Normal non-cacheable 이라 memcpy 의
 //   워드 접근이 그대로 된다 (바이트마다 OCRAM 에 가는 것보다 빠르다).
 //
@@ -211,10 +232,20 @@ void MU1_IRQHandler(void)
 {
   ipc_msg_t msg;
 
+#ifdef _USE_HW_RTOS
+  BaseType_t woken = pdFALSE;
+#endif
+
   if ((MU_GetStatusFlags(MU1_MUB) & kMU_GenInt0Flag) != 0)
   {
     MU_ClearStatusFlags(MU1_MUB, kMU_GenInt0Flag);
     stream_event_cnt++;
+#ifdef _USE_HW_RTOS
+    if (stream_sem != NULL)
+    {
+      xSemaphoreGiveFromISR(stream_sem, &woken);
+    }
+#endif
   }
 
   while ((MU_GetStatusFlags(MU1_MUB) & kMU_Rx0FullFlag) != 0)
@@ -232,11 +263,20 @@ void MU1_IRQHandler(void)
     }
   }
   __DSB();
+#ifdef _USE_HW_RTOS
+  portYIELD_FROM_ISR(woken);
+#endif
 }
 
 static void ipcMsgInit(void)
 {
   qbufferCreateBySize(&msg_q, (uint8_t *)msg_q_buf, sizeof(ipc_msg_t), HW_IPC_MSG_Q_MAX);
+#ifdef _USE_HW_RTOS
+  if (stream_sem == NULL)
+  {
+    stream_sem = xSemaphoreCreateBinary();
+  }
+#endif
 
   MU_Init(MU1_MUB);
   for (uint32_t i = 0; i < MU_RR_COUNT; i++)

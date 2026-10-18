@@ -60,6 +60,18 @@ bool cmdPeerProcess(cmd_t *p_cmd)
       }
       break;
 
+#ifdef _USE_HW_RTOS
+    case SHARED_CMD_PEER_CPU:
+      {
+        uint32_t cnt[2];
+
+        cnt[0] = (uint32_t)ulTaskGetIdleRunTimeCounter();
+        cnt[1] = bspGetRunTimeCounter();
+        cmdSendResp(p_cmd, p_packet->cmd, CMD_OK, (uint8_t *)cnt, sizeof(cnt));
+      }
+      break;
+#endif
+
     default:
       cmdSendResp(p_cmd, p_packet->cmd, ERR_CMD_NO_CMD, NULL, 0);
       break;

@@ -8,7 +8,13 @@
 #define _DEF_FIRMWATRE_VERSION    "V261010R1"
 #define _DEF_BOARD_NAME           "FRDM-IMXRT1186-CM7"
 
+#define _HW_DEF_THREAD_MAIN_PRI       2
+#define _HW_DEF_THREAD_MAIN_STACK     (2 * 1024)
+#define _HW_DEF_THREAD_CMD_PRI        3
+#define _HW_DEF_THREAD_CMD_STACK      (4 * 1024)
 
+
+#define _USE_HW_RTOS
 #define _USE_HW_PSRAM
 
 #define _USE_HW_IPC

@@ -32,12 +32,21 @@ set(NXP_CORE_FILES
 
 # CM7 은 아직 기동 확인만 한다. 공용 드라이버(common)도 필요할 때 더한다.
 #
+# FreeRTOS 포트 : CM7 r1p2 는 ARM_CM4F (bsp/rtos/FreeRTOSConfig.h)
+#
+set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM4F)
+set(FREERTOS_CORE_FILES
+  ${FREERTOS_SRC_FILES}
+  ${FREERTOS_PORT_DIR}/port.c
+  )
+
 add_executable(${EXECUTABLE}
   ${SRC_FILES}
   ${SRC_FILES_RECURSE}
   ${SHARED_SRC_FILES}
   ${NXP_SRC_FILES}
   ${NXP_CORE_FILES}
+  ${FREERTOS_CORE_FILES}
   )
 
 set_target_properties(${EXECUTABLE} PROPERTIES
@@ -50,10 +59,13 @@ target_include_directories(${EXECUTABLE} PRIVATE
   ${CORE_DIR}/ap/modules
   ${CORE_DIR}/ap/modules/cmd
   ${CORE_DIR}/bsp
+  ${CORE_DIR}/bsp/rtos
   ${CORE_DIR}/hw
   ${CORE_DIR}/hw/driver
 
   ${SHARED_INC_DIRS}
+  ${FREERTOS_DIR}/include
+  ${FREERTOS_PORT_DIR}
   )
 
 target_compile_definitions(${EXECUTABLE} PRIVATE
@@ -86,6 +98,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
 set_source_files_properties(
   ${NXP_SRC_FILES}
   ${NXP_CORE_FILES}
+  ${FREERTOS_CORE_FILES}
   TARGET_DIRECTORY ${EXECUTABLE}
   PROPERTIES
     COMPILE_OPTIONS "-Os;-w"
