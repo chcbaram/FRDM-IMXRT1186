@@ -14,6 +14,7 @@ extern "C" {
 #include "rtc.h"
 #include "reset.h"
 #include "ipc.h"
+#include "cmd.h"
 #include "uart.h"
 #include "cli.h"
 #include "log.h"

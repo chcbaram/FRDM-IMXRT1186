@@ -6,6 +6,7 @@
 #include "cm7.h"
 #include "qbuffer.h"
 #include "fsl_mu.h"
+#include <string.h>
 
 
 /*
@@ -34,6 +35,8 @@ static bool     ipcCheckImage(void);
 static uint32_t crc32(const uint8_t *p_data, uint32_t length);
 static void     ipcMsgInit(void);
 #endif
+static void     ringCopyIn(uint8_t *p_ring, uint32_t pos, const uint8_t *p_src, uint32_t length);
+static void     ringCopyOut(uint8_t *p_dst, const uint8_t *p_ring, uint32_t pos, uint32_t length);
 
 
 static IpcState_t ipc_state    = IPC_STATE_DISABLED;
@@ -49,6 +52,10 @@ static uint32_t   last_alive_ms = 0;
 
 static bool       is_msg_init = false;
 static qbuffer_t  msg_q;
+static shared_ring_t * const p_tx = &shared.m2p;
+static shared_ring_t * const p_rx = &shared.p2m;
+static volatile uint32_t stream_event_cnt = 0;
+static uint32_t   stream_tx_timeout = 0;
 #if _HW_DEF_CM7_IMAGE
 static ipc_msg_t  msg_q_buf[HW_IPC_MSG_Q_MAX];
 #endif
@@ -261,9 +268,121 @@ bool ipcPing(uint32_t timeout_ms, uint32_t *p_rtt_us)
   return (pong_data == seq);
 }
 
+uint32_t ipcStreamAvailable(void)
+{
+  if (is_msg_init != true)
+    return 0;
+
+  return (p_rx->head - p_rx->tail) & (SHARED_RING_SIZE - 1);
+}
+
+uint32_t ipcStreamRead(uint8_t *p_data, uint32_t length)
+{
+  uint32_t avail = ipcStreamAvailable();
+  uint32_t tail;
+
+  if (length > avail)
+    length = avail;
+  if (length == 0)
+    return 0;
+
+  //-- head 를 읽은 뒤 데이터를 읽는다. 다 읽은 뒤에 tail 을 넘겨 자리를 돌려준다.
+  //
+  __DMB();
+  tail = p_rx->tail;
+  ringCopyOut(p_data, p_rx->buf, tail, length);
+  __DMB();
+  p_rx->tail = (tail + length) & (SHARED_RING_SIZE - 1);
+
+  return length;
+}
+
+uint32_t ipcStreamWrite(uint8_t *p_data, uint32_t length, uint32_t timeout_ms)
+{
+  uint32_t written = 0;
+  uint32_t pre_ms  = millis();
+
+  if (is_msg_init != true)
+    return 0;
+
+  while (written < length)
+  {
+    uint32_t head  = p_tx->head;
+    uint32_t space = (p_tx->tail - head - 1) & (SHARED_RING_SIZE - 1);
+    uint32_t n     = length - written;
+
+    if (space == 0)
+    {
+      if ((millis() - pre_ms) >= timeout_ms)
+      {
+        stream_tx_timeout++;
+        break;
+      }
+      continue;
+    }
+    if (n > space)
+      n = space;
+
+    ringCopyIn(p_tx->buf, head, &p_data[written], n);
+    __DMB();
+    p_tx->head = (head + n) & (SHARED_RING_SIZE - 1);
+    __DSB();
+
+    //-- doorbell. 상대가 아직 앞 것을 지우지 않았으면 실패하지만 하나로 합쳐지므로 괜찮다.
+    //
+    (void)MU_TriggerInterrupts(MU1_MUA, kMU_GenInt0InterruptTrigger);
+    written += n;
+    pre_ms   = millis();
+  }
+
+  return written;
+}
+
+void ipcStreamFlush(void)
+{
+  if (is_msg_init != true)
+    return;
+
+  p_rx->tail = p_rx->head;
+}
+
+uint32_t ipcStreamGetEventCnt(void)
+{
+  return stream_event_cnt;
+}
+
+//-- 링 복사. 끝에서 넘어가면 두 번에 나눈다. 공유 블록은 Normal non-cacheable 이라 memcpy 의
+//   워드 접근이 그대로 된다 (바이트마다 OCRAM 에 가는 것보다 빠르다).
+//
+static void ringCopyIn(uint8_t *p_ring, uint32_t pos, const uint8_t *p_src, uint32_t length)
+{
+  uint32_t first = SHARED_RING_SIZE - pos;
+
+  if (first > length)
+    first = length;
+  memcpy(&p_ring[pos], p_src, first);
+  memcpy(&p_ring[0], &p_src[first], length - first);
+}
+
+static void ringCopyOut(uint8_t *p_dst, const uint8_t *p_ring, uint32_t pos, uint32_t length)
+{
+  uint32_t first = SHARED_RING_SIZE - pos;
+
+  if (first > length)
+    first = length;
+  memcpy(p_dst, &p_ring[pos], first);
+  memcpy(&p_dst[first], &p_ring[0], length - first);
+}
+
 void MU1_IRQHandler(void)
 {
   ipc_msg_t msg;
+
+  if ((MU_GetStatusFlags(MU1_MUA) & kMU_GenInt0Flag) != 0)
+  {
+    MU_ClearStatusFlags(MU1_MUA, kMU_GenInt0Flag);
+    stream_event_cnt++;
+  }
 
   while ((MU_GetStatusFlags(MU1_MUA) & kMU_Rx0FullFlag) != 0)
   {
@@ -289,6 +408,13 @@ static void ipcMsgInit(void)
 {
   qbufferCreateBySize(&msg_q, (uint8_t *)msg_q_buf, sizeof(ipc_msg_t), HW_IPC_MSG_Q_MAX);
 
+  //-- 두 링을 비운다. 상대 코어를 깨우기 전이라 아무도 쓰고 있지 않다.
+  //
+  shared.m2p.head = 0;
+  shared.m2p.tail = 0;
+  shared.p2m.head = 0;
+  shared.p2m.tail = 0;
+
   //-- LPCG 를 켠다. MU 는 CM33 리셋만으로는 비워지지 않을 수 있어 남은 수신을 버린다.
   //
   MU_Init(MU1_MUA);
@@ -297,7 +423,7 @@ static void ipcMsgInit(void)
     (void)MU_ReceiveMsgNonBlocking(MU1_MUA, i);
   }
 
-  MU_EnableInterrupts(MU1_MUA, kMU_Rx0FullInterruptEnable);
+  MU_EnableInterrupts(MU1_MUA, kMU_Rx0FullInterruptEnable | kMU_GenInt0InterruptEnable);
   NVIC_SetPriority(MU1_IRQn, 5);
   NVIC_EnableIRQ(MU1_IRQn);
 
@@ -379,6 +505,10 @@ void cliIpc(cli_args_t *args)
     cliPrintf("msg        : tx %d  rx %d  tx timeout %d  q full %d  q %d\n",
               (int)msg_tx_cnt, (int)msg_rx_cnt, (int)msg_tx_timeout, (int)msg_q_full,
               (int)ipcMsgAvailable());
+    cliPrintf("stream     : m2p %d B  p2m %d B  doorbell %d  tx timeout %d\n",
+              (int)((shared.m2p.head - shared.m2p.tail) & (SHARED_RING_SIZE - 1)),
+              (int)((shared.p2m.head - shared.p2m.tail) & (SHARED_RING_SIZE - 1)),
+              (int)stream_event_cnt, (int)stream_tx_timeout);
     ret = true;
   }
 

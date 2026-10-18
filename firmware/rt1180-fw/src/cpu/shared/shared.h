@@ -29,6 +29,13 @@ extern "C" {
  *    보내는 쪽이 TR1(data) 을 먼저, TR0(id) 를 나중에 쓰고, 받는 쪽은 RX0 full 인터럽트에서
  *    RR1 → RR0 순으로 읽는다. id 0 은 쓰지 않는다. 아래 SHARED_MSG_* 가 예약된 id 다.
  *
+ * 4. 스트림 (공유 블록의 링 버퍼 + MU doorbell)
+ *    방향마다 링 버퍼가 하나씩 있다(shared_t.m2p, p2m). 쓰는 쪽은 head 만, 읽는 쪽은 tail 만
+ *    고친다(단일 생산자/소비자). 쓰는 쪽은 데이터 → __DMB() → head → MU GP0 를 울린다.
+ *    GP0 는 여러 번 울려도 하나로 합쳐지므로 받는 쪽은 빌 때까지 다 읽는다.
+ *    두 링은 주 코어(CM33)가 상대 코어를 깨우기 전에 비운다.
+ *    이 스트림 위에 cmd 패킷(STX 02 FD)을 올린다. 명령 번호는 아래 SHARED_CMD_*.
+ *
  * 구조체를 고치면 SHARED_VERSION 을 올리고 두 코어를 함께 다시 빌드한다.
  */
 #define SHARED_CM7_IMAGE_ADDR   0x04800000UL      // QSPI CM7 슬롯 (docs/02 5절)
@@ -39,13 +46,20 @@ extern "C" {
 #define SHARED_BLOCK_ADDR       0x20500000UL      // OCRAM2
 #define SHARED_BLOCK_SIZE       0x1000U           // 4 KB. CM7 MPU 가 이 구간을 non-cacheable 로 잡는다 (2^N, 주소는 크기 배수)
 #define SHARED_MAGIC            0x48535452UL      // "RTSH"
-#define SHARED_VERSION          1
+#define SHARED_VERSION          2
 
 //-- 메시지 id. 0x0000~0x00FF 는 드라이버가 쓰고, 그 위는 앱이 쓴다.
 //
 #define SHARED_MSG_PING         0x0001U           // CM33 → CM7. data 를 그대로 돌려준다
 #define SHARED_MSG_PONG         0x0002U           // CM7 → CM33. PING 의 data
 #define SHARED_MSG_USER         0x0100U
+
+#define SHARED_RING_SIZE        1024U             // 2^N. 방향마다 하나
+
+//-- 코어 간 cmd 패킷 명령 번호
+//
+#define SHARED_CMD_PEER_INFO    0x0001U           // 상대 코어 이름 · 버전 (응답 data = "name\0ver\0")
+#define SHARED_CMD_ECHO         0x0002U           // 받은 data 를 그대로 응답한다
 
 #define SHARED_NAME_MAX         32
 #define SHARED_VER_MAX          16
@@ -62,6 +76,14 @@ typedef struct
 
 typedef struct
 {
+  volatile uint32_t head;                     // 쓰는 쪽만 고친다
+  volatile uint32_t tail;                     // 읽는 쪽만 고친다
+  uint8_t           buf[SHARED_RING_SIZE];
+} shared_ring_t;
+
+
+typedef struct
+{
   volatile uint32_t magic;
   volatile uint32_t version;
 
@@ -74,7 +96,14 @@ typedef struct
   char              peer_name[SHARED_NAME_MAX];
   char              peer_fw_ver[SHARED_VER_MAX];
 
+  //-- 스트림. m2p = 주 코어 → 상대 코어, p2m = 상대 코어 → 주 코어
+  shared_ring_t     m2p;
+  shared_ring_t     p2m;
+
 } shared_t;
+
+_Static_assert(sizeof(shared_t) <= SHARED_BLOCK_SIZE, "shared_t must fit in the shared block");
+_Static_assert((SHARED_RING_SIZE & (SHARED_RING_SIZE - 1)) == 0, "SHARED_RING_SIZE must be 2^N");
 
 
 #ifdef __cplusplus

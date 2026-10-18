@@ -43,6 +43,9 @@
 #define      HW_IPC_ALIVE_TIMEOUT_MS 100
 #define      HW_IPC_MSG_Q_MAX       16
 
+#define _USE_HW_CMD
+#define      HW_CMD_MAX_DATA_LENGTH 512
+
 #define _USE_HW_UART
 #define      HW_UART_MAX_CH         1
 #define      HW_UART_CH_CLI         _DEF_UART1
@@ -70,6 +73,7 @@
 #define _USE_CLI_HW_RESET            1
 #define _USE_CLI_HW_IPC              1
 #define _USE_CLI_HW_PWM              1
+#define _USE_CLI_HW_CMD              1
 
 
 typedef enum

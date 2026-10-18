@@ -7,6 +7,7 @@ extern "C" {
 
 #include "hw_def.h"
 #include "ipc.h"
+#include "cmd.h"
 
 
 bool hwInit(void);

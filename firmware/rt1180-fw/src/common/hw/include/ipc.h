@@ -79,6 +79,14 @@ bool         ipcMsgSend(uint32_t id, uint32_t data, uint32_t timeout_ms);
 uint32_t     ipcMsgAvailable(void);
 bool         ipcMsgRead(ipc_msg_t *p_msg);
 
+//-- 스트림. 상대 코어와 바이트를 주고받는다 (공유 링 버퍼 + doorbell, shared.h 4절).
+//   cmd 패킷을 이 위에 올린다. 쓰기는 자리가 날 때까지 timeout_ms 만 기다리고 쓴 바이트 수를 돌려준다.
+uint32_t     ipcStreamAvailable(void);
+uint32_t     ipcStreamRead(uint8_t *p_data, uint32_t length);
+uint32_t     ipcStreamWrite(uint8_t *p_data, uint32_t length, uint32_t timeout_ms);
+void         ipcStreamFlush(void);
+uint32_t     ipcStreamGetEventCnt(void);   // 받은 doorbell 수
+
 //-- 왕복 시간 측정. 상대 코어가 ping 에 답하면 true 와 왕복 시간(us)을 돌려준다.
 //   주 코어 쪽에서만 구현한다. 상대 코어 드라이버는 ping 에 답만 한다.
 bool         ipcPing(uint32_t timeout_ms, uint32_t *p_rtt_us);

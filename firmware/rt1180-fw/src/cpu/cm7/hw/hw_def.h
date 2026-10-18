@@ -12,5 +12,8 @@
 #define _USE_HW_IPC
 #define      HW_IPC_MSG_Q_MAX       16
 
+#define _USE_HW_CMD
+#define      HW_CMD_MAX_DATA_LENGTH 512
+
 
 #endif

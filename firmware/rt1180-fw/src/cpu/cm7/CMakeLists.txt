@@ -47,6 +47,8 @@ set_target_properties(${EXECUTABLE} PROPERTIES
 target_include_directories(${EXECUTABLE} PRIVATE
   ${CORE_DIR}
   ${CORE_DIR}/ap
+  ${CORE_DIR}/ap/modules
+  ${CORE_DIR}/ap/modules/cmd
   ${CORE_DIR}/bsp
   ${CORE_DIR}/hw
   ${CORE_DIR}/hw/driver

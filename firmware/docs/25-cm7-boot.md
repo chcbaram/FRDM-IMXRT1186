@@ -303,10 +303,69 @@ GP 인터럽트는 데이터 없이 비트만 세운다. 이미 서 있으면 �
 - **자는 동안 디버거가 CM7 TCM 을 못 읽는다**(시간 초과). `BLK_CTRL_S_AON M7_CFG[6] HCLK_FORCE_ON` 을 켜면 읽힌다. `M7_CFG[5] CORECLK_FORCE_ON` 은 GPC WAIT 모드용이라 위의 WFI 클럭 게이트에는 듣지 않았다(SysTick 은 여전히 거의 멈춰 있었다).
 - 지금 CM7 은 `delay(10)` 으로 깨어 있는 방식 그대로다.
 
-## 11. 다음 (25b)
+## 11. 코어 간 패킷 통신 — 공유 링 버퍼 + doorbell + cmd
+
+![코어 간 패킷 통신](images/ipc-stream.svg)
+
+**버퍼에 쓰고, 이벤트로 알리고, 받는 쪽은 이벤트에 깨어 처리한다.** 그 위에 PC↔보드와 같은 cmd 패킷(N657X0 의 cmd 모듈)을 그대로 올렸다. 그래서 코어 간 명령도 UART 명령과 같은 형식, 같은 처리 방식이다. 나중에 PC 에서 온 명령을 CM7 으로 넘기기도 쉽다.
+
+### 층
+
+| 층 | 파일 (두 코어 모두) | 하는 일 |
+|---|---|---|
+| 명령 처리 | `ap/modules/cmd/process/cmd_peer.c` | CM7: `PEER_INFO` · `ECHO` 응답 / CM33: CLI `peer` |
+| 채널 | `ap/modules/cmd/cmd_task.c` | 채널마다 `cmd_t` + `cmd_driver_t`. 지금은 ipc 채널 하나 |
+| 전송 바인딩 | `ap/modules/cmd/driver/drv_ipc.c` | `cmd_driver_t` 의 open/available/read/write → ipc 스트림. N657X0 `drv_uart.c` 자리 |
+| 패킷 | `common/hw/src/cmd.c` | STX `02 FD`, type, cmd, err, len, data, checksum. **두 코어가 같은 파일** (벤더 코드 없음) |
+| 스트림 | `hw/driver/ipc.c` | `ipcStreamWrite/Read/Available/Flush` — 공유 링 버퍼 + MU GP0 |
+
+배치는 N657X0 의 `ap/modules/cmd/{cmd_task, driver, process}` 와 같다. 모듈 등록(`MODULE_DEF`)은 로드맵 29 에서 들여오므로, 그 전까지는 `ap.c` 가 `cmdTaskInit()` / `cmdTaskUpdate()` 를 부른다.
+
+### 스트림 (`shared.h` 4절)
+
+- 공유 블록(4 KB, non-cacheable)에 방향마다 1 KB 링: `m2p`(CM33 → CM7), `p2m`(CM7 → CM33). `shared_t` 는 2132 B 로 4 KB 안에 든다(`_Static_assert`).
+- **쓰는 쪽은 head 만, 읽는 쪽은 tail 만** 고친다(단일 생산자/소비자). 락이 필요 없다.
+- 쓰기: 데이터 → `__DMB()` → head → `__DSB()` → **MU GP0** 를 울린다. 자리가 없으면 `timeout_ms` 만 기다린다.
+- 읽기: head 를 읽고 → `__DMB()` → 데이터 → `__DMB()` → tail.
+- GP0 는 이미 서 있으면 다시 세워도 하나로 합쳐진다. 받는 쪽이 **빌 때까지 다 읽으면** 놓치는 알림이 없다.
+- 두 링은 CM33 이 CM7 을 깨우기 전에 비운다. 구조가 바뀌어 `SHARED_VERSION` 을 **2** 로 올렸다.
+
+### 확인
+
+```
+cli# peer info
+name : FRDM-IMXRT1186-CM7
+ver  : V261010R1
+time : 87 us
+cli# peer echo 512 1000
+echo 512 B x 1000 : ok 1000  bad 0  err 0 (last 0x0000)
+rtt min 536 us  avg 537 us  max 571 us  (931 KB/s each way)
+```
+
+| data | 왕복 (처음) | 왕복 (고친 뒤) | 한 방향 |
+|---|---|---|---|
+| 0 B (헤더 10 B) | 20 µs | 14 µs | — |
+| 16 B | 47 µs | 30 µs | 520 KB/s |
+| 256 B | 455 µs | 277 µs | 902 KB/s |
+| 512 B | 889 µs | 537 µs | 931 KB/s |
+
+모든 크기에서 1000 번 다 맞았다(데이터 불일치 0). 512 B 패킷이면 1 KB 링의 끝을 매번 넘으므로 넘김도 같이 확인된 셈이다.
+
+**처음 값이 느렸던 이유.** cmd 파서는 한 바이트마다 `available()` 과 `read()` 를 부른다. 처음엔 그때마다 non-cacheable OCRAM 의 head/tail 을 몇 번씩 읽고 썼고, 링 복사도 바이트 단위였다. 두 가지를 고쳐 1.7 배 빨라졌다.
+
+- 링 복사를 `memcpy` 두 구간으로 바꿨다(공유 블록은 Normal non-cacheable 이라 워드 접근이 된다).
+- `drv_ipc` 가 링에서 64 B 씩 덩어리로 가져와 두고, 파서에는 그것을 한 바이트씩 준다.
+
+남은 시간은 대부분 cmd 파서의 바이트 단위 상태 기계와 체크섬이다. 명령·제어용으로는 충분하다. 큰 데이터(영상, 네트워크 프레임)는 패킷에 싣지 말고, 공유 버퍼를 직접 넘기고 패킷에는 위치와 길이만 싣는 쪽이 맞다.
+
+### 받는 쪽을 재울 때 (10절 실험)
+
+받는 쪽은 지금 깨어 있는 루프에서 `cmdTaskUpdate()` 를 돈다. `WFI` 로 재우면 doorbell(IRQ)에 깨지만 **SysTick 이 멈춘다**. RTOS(로드맵 28)를 넣을 때는 doorbell ISR 에서 세마포어를 주고 cmd 태스크가 깨어 처리하게 한다. CM7 쪽 틱은 하드웨어 타이머 IRQ 로 옮기거나 tickless 로 한다.
+
+## 12. 다음 (25b)
 
 - [x] probe-rs 에 CM7 코어 정의 추가 (AP 2) — `tools/probe-rs/MIMXRT1186.yaml`, CM7 워크스페이스 디버그 구성 ([14](14-cm7-debug.md))
 - [x] CM7 캐시 켜기 + MPU 로 공유 구간 non-cacheable (9절)
 - [x] MU(Message Unit) 로 코어 간 메시지/인터럽트 (10절)
-- [ ] 공유 링 버퍼 + MU doorbell + cmd 모듈 패킷 (코어 간 패킷 통신)
+- [x] 공유 링 버퍼 + MU doorbell + cmd 모듈 패킷 (코어 간 패킷 통신, 11절)
 - [ ] 전원 재인가(SW2)에서도 CM7 이 기동하는지 확인 — 소프트 리셋과 SW3(POR_B)에서는 확인했다

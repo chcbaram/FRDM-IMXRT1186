@@ -24,17 +24,20 @@ firmware/rt1180-fw/
     ├── common/                 포터블 코드. 벤더 금지
     │   ├── def.h  err_code.h  evt_code.h
     │   ├── core/               qbuffer, util_core
-    │   └── hw/include/         드라이버 공개 헤더 (led · pwm · uart · cli · log …)
+    │   └── hw/
+    │       ├── include/        드라이버 공개 헤더 (led · pwm · uart · cli · log · ipc · cmd …)
+    │       └── src/            두 코어가 같이 쓰는 포터블 구현 (swtimer, cmd 패킷)
     ├── cpu/
     │   ├── cm33/               부트 코어
     │   │   ├── main.c          bspInit → hwInit → apInit → apMain
     │   │   ├── ap/             애플리케이션. 벤더 금지
+    │   │   │   └── modules/cmd/ cmd_task.c · driver/drv_ipc.c · process/cmd_peer.c (N657X0 와 같은 배치)
     │   │   ├── bsp/            bsp.c (SysTick, delay, millis), syscalls.c
     │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너
     │   │   │   └── ldscript/   rt1180-fw-cm33.ld
     │   │   └── hw/             hw.c (초기화 순서, 배너), hw_def.h (_USE_HW_*), driver/ led · pwm · uart · cli · log · hw_info …
-    │   ├── cm7/                로드맵 25
-    │   └── shared/             (로드맵 25) 코어 간 규약
+    │   ├── cm7/                CM7 (로드맵 25). 같은 ap/bsp/hw 구조
+    │   └── shared/             코어 간 규약 shared.h — 이미지 헤더, 공유 블록, 메시지 id, 링, cmd 번호
     └── lib/
         ├── cmsis/              CMSIS 6 Core
         └── nxp/                SDK 에서 골라 온 것 (SOURCES.md)

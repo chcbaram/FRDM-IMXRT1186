@@ -1,4 +1,5 @@
 #include "ap.h"
+#include "modules/cmd/cmd_task.h"
 
 
 
@@ -6,6 +7,11 @@
 void apInit(void)
 {
   cliOpen(HW_UART_CH_CLI, 115200);
+
+  if (ipcIsBooted())
+  {
+    cmdTaskInit();
+  }
 }
 
 void apMain(void)
@@ -23,5 +29,6 @@ void apMain(void)
     }
 
     cliMain();
+    cmdTaskUpdate();
   }
 }
