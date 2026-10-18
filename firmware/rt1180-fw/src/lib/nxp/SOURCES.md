@@ -167,3 +167,5 @@
 | `nxp/drivers/fsl_pwm.h` | nxp-mcuxpresso/mcuxsdk-core | `drivers/pwm/fsl_pwm.h` | `5d3d48a4ff50` |
 | `nxp/drivers/fsl_rgpio.c` | nxp-mcuxpresso/mcuxsdk-core | `drivers/rgpio/fsl_rgpio.c` | `acfcbf12c310` |
 | `nxp/drivers/fsl_rgpio.h` | nxp-mcuxpresso/mcuxsdk-core | `drivers/rgpio/fsl_rgpio.h` | `ac89787aa872` |
+| `nxp/drivers/fsl_romapi.c` | nxp-mcuxpresso/mcux-devices-rt | `RT1180/MIMXRT1189/drivers/romapi/fsl_romapi.c` | `973e37ee24ff` |
+| `nxp/drivers/fsl_romapi.h` | nxp-mcuxpresso/mcux-devices-rt | `RT1180/MIMXRT1189/drivers/romapi/fsl_romapi.h` | `c1fa04f43696` |

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="560" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">XIP 로 돌면서 같은 QSPI 를 지우고 쓴다 — qspiWrite() 한 페이지</text>
+  <text x="20" y="48" class="s">cm33/hw/driver/qspi.c · ROM FlexSPI NOR API (probe-rs 알고리즘 · SDK fsl_romapi 예제와 같은 길)</text>
+  <rect x="20" y="66" width="250" height="34" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="145.0" y="86" class="b" text-anchor="middle" fill="#3730a3">CM33 코드 (QSPI XIP)</text>
+  <rect x="330" y="66" width="250" height="34" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="455.0" y="86" class="b" text-anchor="middle" fill="#b45309">BootROM (0x1000_xxxx)</text>
+  <rect x="640" y="66" width="300" height="34" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="790.0" y="86" class="b" text-anchor="middle" fill="#1e40af">FlexSPI2 → W25Q128JV</text>
+  <line x1="145" y1="100" x2="145" y2="540" stroke="#e5e7eb" stroke-dasharray="4 4"/>
+  <line x1="455" y1="100" x2="455" y2="540" stroke="#e5e7eb" stroke-dasharray="4 4"/>
+  <line x1="790" y1="100" x2="790" y2="540" stroke="#e5e7eb" stroke-dasharray="4 4"/>
+  <rect x="30" y="120" width="230" height="50" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="145.0" y="140" class="b" text-anchor="middle" fill="#3730a3">1. 원본을 RAM 페이지 버퍼로</text>
+  <text x="145.0" y="158" class="s" text-anchor="middle">memcpy · 남는 쪽 0xFF</text>
+  <rect x="30" y="182" width="230" height="50" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="145.0" y="202" class="b" text-anchor="middle" fill="#3730a3">2. __disable_irq()</text>
+  <text x="145.0" y="220" class="s" text-anchor="middle">ISR 이 플래시를 읽지 않게</text>
+  <rect x="340" y="244" width="230" height="64" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="455.0" y="264" class="b" text-anchor="middle" fill="#b45309">3. ProgramPage</text>
+  <text x="455.0" y="282" class="m" text-anchor="middle">WREN → 0x02 page → RDSR</text>
+  <text x="455.0" y="298" class="s" text-anchor="middle">바쁨이 풀릴 때까지 ROM 이 기다림</text>
+  <line x1="262" y1="207" x2="338" y2="260" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="650" y="244" width="280" height="64" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="790.0" y="264" class="b" text-anchor="middle" fill="#1e40af">IP 명령 (AHB 읽기는 멈춤)</text>
+  <text x="790.0" y="282" class="m" text-anchor="middle">LUT 3 · 9 · 1 (FCB 그대로)</text>
+  <text x="790.0" y="298" class="s" text-anchor="middle">페이지 약 0.67 ms</text>
+  <line x1="572" y1="276" x2="648" y2="276" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="340" y="326" width="230" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="455.0" y="346" class="b" text-anchor="middle" fill="#b45309">4. ClearCache</text>
+  <text x="455.0" y="364" class="s" text-anchor="middle">FlexSPI AHB 버퍼 비움</text>
+  <line x1="455" y1="310" x2="455" y2="324" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="30" y="394" width="230" height="50" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="145.0" y="414" class="b" text-anchor="middle" fill="#3730a3">5. XCACHE_PC 무효화</text>
+  <text x="145.0" y="432" class="s" text-anchor="middle">CM33 코드 버스 캐시</text>
+  <line x1="338" y1="360" x2="262" y2="410" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="30" y="462" width="230" height="50" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="145.0" y="482" class="b" text-anchor="middle" fill="#15803d">6. __set_PRIMASK()</text>
+  <text x="145.0" y="500" class="s" text-anchor="middle">XIP 재개 · 새 값이 읽힌다</text>
+  <line x1="145" y1="446" x2="145" y2="460" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="650" y="394" width="280" height="118" rx="6" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="790.0" y="414" class="b" text-anchor="middle" fill="#374151">실측 (데이터 영역 0x00C0_0000)</text>
+  <text x="790.0" y="432" class="m" text-anchor="middle">섹터 4 KB 지우기   46 ms</text>
+  <text x="790.0" y="448" class="m" text-anchor="middle">블록 64 KB 지우기  254 ms</text>
+  <text x="790.0" y="464" class="m" text-anchor="middle">4 KB 쓰기          10.7 ms</text>
+  <text x="790.0" y="480" class="m" text-anchor="middle">64 KB 읽기  2.2 ms (28.5 MB/s)</text>
+  <text x="340" y="420" class="s" text-anchor="start">그동안 막힌 인터럽트:</text>
+  <text x="340" y="438" class="s" text-anchor="start">SysTick · UART RX · MU</text>
+  <text x="340" y="456" class="s" text-anchor="start">블록 지우기면 254 ms 동안</text>
+</svg>

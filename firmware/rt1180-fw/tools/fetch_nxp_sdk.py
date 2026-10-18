@@ -60,6 +60,10 @@ FILES = [
     *[('devices', f'RT1180/MIMXRT1189/drivers/{f}', f'nxp/drivers/{f}') for f in [
         'fsl_iomuxc.h', 'fsl_clock.c', 'fsl_clock.h', 'fsl_pmu.c', 'fsl_pmu.h', 'fsl_dcdc.c', 'fsl_dcdc.h',
     ]],
+    #-- ROM API (FlexSPI NOR 지우기/쓰기, docs/26). 드라이버가 romapi/ 하위 폴더에 있다
+    *[('devices', f'RT1180/MIMXRT1189/drivers/romapi/{f}', f'nxp/drivers/{f}') for f in [
+        'fsl_romapi.c', 'fsl_romapi.h',
+    ]],
 
     #-- 공통 드라이버
     *[('core', f'drivers/{f}', f'nxp/drivers/{Path(f).name}') for f in [

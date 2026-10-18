@@ -68,6 +68,7 @@ set(NXP_SRC_FILES
   ${NXP_DIR}/drivers/fsl_lpuart.c
   ${NXP_DIR}/drivers/fsl_pwm.c
   ${NXP_DIR}/drivers/fsl_mu.c
+  ${NXP_DIR}/drivers/fsl_romapi.c
   )
 
 

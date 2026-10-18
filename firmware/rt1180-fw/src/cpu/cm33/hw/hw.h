@@ -9,6 +9,7 @@ extern "C" {
 
 #include "led.h"
 #include "pwm.h"
+#include "qspi.h"
 #include "swtimer.h"
 #include "button.h"
 #include "rtc.h"

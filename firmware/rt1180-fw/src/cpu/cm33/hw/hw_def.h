@@ -10,6 +10,7 @@
 
 
 #define _USE_HW_INFO
+#define _USE_HW_QSPI
 
 #define _USE_HW_LED
 #define      HW_LED_MAX_CH          3
@@ -74,6 +75,7 @@
 #define _USE_CLI_HW_IPC              1
 #define _USE_CLI_HW_PWM              1
 #define _USE_CLI_HW_CMD              1
+#define _USE_CLI_HW_QSPI             1
 
 
 typedef enum
