@@ -60,6 +60,25 @@ void cliPeer(cli_args_t *args)
     ret = true;
   }
 
+  if (args->argc == 2 && args->isStr(0, "read"))
+  {
+    cmd_packet_t *p_packet = &p_cmd->packet;
+    uint32_t      addr     = (uint32_t)args->getData(1);
+    uint32_t      data;
+
+    cmdSendCmdRxResp(p_cmd, SHARED_CMD_MEM_READ, (uint8_t *)&addr, 4, CMD_PEER_RESP_TIMEOUT);
+    if (p_packet->err_code == CMD_OK && p_packet->type == PKT_TYPE_RESP && p_packet->length == 4)
+    {
+      memcpy(&data, p_packet->data, 4);
+      cliPrintf("CM7  0x%08X : 0x%08X\n", (unsigned)addr, (unsigned)data);
+    }
+    else
+    {
+      cliPrintf("E_ err 0x%04X\n", p_packet->err_code);
+    }
+    ret = true;
+  }
+
   if (args->argc >= 2 && args->isStr(0, "echo"))
   {
     static uint8_t tx_buf[CMD_MAX_DATA_LENGTH];
@@ -120,6 +139,7 @@ void cliPeer(cli_args_t *args)
   if (ret == false)
   {
     cliPrintf("peer info\n");
+    cliPrintf("peer read addr        (CM7 이 읽는다)\n");
     cliPrintf("peer echo 0~%d [count]\n", CMD_MAX_DATA_LENGTH);
   }
 }

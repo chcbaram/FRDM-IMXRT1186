@@ -43,6 +43,23 @@ bool cmdPeerProcess(cmd_t *p_cmd)
       cmdSendResp(p_cmd, p_packet->cmd, CMD_OK, p_packet->data, p_packet->length);
       break;
 
+    case SHARED_CMD_MEM_READ:
+      if (p_packet->length == 4)
+      {
+        uint32_t addr;
+        uint32_t data;
+
+        //-- CM7 이 보는 주소로, CM7 의 캐시를 거쳐 읽는다 (docs/27 캐시 확인)
+        memcpy(&addr, p_packet->data, 4);
+        data = *(volatile uint32_t *)addr;
+        cmdSendResp(p_cmd, p_packet->cmd, CMD_OK, (uint8_t *)&data, 4);
+      }
+      else
+      {
+        cmdSendResp(p_cmd, p_packet->cmd, ERR_CMD_MAX_LENGTH, NULL, 0);
+      }
+      break;
+
     default:
       cmdSendResp(p_cmd, p_packet->cmd, ERR_CMD_NO_CMD, NULL, 0);
       break;

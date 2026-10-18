@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="520" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">HyperRAM — BootROM 이 XMCD 로 열고, 두 코어가 캐시 규칙만 다르게 쓴다</text>
+  <text x="20" y="48" class="s">W956A8MBYA 8 MB · FlexSPI1 포트 B · 0x2800_0000 · 펌웨어는 확인만 한다 (psramInit)</text>
+  <text x="30" y="84" class="b" text-anchor="start">부팅할 때 (ROM)</text>
+  <rect x="30" y="96" width="250" height="96" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="155.0" y="116" class="b" text-anchor="middle" fill="#1e40af">QSPI 부트 헤더</text>
+  <text x="155.0" y="134" class="m" text-anchor="middle">+0x400  FCB</text>
+  <text x="155.0" y="150" class="m" text-anchor="middle">+0x800  XMCD  C001000C</text>
+  <text x="155.0" y="166" class="m" text-anchor="middle">              C1001800 10000000</text>
+  <rect x="355" y="96" width="250" height="96" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="480.0" y="116" class="b" text-anchor="middle" fill="#b45309">BootROM</text>
+  <text x="480.0" y="134" class="s" text-anchor="middle">HyperRAM · 166 MHz · 크기 자동</text>
+  <text x="480.0" y="150" class="s" text-anchor="middle">포트 B · 기본 핀 그룹</text>
+  <text x="480.0" y="166" class="s" text-anchor="middle">RM 12.7, Table 91 / 93 / 94</text>
+  <rect x="680" y="96" width="250" height="96" rx="6" fill="#ecfdf5" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="805.0" y="116" class="b" text-anchor="middle" fill="#15803d">FlexSPI1 + W956A8MBYA</text>
+  <text x="805.0" y="134" class="m" text-anchor="middle">핀 GPIO_SD_B2_00~11 ALT1</text>
+  <text x="805.0" y="150" class="m" text-anchor="middle">root 332 MHz (DDR 166)</text>
+  <text x="805.0" y="166" class="m" text-anchor="middle">FLSHB1CR0 = 8192 KB</text>
+  <line x1="282" y1="144" x2="353" y2="144" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="607" y1="144" x2="678" y2="144" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="30" y="232" class="b" text-anchor="start">실행할 때 (펌웨어)</text>
+  <rect x="355" y="244" width="250" height="74" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="480.0" y="264" class="b" text-anchor="middle" fill="#15803d">0x2800_0000 · 8 MB</text>
+  <text x="480.0" y="282" class="s" text-anchor="middle">메모리 맵. 바로 읽고 쓴다</text>
+  <text x="480.0" y="298" class="s" text-anchor="middle">psram test : 8 MB 전부 OK</text>
+  <line x1="805" y1="194" x2="520" y2="242" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="30" y="244" width="250" height="140" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="155.0" y="264" class="b" text-anchor="middle" fill="#3730a3">CM33 (240 MHz)</text>
+  <text x="155.0" y="282" class="s" text-anchor="middle">XCACHE_PS 꺼짐 → 캐시 안 함</text>
+  <text x="155.0" y="298" class="m" text-anchor="middle">32bit 쓰기  24 MB/s</text>
+  <text x="155.0" y="314" class="m" text-anchor="middle">32bit 읽기  39 MB/s</text>
+  <text x="155.0" y="330" class="m" text-anchor="middle">memset 1 MB  6 MB/s</text>
+  <text x="155.0" y="346" class="s" text-anchor="middle">newlib-nano 바이트 루프</text>
+  <rect x="680" y="244" width="250" height="140" rx="6" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="805.0" y="264" class="b" text-anchor="middle" fill="#c2410c">CM7 (792 MHz)</text>
+  <text x="805.0" y="282" class="s" text-anchor="middle">MPU 영역 8 : Normal WB</text>
+  <text x="805.0" y="298" class="s" text-anchor="middle">→ 캐시한다</text>
+  <text x="805.0" y="314" class="m" text-anchor="middle">CM33 이 0x2222 로 바꿔도</text>
+  <text x="805.0" y="330" class="m" text-anchor="middle">CM7 은 0x1111 (옛 값)</text>
+  <text x="805.0" y="346" class="s" text-anchor="middle">주고받으려면 clean / invalidate</text>
+  <line x1="282" y1="300" x2="353" y2="290" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="678" y1="300" x2="607" y2="290" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="30" y="430" class="s" text-anchor="start">펌웨어는 FlexSPI1 을 설정하지 않는다. psramInit() 은 MCR0.MDIS · FLSHB1CR0 크기 · 세 곳 쓰기/읽기로 ROM 이 열었는지만 본다.</text>
+  <text x="30" y="450" class="s" text-anchor="start">ROM 은 전원 · SW3 · SYSRESETREQ 마다 다시 돌아 XMCD 도 매번 적용된다.</text>
+  <text x="30" y="470" class="s" text-anchor="start">직접 초기화(fsl_flexspi + LUT)는 저전력 복귀 · 주파수 변경 · ROM 을 거치지 않는 실행이 생길 때 넣는다.</text>
+</svg>

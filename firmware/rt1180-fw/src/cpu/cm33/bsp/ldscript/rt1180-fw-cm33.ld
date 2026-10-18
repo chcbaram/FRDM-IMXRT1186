@@ -6,7 +6,7 @@
  * (HyperRAM, rpmsg, core1 이미지, non-cacheable)을 걷어냈다.
  *
  *   0x0400_0400  FCB        .boot_hdr.conf       ROM 이 FlexSPI 설정을 읽는다
- *   0x0400_0800  XMCD       .boot_hdr.xmcd_data  (비움)
+ *   0x0400_0800  XMCD       .boot_hdr.xmcd_data  ROM 이 HyperRAM 을 설정한다 (docs/27)
  *   0x0400_1000  컨테이너   .boot_hdr.container  ROM/ELE 가 이미지 위치를 읽는다
  *   0x0400_B000  벡터 테이블 → 코드 → .data 초기값
  *

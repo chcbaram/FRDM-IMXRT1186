@@ -33,6 +33,7 @@ bool hwInit(void)
   pwmInit();
   ledInit();
   qspiInit();
+  psramInit();
   rtcInit();
   resetInit();
   buttonInit();

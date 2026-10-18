@@ -73,6 +73,25 @@ const flexspi_nor_config_t boot_fcb =
 };
 
 
+//-- XMCD (External Memory Configuration Data, RM 12.7) — 0x0400_0800
+//
+//   BootROM 이 부팅할 때 이 값으로 HyperRAM(W956A8MBYA, FlexSPI1 포트 B)을 설정해 둔다.
+//   핀 · 클럭 · LUT 를 ROM 이 잡으므로 펌웨어는 0x2800_0000 을 바로 쓴다 (docs/27).
+//   값은 SDK frdmimxrt1186_flexspi_nor_config.c 의 USE_HYPERRAM 과 같다.
+//
+//     0xC001000C  헤더    : tag C, FlexSPI, 인스턴스 1, 간이 설정, 크기 12 B   (RM Table 91)
+//     0xC1001800  옵션 0  : 옵션 2 워드, HyperRAM, single-ended 클럭, 166 MHz, 크기 자동 (Table 93)
+//     0x10000000  옵션 1  : 포트 B, 기본 핀 그룹, 더미 사이클 자동                   (Table 94)
+//
+__attribute__((section(".boot_hdr.xmcd_data"), used))
+const uint32_t boot_xmcd[] =
+{
+  0xC001000C,
+  0xC1001800,
+  0x10000000,
+};
+
+
 //-- 컨테이너 (RM 12.6.2)
 //
 //   헤더 16 B + 이미지 엔트리 128 B + 서명 블록 16 B = 0xA0 B.

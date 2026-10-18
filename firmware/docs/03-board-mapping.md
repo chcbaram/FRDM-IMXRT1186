@@ -88,7 +88,7 @@ D4 는 RGB LED 하나다. 세 신호 모두 **3핀 0402 점퍼 두 개를 거쳐
 | 컨트롤러 | 부품 | 핀 | 비고 |
 |---|---|---|---|
 | **FlexSPI2 Port A** | **W25Q128JVSIQ** (U28) QSPI NOR 16 MB, 3.3 V | `GPIO_AON_22~27` (SS0 · CLK · D0~D3) | **기본 부트 플래시**, CM33 `0x0400_0000` |
-| FlexSPI1 | W956A8MBYA5K (U18) HyperRAM 8 MB | 회로도 9페이지 (로드맵 27 에서 정리) | `0x2800_0000` |
+| FlexSPI1 | W956A8MBYA5K (U18) HyperRAM 8 MB | 포트 B, `GPIO_SD_B2_00~03 · 05~11` (ROM 이 XMCD 로 잡는다, [27](27-hyperram.md)) | `0x2800_0000` |
 | FlexSPI1 | S26HL512T (U24) HyperFlash 64 MB | — | **기본 미연결.** R183~185, R213~217, R231~233 을 1-3 으로 옮겨야 함 |
 
 SDK FCB(`frdmimxrt1186_flexspi_nor_config.c`)는 W25Q128 을 이렇게 설정한다.

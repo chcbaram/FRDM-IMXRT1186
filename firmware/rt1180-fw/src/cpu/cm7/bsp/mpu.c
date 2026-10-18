@@ -17,9 +17,10 @@
  *   5  0x2048_0000  512 KB  Normal WB       OCRAM1
  *   6  0x2050_0000  256 KB  Normal WB       OCRAM2
  *   7  0x2050_0000  4 KB    Normal NC       공유 블록. CM33 과 같은 값을 봐야 하므로 캐시하지 않는다
+ *   8  0x2800_0000  8 MB    Normal WB       HyperRAM (FlexSPI1, ROM 이 XMCD 로 설정, docs/27)
  *
- * QSPI(0x0400_0000)와 HyperRAM 은 CM7 이 쓰지 않아 열지 않았다(영역 2 의 Device 로 남는다).
- * HyperRAM 을 CM7 이 쓰게 되면(로드맵 27) 여기에 영역을 더한다.
+ * QSPI(0x0400_0000)는 CM7 이 쓰지 않아 열지 않았다(영역 2 의 Device 로 남는다).
+ * HyperRAM 은 CM7 이 캐시한다. CM33 과 같은 구간을 주고받으려면 캐시를 비우고 무효화해야 한다.
  */
 
 static void mpuConfig(void);
@@ -71,6 +72,9 @@ static void mpuConfig(void)
   _Static_assert((SHARED_BLOCK_ADDR % SHARED_BLOCK_SIZE) == 0, "MPU region base must be size aligned");
   MPU->RBAR = ARM_MPU_RBAR(7, SHARED_BLOCK_ADDR);
   MPU->RASR = ARM_MPU_RASR(1, ARM_MPU_AP_FULL, 1, 0, 0, 0, 0, ARM_MPU_REGION_SIZE_4KB);
+
+  MPU->RBAR = ARM_MPU_RBAR(8, 0x28000000U);
+  MPU->RASR = ARM_MPU_RASR(0, ARM_MPU_AP_FULL, 0, 0, 1, 1, 0, ARM_MPU_REGION_SIZE_8MB);
 
   ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk);
 }

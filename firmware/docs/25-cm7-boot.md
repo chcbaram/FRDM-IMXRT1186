@@ -204,9 +204,10 @@ CM7 `SystemInit()` 이 `.data` 복사와 `.bss` 클리어 **전에** `BOARD_Earl
 | 5 | `0x2048_0000` | 512 KB | Normal WB | OCRAM1 |
 | 6 | `0x2050_0000` | 256 KB | Normal WB | OCRAM2 |
 | **7** | **`0x2050_0000`** | **4 KB** | **Normal, non-cacheable** (TEX=1 C=0 B=0) | **공유 블록** |
+| 8 | `0x2800_0000` | 8 MB | Normal WB | HyperRAM — 로드맵 27 에서 추가 ([27](27-hyperram.md) 4절) |
 
 - TCM 은 L1 캐시를 거치지 않는다. 3, 4 번은 Normal 속성만 준다.
-- QSPI 와 HyperRAM 은 CM7 이 쓰지 않아 열지 않았다(2 번의 Device 로 남는다). HyperRAM 을 CM7 이 쓰게 되면(로드맵 27) 영역을 더한다.
+- QSPI 는 CM7 이 쓰지 않아 열지 않았다(2 번의 Device 로 남는다). HyperRAM 은 로드맵 27 에서 8 번으로 열었다. CM7 이 캐시하므로 CM33 과 주고받을 때는 캐시를 다뤄야 한다([27](27-hyperram.md) 4절).
 - MPU 영역은 크기가 2^N 이고 주소가 크기의 배수여야 한다. `shared.h` 에 `SHARED_BLOCK_SIZE`(4 KB)를 두고 `_Static_assert` 로 막았다.
 - CM33 쪽은 손대지 않았다. CM33 `SystemInit()` 은 코드 버스 캐시(`XCACHE_PC`)만 켜고, 시스템 버스 캐시(`XCACHE_PS`)는 꺼져 있다(`0x5440_0800` = 0). OCRAM2 는 시스템 버스라 CM33 은 공유 블록을 캐시하지 않는다. `XCACHE_PS` 를 켜게 되면 CM33 MPU 도 같은 구간을 non-cacheable 로 잡아야 한다.
 

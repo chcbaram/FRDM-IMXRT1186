@@ -60,6 +60,7 @@ extern "C" {
 //
 #define SHARED_CMD_PEER_INFO    0x0001U           // 상대 코어 이름 · 버전 (응답 data = "name\0ver\0")
 #define SHARED_CMD_ECHO         0x0002U           // 받은 data 를 그대로 응답한다
+#define SHARED_CMD_MEM_READ     0x0003U           // data = 주소(4 B). 상대 코어가 그 주소의 32 bit 를 읽어 응답한다
 
 #define SHARED_NAME_MAX         32
 #define SHARED_VER_MAX          16

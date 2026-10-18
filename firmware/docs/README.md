@@ -33,7 +33,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **27 HyperRAM** → **28 FreeRTOS** (코어 간 doorbell → 세마포어, CM7 틱) → **29 모듈** (`cmd_task` 를 `MODULE_DEF` 로)
+1. **28 FreeRTOS** (코어 간 doorbell → 세마포어, CM7 틱) → **29 모듈** (`cmd_task` 를 `MODULE_DEF` 로)
 3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절)
 
 ### 미해결 과제
@@ -92,7 +92,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · SW3 더블클릭 · 부팅 확인/폴트 카운터 | ✅ |
 | [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b 까지 완료: CM7 디버그 · 캐시/MPU · MU · 코어 간 cmd 패킷 · 전원 재인가) |
 | [26](26-qspi-nor.md) | **QSPI NOR** — XIP 로 돌면서 ROM API 로 지우기/쓰기, `qspi` CLI, 섹터 46 ms · 쓰기 4 KB 10.7 ms · 읽기 28.5 MB/s | ✅ |
-| 27 | HyperRAM (FlexSPI1) | 예정 |
+| [27](27-hyperram.md) | **HyperRAM 8 MB** — XMCD 로 ROM 이 설정, `psram test` 8 MB OK, CM7 캐시 규칙 | ✅ |
 | 28 | FreeRTOS | 예정 |
 | 29 | 로그 / 모듈 / 이벤트 | 예정 |
 | 30~33 | USB(tinyusb CDC) · CAN-FD · I2C · SPI | 예정 |
@@ -144,6 +144,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | ![](images/core-memory-map.svg) | [25](25-cm7-boot.md) 코어별 메모리 할당 |
 | ![](images/ipc-stream.svg) | [25](25-cm7-boot.md) 코어 간 패킷 통신 |
 | ![](images/qspi-xip-write.svg) | [26](26-qspi-nor.md) XIP 로 돌면서 QSPI 쓰기 |
+| ![](images/hyperram-xmcd.svg) | [27](27-hyperram.md) HyperRAM 과 두 코어의 캐시 |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 | ![](images/cm7-debug-path.svg) | [14](14-cm7-debug.md) CM7 디버그 경로 |
 
