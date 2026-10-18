@@ -17,6 +17,9 @@ static void cmdTaskThread(void const *arg);
 
 static cmd_t        cmd[CMD_DRIVER_MAX_CH];
 static cmd_driver_t cmd_driver[CMD_DRIVER_MAX_CH];
+#ifdef _USE_HW_RTOS
+static SemaphoreHandle_t cmd_lock = NULL;
+#endif
 
 
 MODULE_DEF(cmd)
@@ -32,6 +35,9 @@ MODULE_DEF(cmd)
 
 bool cmdTaskInit(void)
 {
+#ifdef _USE_HW_RTOS
+  cmd_lock = xSemaphoreCreateMutex();
+#endif
   drvIpcInit(&cmd_driver[CMD_CH_PEER]);
 
   for (uint32_t i = 0; i < CMD_DRIVER_MAX_CH; i++)
@@ -47,12 +53,38 @@ bool cmdTaskInit(void)
 bool cmdTaskUpdate(void)
 {
   //-- CM7 이 먼저 보내는 패킷은 아직 없다. 들어오면 읽어 버린다.
+  //   다른 스레드가 명령을 주고받는 중이면(잠겨 있으면) 이번 차례는 건너뛴다.
   //
+  if (cmdTaskLock(0) != true)
+    return false;
+
   for (uint32_t i = 0; i < CMD_DRIVER_MAX_CH; i++)
   {
     cmdReceivePacket(&cmd[i]);
   }
+
+  cmdTaskUnlock();
   return true;
+}
+
+bool cmdTaskLock(uint32_t timeout_ms)
+{
+#ifdef _USE_HW_RTOS
+  if (cmd_lock == NULL)
+    return false;
+  return (xSemaphoreTake(cmd_lock, pdMS_TO_TICKS(timeout_ms)) == pdTRUE);
+#else
+  (void)timeout_ms;
+  return true;
+#endif
+}
+
+void cmdTaskUnlock(void)
+{
+#ifdef _USE_HW_RTOS
+  if (cmd_lock != NULL)
+    xSemaphoreGive(cmd_lock);
+#endif
 }
 
 void cmdTaskThread(void const *arg)

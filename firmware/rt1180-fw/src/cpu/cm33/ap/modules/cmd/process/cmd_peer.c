@@ -1,4 +1,5 @@
 #include "process/cmd_peer.h"
+#include "cmd_task.h"
 
 #ifdef _USE_HW_CMD
 #include "shared.h"
@@ -34,6 +35,14 @@ bool cmdPeerInit(cmd_t *p_cmd_ch)
 void cliPeer(cli_args_t *args)
 {
   bool ret = false;
+
+  //-- 응답을 기다리는 동안 cmd 모듈의 백그라운드 수신이 읽어 가지 않게 잠근다
+  //
+  if (cmdTaskLock(1000) != true)
+  {
+    cliPrintf("E_ cmd channel busy\n");
+    return;
+  }
 
 
   if (args->argc == 1 && args->isStr(0, "info"))
@@ -142,6 +151,8 @@ void cliPeer(cli_args_t *args)
     cliPrintf("peer read addr        (CM7 이 읽는다)\n");
     cliPrintf("peer echo 0~%d [count]\n", CMD_MAX_DATA_LENGTH);
   }
+
+  cmdTaskUnlock();
 }
 #endif
 

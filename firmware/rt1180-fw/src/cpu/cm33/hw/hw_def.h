@@ -10,6 +10,8 @@
 
 #define _HW_DEF_THREAD_MAIN_PRI       2
 #define _HW_DEF_THREAD_MAIN_STACK     (4 * 1024)
+#define _HW_DEF_THREAD_CLI_PRI        3
+#define _HW_DEF_THREAD_CLI_STACK      (4 * 1024)
 
 
 #define _USE_HW_RTOS

@@ -11,16 +11,20 @@
 
 ```
 [OK] moduleInit()
-     count : 1
+     count : 2
      cmd              OK
+     cli              OK
+[  ] Thread Started : cli
 cli# thread cpu
 name              pri     cpu
-main                2    0.0 %
-IDLE                0   99.9 %
+cli                 3    0.0 %
+main                2    0.5 %
+IDLE                0   99.4 %
 Tmr Svc             7    0.0 %
 cli# module info
 idx  name             pri  update init
 0    cmd              7    yes    OK
+1    cli              6    -      OK
 ```
 
 기존 기능은 그대로다: 모든 드라이버 `[OK]`, CM7 기동, `ipc ping 1000` · `peer echo 512 1000` 1000/1000, `qspi test`, `psram test`. 왕복 시간은 조금 늘었다(ping 4 → 5 µs, echo 537 → 577 µs). 틱 인터럽트와 문맥 전환 몫이다.
@@ -34,8 +38,9 @@ main()
   vTaskStartScheduler()
     mainThread
       hwInit()                  드라이버. threadInit() 은 cliInit/logInit 바로 뒤
-      apInit()                  cliOpen, moduleInit()  ← 모듈 init 이 스레드를 등록할 수 있다
-      apMain()                  threadBegin()  → 루프: LED · cliMain · moduleUpdate · delay(1)
+      apInit()                  moduleInit()  ← 모듈 init 이 스레드를 등록한다 (cli)
+      apMain()                  threadBegin()  → 루프: LED · moduleUpdate · delay(1)
+    cli 스레드 (pri 3, 4 KB)    cliMain · delay(2)
 ```
 
 - `hwInit` 부터 모두 스케줄러 아래에서 돈다. 그래서 `millis()` · `delay()` 가 처음부터 RTOS 틱을 쓴다.
@@ -49,6 +54,16 @@ main()
 | `cm33/main.c` | 위 순서 |
 | `common/hw/include/osal/thread.h` · `cm33/hw/driver/osal/thread.c` | titan-mini 그대로. 등록 → `threadBegin()` 에서 생성, CLI `thread info` · `thread cpu` |
 | `cm33/ap/modules/module.{h,c}` | N657X0 그대로. `MODULE_DEF` 디스크립터를 `.module` 섹션에 모아 우선순위 순으로 `init()`, 등록 순으로 `update()`. CLI `module info` |
+| `cm33/ap/modules/common/cli/cli.c` | titan-mini 그대로. `MODULE_DEF(cli)` 의 `init()` 이 `cliOpen()` 후 `threadCreate("cli")` |
+
+### 모듈
+
+| 모듈 | 우선순위 | 방식 | 하는 일 |
+|---|---|---|---|
+| `cmd` | LOWEST | `update()` (main 스레드) | 코어 간 cmd 채널 수신 ([25](25-cm7-boot.md) 11절) |
+| `cli` | NORMAL | 자기 스레드 (pri 3) | `cliMain()`. 명령이 오래 걸려도 main 스레드와 LED 는 계속 돈다 |
+
+**cmd 채널 잠금.** CLI 가 스레드로 나가면서, CLI 의 `peer` 명령(보내고 응답을 기다린다)과 main 스레드의 cmd 모듈 수신이 같은 링 버퍼를 동시에 읽을 수 있게 됐다. 그러면 응답을 가로챈다. `cmd_task` 에 뮤텍스(`cmdTaskLock` / `cmdTaskUnlock`)를 두었다. 백그라운드 수신은 바로 잠글 수 있을 때만 읽고, `peer` 명령은 주고받는 동안 잠금을 쥔다.
 
 ## 3. 설정에서 짚을 것 (`FreeRTOSConfig.h`)
 

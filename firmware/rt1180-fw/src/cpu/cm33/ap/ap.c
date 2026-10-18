@@ -6,10 +6,8 @@
 
 void apInit(void)
 {
-  cliOpen(HW_UART_CH_CLI, 115200);
-
   //-- 각 모듈의 init() 이 여기서 실행된다 (ap/modules, MODULE_DEF).
-  //   스레드가 필요한 모듈은 그 안에서 threadCreate() 로 등록한다.
+  //   스레드가 필요한 모듈은 그 안에서 threadCreate() 로 등록한다 (cli 등).
   //
   moduleInit();
 }
@@ -32,7 +30,6 @@ void apMain(void)
       ledToggle(_DEF_LED2);
     }
 
-    cliMain();
     moduleUpdate();           // update() 를 등록한 모듈들
     delay(1);                 // main 스레드가 CPU 를 혼자 잡지 않게 (docs/28)
   }
