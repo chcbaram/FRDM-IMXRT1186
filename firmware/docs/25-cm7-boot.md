@@ -248,9 +248,65 @@ CM7 에서 16 KB(4096 워드)를 읽어 더하는 시간을 DWT `CYCCNT` 로 쟀
 
 캐시에 들어온 OCRAM 은 DTCM 과 같은 속도다. 지금 CM7 의 코드와 데이터는 전부 TCM 에 있어서 이번 변경으로 당장 빨라지는 곳은 없다. OCRAM 이나 HyperRAM 에 큰 버퍼를 둘 때 차이가 난다.
 
-## 10. 다음 (25b)
+## 10. MU 메시지 — `ipcMsgSend` / `ipcMsgRead` / `ipcPing`
+
+공유 블록은 **상태**를 두는 곳이고(누가 언제 읽어도 되는 값), **알림**은 MU(Message Unit)로 보낸다. MU1 을 쓴다. SDK 멀티코어 예제와 같다.
+
+| | CM33 | CM7 |
+|---|---|---|
+| MU 쪽 | `MU1_MUA` (`0x5422_0000`, Secure) | `MU1_MUB` (`0x4423_0000`) |
+| IRQ | `MU1_IRQn` (21) | `MU1_IRQn` (21) |
+| LPCG | `kCLOCK_Mu_A` | `kCLOCK_Mu_B` |
+| SDK 드라이버 | `drivers/mu1/fsl_mu` (RT1180 의 MU 는 TR/RR/TSR/RSR 구조라 `mu` 가 아니라 `mu1`) | 같음 |
+
+### 형식과 순서 (`shared.h` 3절)
+
+- 메시지는 `id` + `data`, 32 bit 두 개. 보내는 쪽은 **TR1(data) 을 먼저, TR0(id) 를 나중에** 쓴다. 받는 쪽은 RX0 full 인터럽트에서 RR1 → RR0 순으로 읽는다. TR0 가 마지막이라 RX0 가 차면 RR1 은 이미 차 있다.
+- id 는 `shared.h` 의 `SHARED_MSG_*`. `0x0000~0x00FF` 는 드라이버, `0x0100~` 는 앱. 0 은 쓰지 않는다.
+- `PING`(CM33 → CM7)은 CM7 드라이버가 **인터럽트 안에서 바로** `PONG` 으로 돌려준다. `PONG` 은 CM33 드라이버가 받아 `ipcPing()` 에 넘긴다. 나머지 id 는 큐(`HW_IPC_MSG_Q_MAX` = 16)에 쌓인다.
+- MU 는 CM33 은 CM7 을 깨우기 **전에**, CM7 은 magic 을 쓰기 **전에** 연다. 상대가 기동 직후 보내도 받는다. 열 때 RR 에 남은 값은 읽어 버린다.
+
+### 송신은 기다리되 막히지 않는다
+
+`MU_SendMsg()` 는 TR 이 빌 때까지 **끝없이** 기다린다. CM7 이 디버거로 멈춰 있으면 CM33 도 같이 멈춘다. 그래서 `ipcMsgSend(id, data, timeout_ms)` 는 TR0/TR1 이 빌 때까지 `timeout_ms` 만 기다리고, 그래도 안 비면 `false` 를 돌려준다(`ipc info` 의 `tx timeout`). 두 TR 쓰기 사이에는 인터럽트를 막는다. CM7 은 인터럽트 안에서도 PONG 을 보내기 때문이다.
+
+### 확인
+
+```
+cli# ipc ping 1000
+ping 1000/1000  rtt min 3 us  avg 3 us  max 14 us
+cli# ipc info
+...
+msg        : tx 1000  rx 1000  tx timeout 0  q full 0  q 0
+```
+
+왕복 3 µs 는 CM33 송신 → CM7 인터럽트 → PONG 송신 → CM33 인터럽트 → 루프 확인까지다.
+
+### 걸렸던 것: `MU_GetRxStatusFlags()`
+
+처음엔 `ping 0/100`, `tx timeout 99` 였다. CM7 쪽 RR0/RR1 에 값이 들어와 있고(RSR = 3) RX0 인터럽트도 켜져 있는데 큐가 비었다. `MU_GetRxStatusFlags()` 는 RSR 의 4 bit 를 **순서를 뒤집어**(RF0 → bit3) 돌려주는 옛 호환 함수다. 이것을 `kMU_Rx0FullFlag`(`1 << 24` 형식)와 비교해서 수신 루프에 한 번도 들어가지 못했다. `MU_GetStatusFlags()` 와 비교하도록 고쳤다.
+
+### 이벤트로 깨우기 — 다음 단계를 위한 확인 (임시 실험)
+
+"공유 버퍼에 쓰고 → 이벤트를 보내고 → 받는 쪽이 이벤트에 깨어 처리" 하는 구조가 되는지 미리 보았다. 실험 코드는 남기지 않았다.
+
+| 확인 | 결과 |
+|---|---|
+| CM33 이 `0x2050_0100` 에 쓰고 **MU GP 인터럽트 0**(doorbell) → CM7 이 읽고 `0x2050_0104` 에 답 → GP0 응답 | 1000/1000, 데이터 오류 0, 왕복 평균 2 µs |
+| 그 동안 CM7 은 `WFI` 로 잔다 | doorbell 에 깨어 처리한다. ping 도 평균 5 µs 로 된다 |
+
+GP 인터럽트는 데이터 없이 비트만 세운다. 이미 서 있으면 다시 세워도 하나로 합쳐지므로, 받는 쪽이 "버퍼가 빌 때까지 다 읽기" 만 지키면 놓치는 것이 없다. doorbell 로 알맞다.
+
+`WFI` 에서 알아 둘 것:
+
+- **`WFI` 만으로 CM7 코어 클럭이 꺼진다.** GPC 목표 모드가 RUN(`CPU1_CM_MODE_CTRL` = 0)이어도 그렇다. RM 21.5.1: *"The core clock can also be gated by a WFI event without any GPC sequence. The GPC uses a signal to clear this gate when a wakeup trigger occurs."* 깨우는 것은 IRQ 다. **SysTick 은 IRQ 가 아니라서 깨우지 못하고 멈춘다**(alive 가 0 에서 멈췄다). 재우려면 주기 작업을 하드웨어 타이머 IRQ 로 옮겨야 한다.
+- **자는 동안 디버거가 CM7 TCM 을 못 읽는다**(시간 초과). `BLK_CTRL_S_AON M7_CFG[6] HCLK_FORCE_ON` 을 켜면 읽힌다. `M7_CFG[5] CORECLK_FORCE_ON` 은 GPC WAIT 모드용이라 위의 WFI 클럭 게이트에는 듣지 않았다(SysTick 은 여전히 거의 멈춰 있었다).
+- 지금 CM7 은 `delay(10)` 으로 깨어 있는 방식 그대로다.
+
+## 11. 다음 (25b)
 
 - [x] probe-rs 에 CM7 코어 정의 추가 (AP 2) — `tools/probe-rs/MIMXRT1186.yaml`, CM7 워크스페이스 디버그 구성 ([14](14-cm7-debug.md))
 - [x] CM7 캐시 켜기 + MPU 로 공유 구간 non-cacheable (9절)
-- [ ] MU(Message Unit) 로 코어 간 메시지/인터럽트
+- [x] MU(Message Unit) 로 코어 간 메시지/인터럽트 (10절)
+- [ ] 공유 링 버퍼 + MU doorbell + cmd 모듈 패킷 (코어 간 패킷 통신)
 - [ ] 전원 재인가(SW2)에서도 CM7 이 기동하는지 확인 — 소프트 리셋과 SW3(POR_B)에서는 확인했다

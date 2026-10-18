@@ -68,6 +68,7 @@ FILES = [
         'rgpio/fsl_rgpio.c', 'rgpio/fsl_rgpio.h',
         'lpuart/fsl_lpuart.c', 'lpuart/fsl_lpuart.h',
         'pwm/fsl_pwm.c', 'pwm/fsl_pwm.h',
+        'mu1/fsl_mu.c', 'mu1/fsl_mu.h',
     ]],
 
     #-- 보드: FlexSPI NOR 설정 블록의 타입 정의. 값은 bsp/boot/boot_hdr.c 에 직접 쓴다.

@@ -10,6 +10,7 @@
 
 
 #define _USE_HW_IPC
+#define      HW_IPC_MSG_Q_MAX       16
 
 
 #endif

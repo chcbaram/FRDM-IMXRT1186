@@ -35,6 +35,7 @@ set(NXP_CORE_FILES
 add_executable(${EXECUTABLE}
   ${SRC_FILES}
   ${SRC_FILES_RECURSE}
+  ${SHARED_SRC_FILES}
   ${NXP_SRC_FILES}
   ${NXP_CORE_FILES}
   )

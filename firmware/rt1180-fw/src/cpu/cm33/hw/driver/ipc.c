@@ -4,6 +4,8 @@
 #include "cli.h"
 #include "shared.h"
 #include "cm7.h"
+#include "qbuffer.h"
+#include "fsl_mu.h"
 
 
 /*
@@ -13,6 +15,9 @@
  *   2. 공유 블록 magic 을 0 으로 지운다 (낡은 값 방지, ipc.h 주석)
  *   3. cm7Prepare → cm7Load → cm7Start (bsp/cm7.c)
  *   4. CM7 이 magic 을 쓸 때까지 기다린다
+ *
+ * 메시지는 MU1 의 A 쪽(MU1_MUA)을 쓴다. CM7 은 B 쪽이다. 형식은 shared.h 3절.
+ * MU 는 CM7 을 깨우기 전에 연다. CM7 이 기동하자마자 보내도 받을 수 있게.
  *
  * 공유 블록은 두 코어가 각자 정의하고 링커가 .shared 를 같은 주소(OCRAM2)에 놓는다.
  */
@@ -27,6 +32,7 @@ static void cliIpc(cli_args_t *args);
 #if _HW_DEF_CM7_IMAGE
 static bool     ipcCheckImage(void);
 static uint32_t crc32(const uint8_t *p_data, uint32_t length);
+static void     ipcMsgInit(void);
 #endif
 
 
@@ -40,6 +46,18 @@ static uint32_t   image_size   = 0;
 
 static uint32_t   last_alive    = 0;
 static uint32_t   last_alive_ms = 0;
+
+static bool       is_msg_init = false;
+static qbuffer_t  msg_q;
+#if _HW_DEF_CM7_IMAGE
+static ipc_msg_t  msg_q_buf[HW_IPC_MSG_Q_MAX];
+#endif
+static uint32_t   msg_tx_cnt     = 0;
+static uint32_t   msg_rx_cnt     = 0;
+static uint32_t   msg_tx_timeout = 0;
+static uint32_t   msg_q_full     = 0;
+static volatile uint32_t pong_cnt  = 0;
+static volatile uint32_t pong_data = 0;
 
 static const char *ipc_state_str[] =
   {
@@ -65,6 +83,8 @@ bool ipcInit(void)
   {
     shared.magic = 0;
     __DMB();
+
+    ipcMsgInit();
 
     pre_ms = millis();
 
@@ -173,6 +193,118 @@ uint32_t ipcGetClock(void)
   return ipcIsBooted() ? shared.peer_clock : 0;
 }
 
+bool ipcMsgSend(uint32_t id, uint32_t data, uint32_t timeout_ms)
+{
+  const uint32_t tx_empty = kMU_Tx0EmptyFlag | kMU_Tx1EmptyFlag;
+  uint32_t       pre_ms;
+  uint32_t       primask;
+
+  if (is_msg_init != true || id == 0)
+    return false;
+
+  //-- 상대가 앞 메시지를 읽어 TR0/TR1 이 빌 때까지 기다린다. MU_SendMsg() 는
+  //   끝없이 기다리므로 쓰지 않는다 (CM7 이 디버거로 멈춰 있으면 같이 멈춘다).
+  //
+  pre_ms = millis();
+  while ((MU_GetStatusFlags(MU1_MUA) & tx_empty) != tx_empty)
+  {
+    if ((millis() - pre_ms) >= timeout_ms)
+    {
+      msg_tx_timeout++;
+      return false;
+    }
+  }
+
+  //-- data 다음 id. 두 쓰기 사이에 다른 송신이 끼지 않게 막는다.
+  //
+  primask = __get_PRIMASK();
+  __disable_irq();
+  MU_SendMsgNonBlocking(MU1_MUA, 1, data);
+  MU_SendMsgNonBlocking(MU1_MUA, 0, id);
+  __set_PRIMASK(primask);
+
+  msg_tx_cnt++;
+  return true;
+}
+
+uint32_t ipcMsgAvailable(void)
+{
+  return is_msg_init ? qbufferAvailable(&msg_q) : 0;
+}
+
+bool ipcMsgRead(ipc_msg_t *p_msg)
+{
+  if (ipcMsgAvailable() == 0)
+    return false;
+
+  return qbufferRead(&msg_q, (uint8_t *)p_msg, 1);
+}
+
+bool ipcPing(uint32_t timeout_ms, uint32_t *p_rtt_us)
+{
+  uint32_t seq = pong_cnt + 1;
+  uint32_t pre_us;
+  uint32_t pre_ms;
+
+  pre_us = micros();
+  if (ipcMsgSend(SHARED_MSG_PING, seq, timeout_ms) != true)
+    return false;
+
+  pre_ms = millis();
+  while (pong_cnt == seq - 1)
+  {
+    if ((millis() - pre_ms) >= timeout_ms)
+      return false;
+  }
+  *p_rtt_us = micros() - pre_us;
+
+  return (pong_data == seq);
+}
+
+void MU1_IRQHandler(void)
+{
+  ipc_msg_t msg;
+
+  while ((MU_GetStatusFlags(MU1_MUA) & kMU_Rx0FullFlag) != 0)
+  {
+    msg.data = MU_ReceiveMsgNonBlocking(MU1_MUA, 1);
+    msg.id   = MU_ReceiveMsgNonBlocking(MU1_MUA, 0);
+    msg_rx_cnt++;
+
+    if (msg.id == SHARED_MSG_PONG)
+    {
+      pong_data = msg.data;
+      pong_cnt++;
+    }
+    else if (qbufferWrite(&msg_q, (uint8_t *)&msg, 1) != true)
+    {
+      msg_q_full++;
+    }
+  }
+  __DSB();
+}
+
+#if _HW_DEF_CM7_IMAGE
+static void ipcMsgInit(void)
+{
+  qbufferCreateBySize(&msg_q, (uint8_t *)msg_q_buf, sizeof(ipc_msg_t), HW_IPC_MSG_Q_MAX);
+
+  //-- LPCG 를 켠다. MU 는 CM33 리셋만으로는 비워지지 않을 수 있어 남은 수신을 버린다.
+  //
+  MU_Init(MU1_MUA);
+  for (uint32_t i = 0; i < MU_RR_COUNT; i++)
+  {
+    (void)MU_ReceiveMsgNonBlocking(MU1_MUA, i);
+  }
+
+  MU_EnableInterrupts(MU1_MUA, kMU_Rx0FullInterruptEnable);
+  NVIC_SetPriority(MU1_IRQn, 5);
+  NVIC_EnableIRQ(MU1_IRQn);
+
+  is_msg_init = true;
+}
+#endif
+
 
 #if _HW_DEF_CM7_IMAGE
 static uint32_t crc32(const uint8_t *p_data, uint32_t length)
@@ -244,12 +376,41 @@ void cliIpc(cli_args_t *args)
                 (int)shared.peer_tick, (int)(shared.peer_tick - t0));
       cliPrintf("running    : %s\n", ipcIsRunning() ? "yes" : "no");
     }
+    cliPrintf("msg        : tx %d  rx %d  tx timeout %d  q full %d  q %d\n",
+              (int)msg_tx_cnt, (int)msg_rx_cnt, (int)msg_tx_timeout, (int)msg_q_full,
+              (int)ipcMsgAvailable());
+    ret = true;
+  }
+
+  if (args->argc >= 1 && args->isStr(0, "ping"))
+  {
+    uint32_t cnt = (args->argc == 2) ? (uint32_t)args->getData(1) : 1;
+    uint32_t ok  = 0;
+    uint32_t rtt, rtt_min = 0xFFFFFFFFU, rtt_max = 0, rtt_sum = 0;
+
+    for (uint32_t i = 0; i < cnt; i++)
+    {
+      if (ipcPing(10, &rtt) == true)
+      {
+        ok++;
+        rtt_sum += rtt;
+        rtt_min  = (rtt < rtt_min) ? rtt : rtt_min;
+        rtt_max  = (rtt > rtt_max) ? rtt : rtt_max;
+      }
+    }
+    cliPrintf("ping %d/%d", (int)ok, (int)cnt);
+    if (ok > 0)
+    {
+      cliPrintf("  rtt min %d us  avg %d us  max %d us", (int)rtt_min, (int)(rtt_sum / ok), (int)rtt_max);
+    }
+    cliPrintf("\n");
     ret = true;
   }
 
   if (ret == false)
   {
     cliPrintf("ipc info\n");
+    cliPrintf("ipc ping [count]\n");
   }
 }
 #endif

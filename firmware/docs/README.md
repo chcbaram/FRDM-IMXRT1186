@@ -11,7 +11,7 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 | 펌웨어 | `firmware/rt1180-fw` — CM33 **LED · UART(LPUART1) · CLI · 로그 · 240 MHz · 버튼 · swtimer · RTC · reset** + **CM7 기동** (792 MHz) |
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
 | 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `hwinfo clock` 로 CCM 실측 ([22](22-clock.md)) |
-| SDK | MCUXpresso SDK 에서 154개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
+| SDK | MCUXpresso SDK 에서 156개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
 | 빌드 | FLASH 44,360 B / 211 KB · DTCM 18,792 B / 128 KB |
 | 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `hwinfo boot` 로 부트 모드/퓨즈/클럭 확인 |
 | CM7 | **기동 확인** — ELE kick-off, ITCM 실행, 공유 블록 핸드셰이크 ([25](25-cm7-boot.md)). `-DBUILD_CM7=ON` |
@@ -33,7 +33,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **25b** — MU 메시지 (CM7 디버그 · 캐시/MPU 는 끝)
+1. **25b** — 코어 간 패킷 통신: 공유 링 버퍼 + MU doorbell + cmd 모듈
 2. **26 QSPI NOR 드라이버** — TCM 에서 실행하며 지우기/쓰기. 부트로더의 전제
 3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절), SW2 전원 재인가 후 CM7 기동 ([25](25-cm7-boot.md) 8절)
 
@@ -91,7 +91,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
 | [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · SW3 더블클릭 · 부팅 확인/폴트 카운터 | ✅ |
-| [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b: MU 남음. CM7 디버그 · 캐시/MPU 완료) |
+| [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b: CM7 디버그 · 캐시/MPU · MU 메시지 완료, 코어 간 패킷 통신 진행 중) |
 | 26 | QSPI NOR 드라이버 (TCM 실행 지우기/쓰기) | 예정 |
 | 27 | HyperRAM (FlexSPI1) | 예정 |
 | 28 | FreeRTOS | 예정 |

@@ -65,6 +65,24 @@ uint32_t     ipcGetClock(void);            // Hz
 //-- 상대 코어가 자기 생존을 알린다. 상대 코어 쪽에서만 구현한다.
 void         ipcUpdate(void);
 
+
+//-- 메시지. 상대 코어에 id + data 를 보낸다. 상대가 앞 메시지를 아직 읽지 않았으면
+//   timeout_ms 까지 기다리고, 그래도 비지 않으면 false 다 (상대가 멈춰 있어도 막히지 않는다).
+//   받은 메시지는 인터럽트에서 큐에 쌓인다. 드라이버가 쓰는 id(ping 등)는 큐에 넣지 않는다.
+typedef struct
+{
+  uint32_t id;
+  uint32_t data;
+} ipc_msg_t;
+
+bool         ipcMsgSend(uint32_t id, uint32_t data, uint32_t timeout_ms);
+uint32_t     ipcMsgAvailable(void);
+bool         ipcMsgRead(ipc_msg_t *p_msg);
+
+//-- 왕복 시간 측정. 상대 코어가 ping 에 답하면 true 와 왕복 시간(us)을 돌려준다.
+//   주 코어 쪽에서만 구현한다. 상대 코어 드라이버는 ping 에 답만 한다.
+bool         ipcPing(uint32_t timeout_ms, uint32_t *p_rtt_us);
+
 #endif
 
 #ifdef __cplusplus

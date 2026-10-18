@@ -22,8 +22,12 @@ extern "C" {
  * 2. 공유 블록 (shared_t)
  *    OCRAM2 맨 앞(SHARED_BLOCK_ADDR). 두 코어가 같은 주소로 본다(docs/02 1절).
  *    두 링커 스크립트가 .shared (NOLOAD) 를 이 주소에 놓는다.
- *    CM7 의 D-cache 는 아직 꺼져 있다. 캐시를 켤 때(로드맵 25b) 이 구간을 MPU 로
- *    non-cacheable 로 잡아야 한다.
+ *    CM7 은 D-cache 를 켜고 이 구간만 MPU 로 non-cacheable 로 잡는다(cm7/bsp/mpu.c).
+ *
+ * 3. 메시지 (MU1)
+ *    공유 블록은 상태를 두는 곳이고, 알림은 MU 로 보낸다. 메시지는 id + data 32 bit 두 개다.
+ *    보내는 쪽이 TR1(data) 을 먼저, TR0(id) 를 나중에 쓰고, 받는 쪽은 RX0 full 인터럽트에서
+ *    RR1 → RR0 순으로 읽는다. id 0 은 쓰지 않는다. 아래 SHARED_MSG_* 가 예약된 id 다.
  *
  * 구조체를 고치면 SHARED_VERSION 을 올리고 두 코어를 함께 다시 빌드한다.
  */
@@ -36,6 +40,12 @@ extern "C" {
 #define SHARED_BLOCK_SIZE       0x1000U           // 4 KB. CM7 MPU 가 이 구간을 non-cacheable 로 잡는다 (2^N, 주소는 크기 배수)
 #define SHARED_MAGIC            0x48535452UL      // "RTSH"
 #define SHARED_VERSION          1
+
+//-- 메시지 id. 0x0000~0x00FF 는 드라이버가 쓰고, 그 위는 앱이 쓴다.
+//
+#define SHARED_MSG_PING         0x0001U           // CM33 → CM7. data 를 그대로 돌려준다
+#define SHARED_MSG_PONG         0x0002U           // CM7 → CM33. PING 의 data
+#define SHARED_MSG_USER         0x0100U
 
 #define SHARED_NAME_MAX         32
 #define SHARED_VER_MAX          16
