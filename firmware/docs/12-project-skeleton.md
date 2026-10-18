@@ -130,12 +130,14 @@ titan-mini 의 규칙을 그대로 지킨다. 실제로 돌려 본 것은 macOS 
 | 파일 | 숨기는 것 | IntelliSense | 디버그 구성 |
 |---|---|---|---|
 | `rt1180-fw-cm33.code-workspace` | `src/cpu/cm7` | `build/cm33/compile_commands.json` | **Debug CM33**, **Attach CM33** |
-| `rt1180-fw-cm7.code-workspace` | `src/cpu/cm33` | `build/cm7/compile_commands.json` | (로드맵 25) |
-| `rt1180-fw.code-workspace` | — | CM33 | — |
+| `rt1180-fw-cm7.code-workspace` | `src/cpu/cm33` | `build/cm7/compile_commands.json` | **Flash + Attach CM7**, **Attach CM7** ([14](14-cm7-debug.md)) |
+| `rt1180-fw.code-workspace` | — | CM33 | **Flash + Attach CM33 + CM7**, **Attach CM33 + CM7**, **Attach CM33**, **Attach CM7** |
+
+CM7 이 들어간 두 워크스페이스(`-cm7`, 전체)는 configure 태스크가 `-DBUILD_CM7=ON` 으로 돈다. CM33 워크스페이스는 옵션을 넘기지 않아 CMake 캐시에 남은 값을 쓴다.
 
 > 같은 폴더를 열기 때문에 `.vscode/launch.json` 은 세 워크스페이스가 공유하게 된다. 그래서 디버그 구성은 `.vscode` 가 아니라 **각 워크스페이스 파일의 `"launch"` 안에** 둔다.
 >
-> ⚠️ **태스크도 워크스페이스 파일에 둔다.** 워크스페이스 파일의 launch 는 `preLaunchTask` 를 **같은 워크스페이스 파일의 `"tasks"` 에서만** 찾는다. 처음에 태스크를 `.vscode/tasks.json` 에 두었더니 빌드(`Cmd+Shift+B`)는 되는데 디버그를 시작하면 *"Could not find the task 'build-build'"* 가 떴다. 그래서 `.vscode/tasks.json` 을 지우고 네 태스크(`build-configure`, `build-build`, `build-clean`, `flash`)를 세 워크스페이스 파일에 똑같이 넣었다. 태스크를 고칠 때는 세 파일을 같이 고친다. `.vscode/` 에는 `c_cpp_properties.json` 과 `extensions.json` 만 남는다.
+> ⚠️ **태스크도 워크스페이스 파일에 둔다.** 워크스페이스 파일의 launch 는 `preLaunchTask` 를 **같은 워크스페이스 파일의 `"tasks"` 에서만** 찾는다. 처음에 태스크를 `.vscode/tasks.json` 에 두었더니 빌드(`Cmd+Shift+B`)는 되는데 디버그를 시작하면 *"Could not find the task 'build-build'"* 가 떴다. 그래서 `.vscode/tasks.json` 을 지우고 네 태스크(`build-configure`, `build-build`, `build-clean`, `flash`)를 세 워크스페이스 파일에 똑같이 넣었다. 태스크를 고칠 때는 세 파일을 같이 고친다(configure 의 `-DBUILD_CM7=ON` 만 다르다). `.vscode/` 에는 `c_cpp_properties.json` 과 `extensions.json` 만 남는다.
 
 디버그는 `probe-rs-debug` 타입이다. `Debug CM33` 의 동작은 다음과 같다.
 

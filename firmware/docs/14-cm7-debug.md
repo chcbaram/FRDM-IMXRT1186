@@ -129,6 +129,14 @@ arm-none-eabi-gdb build/cm7/rt1180-fw-cm7.elf -ex "target extended-remote :1337"
 
 이 워크스페이스의 configure 태스크는 `-DBUILD_CM7=ON` 으로 돈다. CM7 이미지가 빌드되어야 `flash` 가 CM7 슬롯까지 쓴다.
 
+**전체 워크스페이스.** `prj/rt1180-fw.code-workspace` 에는 두 코어를 **한 디버그 세션**으로 붙는 구성도 있다. `coreConfigs` 에 core 0(CM33)과 core 1(CM7)을 같이 넣는다. 두 코어 모두 attach 라 어느 쪽도 리셋하지 않는다.
+
+| 구성 | 하는 일 |
+|---|---|
+| **Flash + Attach CM33 + CM7** | `flash` 후 두 코어에 같이 붙는다 |
+| **Attach CM33 + CM7** | 돌고 있는 두 코어에 같이 붙는다 |
+| **Attach CM33** · **Attach CM7** | 한 코어만 |
+
 ## 4. 확인한 것
 
 | 확인 | 결과 |

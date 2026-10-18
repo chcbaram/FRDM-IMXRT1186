@@ -33,9 +33,9 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **25b** — SW2 전원 재인가에서 CM7 기동 확인 (나머지는 끝)
-2. **26 QSPI NOR 드라이버** — TCM 에서 실행하며 지우기/쓰기. 부트로더의 전제
-3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절), SW2 전원 재인가 후 CM7 기동 ([25](25-cm7-boot.md) 8절)
+1. **26 QSPI NOR 드라이버** — TCM 에서 실행하며 지우기/쓰기. 부트로더 · NVS 의 전제
+2. **27 HyperRAM** → **28 FreeRTOS** (코어 간 doorbell → 세마포어, CM7 틱) → **29 모듈** (`cmd_task` 를 `MODULE_DEF` 로)
+3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절)
 
 ### 미해결 과제
 
@@ -91,7 +91,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [22](22-clock.md) | **클럭** — CM33 240 MHz (300 MHz 는 오버드라이브 필요), CCM OBSERVE 실측 | ✅ |
 | [23](23-button-swtimer.md) | **버튼(SW4) · swtimer** — RTOS 없이 SysTick 에서 갱신, 스냅샷 API | ✅ (누름 확인 남음) |
 | [24](24-rtc-reset.md) | **RTC · reset** — BBNSM RTC, GPR 에 리셋 원인 · 부트 모드 · SW3 더블클릭 · 부팅 확인/폴트 카운터 | ✅ |
-| [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b: CM7 디버그 · 캐시/MPU · MU · 코어 간 cmd 패킷 완료, SW2 확인 남음) |
+| [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b 까지 완료: CM7 디버그 · 캐시/MPU · MU · 코어 간 cmd 패킷 · 전원 재인가) |
 | 26 | QSPI NOR 드라이버 (TCM 실행 지우기/쓰기) | 예정 |
 | 27 | HyperRAM (FlexSPI1) | 예정 |
 | 28 | FreeRTOS | 예정 |

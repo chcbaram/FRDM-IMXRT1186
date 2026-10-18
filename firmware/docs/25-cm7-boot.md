@@ -368,4 +368,4 @@ rtt min 536 us  avg 537 us  max 571 us  (931 KB/s each way)
 - [x] CM7 캐시 켜기 + MPU 로 공유 구간 non-cacheable (9절)
 - [x] MU(Message Unit) 로 코어 간 메시지/인터럽트 (10절)
 - [x] 공유 링 버퍼 + MU doorbell + cmd 모듈 패킷 (코어 간 패킷 통신, 11절)
-- [ ] 전원 재인가(SW2)에서도 CM7 이 기동하는지 확인 — 소프트 리셋과 SW3(POR_B)에서는 확인했다
+- [x] 전원 재인가에서도 CM7 이 기동하는지 확인 — `RESET_BIT_POWER`(reset_count 0) 뒤 `CM7 RUNNING (10 ms)`, `peer echo 512 1000` 1000/1000, `ipc ping 1000` 1000/1000. 소프트 리셋과 SW3(POR_B)에서도 확인했다
