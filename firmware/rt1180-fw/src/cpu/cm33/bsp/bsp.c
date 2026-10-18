@@ -21,6 +21,11 @@ bool bspInit(void)
   //
   clockInit();
 
+  //-- MPU 를 잡고 시스템 버스 캐시(XCACHE_PS)를 켠다 (bsp/mpu.c). CM7 을 깨우기 전에 해야
+  //   CM7 TCM alias 와 공유 블록이 non-cacheable 로 잡힌다.
+  //
+  mpuInit();
+
   SysTick_Config(SystemCoreClock / 1000);   // 1ms
 
   return true;

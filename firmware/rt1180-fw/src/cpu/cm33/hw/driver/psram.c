@@ -19,7 +19,8 @@
  *   0x2860_0000  2 MB  CM33   ← 여기
  * 확인이 끝나면 .psram_bss 를 0 으로 채운다. 그 전에는 PSRAM_BSS 변수를 쓰면 안 된다.
  *
- * CM33 은 시스템 버스 캐시(XCACHE_PS) 가 꺼져 있어 HyperRAM 을 캐시하지 않는다.
+ * CM33 은 자기 몫 2 MB 를 시스템 버스 캐시(XCACHE_PS)로 write-back 캐시한다 (bsp/mpu.c 9 번).
+ * CM7 몫은 CM33 MPU 가 non-cacheable 로 둔다 (8 번).
  * CM7 은 MPU 영역 8 이 Normal write-back 으로 연다 (cm7/bsp/mpu.c).
  */
 
@@ -208,6 +209,14 @@ void cliPsram(cli_args_t *args)
     memcpy((void *)((uint32_t)p + blk), (const void *)p, blk);
     us = cycToUs(t);
     cliPrintf("  memcpy %4d KB     : %7d us  (%d KB/s)\n", (int)(blk / 1024), (int)us, us ? (int)((uint64_t)blk * 1000000U / us / 1024U) : 0);
+
+    //-- 5. 32 bit 복사 루프. newlib-nano 의 memcpy 는 크기 우선이라 바이트 단위다 (docs/27)
+    volatile uint32_t *src = p;
+    volatile uint32_t *dst = (volatile uint32_t *)((uint32_t)p + blk);
+    t = cycStart();
+    for (uint32_t i = 0; i < blk / 4; i++) dst[i] = src[i];
+    us = cycToUs(t);
+    cliPrintf("  copy   %4d KB     : %7d us  (%d KB/s, 32bit loop)\n", (int)(blk / 1024), (int)us, us ? (int)((uint64_t)blk * 1000000U / us / 1024U) : 0);
     ret = true;
   }
 

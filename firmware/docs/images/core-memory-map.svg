@@ -105,7 +105,7 @@
   <text x="24" y="699" class="m">0x2860_0000</text>
   <rect x="128" y="677" width="400" height="36" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
   <text x="140" y="693" class="b" fill="#1e40af">HyperRAM · 2 MB</text>
-  <text x="140" y="708" class="s">.psram_bss (캐시 안 함)</text>
+  <text x="140" y="708" class="s">.psram_bss (캐시 WB)</text>
   <rect x="540" y="677" width="400" height="36" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
   <text x="552" y="693" class="b" fill="#1e40af">HyperRAM · 2 MB</text>
   <text x="552" y="708" class="s">CM33 몫 — 접근 안 함</text>

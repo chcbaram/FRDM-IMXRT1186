@@ -81,8 +81,8 @@ ROM 은 전원 재인가 · SW3(POR_B) · SYSRESETREQ(`probe-rs` 리셋, 소프�
 
 | | CM33 | CM7 |
 |---|---|---|
-| 캐시 | **하지 않는다.** 시스템 버스 캐시 `XCACHE_PS` 가 꺼져 있다([25](25-cm7-boot.md) 9절) | **한다.** MPU 영역 8 `0x2800_0000` 8 MB Normal write-back (`cm7/bsp/mpu.c`) |
-| 결과 | 바이트 접근마다 버스를 탄다. newlib-nano 의 `memset` · `memcpy` 는 크기 우선이라 바이트 루프여서 6 MB/s 다. 32 bit 루프는 24 / 39 MB/s | 빠르지만 CM33 이 쓴 값을 늦게 본다 |
+| 캐시 | 처음엔 **하지 않았다**(시스템 버스 캐시 `XCACHE_PS` 꺼짐). 6절에서 자기 몫 2 MB 만 write-back 으로 켰다 | **한다.** MPU 영역 8 `0x2800_0000` 8 MB Normal write-back (`cm7/bsp/mpu.c`) |
+| 결과 (캐시 끔) | 바이트 접근마다 버스를 탄다. newlib-nano 의 `memset` · `memcpy` 는 크기 우선이라 바이트 루프여서 6 MB/s 다. 32 bit 루프는 24 / 39 MB/s | 빠르지만 CM33 이 쓴 값을 늦게 본다 |
 
 ### CM7 캐시 확인 (`peer read`)
 
@@ -116,7 +116,7 @@ SDK 는 섹션을 따로 두지 않는다. **링커 스크립트를 통째로 �
 
 ### 여기서는 섹션으로 큰 버퍼만 둔다
 
-TCM 이 충분하고 CM33 은 HyperRAM 을 캐시하지 않아 느리다(32 bit 읽기 39 MB/s). 그래서 SDK 처럼 변수와 스택을 통째로 옮기지 않고, **표시한 큰 버퍼만** HyperRAM 에 둔다. 나누는 비율은 SDK 와 같게 했다(나중에 SDK 코드를 가져올 때 주소가 맞는다).
+TCM 이 충분하고 HyperRAM 은 캐시를 켜도 TCM 보다 훨씬 느리다(6절, CM33 32 bit 읽기 63 MB/s). 그래서 SDK 처럼 변수와 스택을 통째로 옮기지 않고, **표시한 큰 버퍼만** HyperRAM 에 둔다. 나누는 비율은 SDK 와 같게 했다(나중에 SDK 코드를 가져올 때 주소가 맞는다).
 
 | 코어 | 링커 `PSRAM` 영역 | 섹션 |
 |---|---|---|
@@ -155,7 +155,62 @@ full 2044 KB (addr, ~addr) : OK  (0 words differ)
 
 `psram test` 는 CM33 몫에서 **bss 뒤만** 덮어쓴다. 시험 뒤에도 bss 첫 워드(`0x2860_0000`)와 CM7 몫의 마지막 워드(`0x285F_FFFC`)에 넣어 둔 값이 그대로 남았다.
 
-## 6. CLI
+## 6. CM33 시스템 버스 캐시 켜기 — `cm33/bsp/mpu.c`
+
+CM33 에는 XCACHE 가 둘 있다(RM 39, 각 16 KB).
+
+| 캐시 | 버스 | 전 | 후 |
+|---|---|---|---|
+| `XCACHE_PC` | 코드 버스 (QSPI, Code TCM) | 켜짐 (`SystemInit`) | 그대로 |
+| `XCACHE_PS` | 시스템 버스 (OCRAM, HyperRAM, CM7 TCM alias) | 꺼짐 | **켬** |
+
+XCACHE 는 **MPU 속성을 따른다**(캐시 여부, write-back / write-through). 하드웨어 일관성은 없다. 그래서 켜기 전에 MPU 로 캐시하면 안 되는 곳을 먼저 잡았다. 순서와 속성은 SDK CM33 `BOARD_ConfigMPU()` 를 따랐다.
+
+- **ARMv8-M MPU 는 영역이 겹치면 fault 다.** CM7 처럼 "4 GB 를 막고 위에 겹쳐 열기"를 할 수 없어 겹치지 않게 나눠 적는다.
+- **적지 않은 곳은 기본 맵을 따른다**(`PRIVDEFENA`). `0x2000_0000~0x3FFF_FFFF` 의 기본은 Normal WB 라서 캐시하면 안 되는 곳은 꼭 적어야 한다.
+
+| # | 구간 | 속성 | 이유 |
+|---|---|---|---|
+| 0 | Code TCM `0x0FFE_0000` 128 KB | Normal WT | SDK 와 같음 (TCM 은 XCACHE 를 거치지 않는다) |
+| 1 | System TCM `0x2000_0000` 128 KB | Normal WB | SDK 와 같음 |
+| 2 · 3 | CM7 TCM alias `0x203C_0000` · `0x303C_0000` 512 KB | **non-cacheable**, XN | `cm7Load()` 가 CM7 이미지를 여기로 복사한다. 캐시에 남으면 CM7 이 받지 못한다 |
+| 4 | QSPI `0x0400_0000` 16 MB | Normal WT, 읽기 전용 | SDK 와 같음. ROM API 는 IP 명령으로 쓰므로 RO 와 무관 |
+| 5 | 주변장치 `0x4000_0000~0x7FFF_FFFF` | Device, XN | SDK 와 같음 |
+| 6 · 7 | OCRAM1 · OCRAM2 전체 | **non-cacheable** | 공유 블록이 있다. RM 39: ECC OCRAM 은 non-cacheable 이나 WT. SDK 멀티코어 설정도 같다 |
+| 8 | HyperRAM CM7 몫 6 MB | **non-cacheable** | 상대 코어 영역은 캐시하지 않는다 |
+| 9 | HyperRAM CM33 몫 2 MB | **Normal WB** (읽기 · 쓰기 할당) | 이번에 빨라질 곳 |
+
+`mpuInit()` 은 `bspInit()` 에서 `clockInit()` 다음, CM7 을 깨우기 전에 부른다. `XCACHE_PC` 는 끄지 않았다. 플래시 구간의 속성(WT)이 기본 맵과 같아 바뀌는 것이 없다.
+
+### 확인
+
+```
+XCACHE_PS CCR (0x5440_0800) = 0x0000_0001   MPU_CTRL = 0x7
+[OK] CM7 RUNNING (10 ms)
+ipc ping 1000          1000/1000   ← 공유 블록이 non-cacheable 로 잡혔다
+peer echo 512 1000     1000/1000
+qspi test              그대로 OK
+```
+
+### CM33 몫 2 MB 속도
+
+| | 캐시 끔 | **WB** (채택) | WT (비교) |
+|---|---|---|---|
+| 32 bit 쓰기 | 24.0 MB/s | **51.0 MB/s** | 24.0 MB/s |
+| 32 bit 읽기 | 38.8 MB/s | **62.6 MB/s** | 63.0 MB/s |
+| `memset` | 6.2 MB/s | **26.1 MB/s** | 5.3 MB/s |
+| `memcpy` (newlib-nano) | 5.9 MB/s | 3.3 MB/s | 4.8 MB/s |
+| 32 bit 복사 루프 | — | **17.5 MB/s** | — |
+
+- **write-back 이 낫다.** write-through 는 읽기만 빨라지고 쓰기는 캐시를 끈 것과 같다.
+- **바이트 단위 `memcpy` 는 캐시를 켜면 오히려 느려졌다.** 쓰기 미스마다 줄을 HyperRAM 에서 읽어 오고(write-allocate), 16 KB 캐시에서 원본 줄과 대상 줄이 서로 밀어내며 write-back 이 늘어나는 것으로 본다. 32 bit 복사 루프는 같은 조건에서 17.5 MB/s 다. HyperRAM 에서 큰 복사를 할 때는 워드 단위 복사를 쓴다.
+
+### 이제 지킬 것
+
+- CM33 몫 HyperRAM 을 **DMA 나 CM7 과 주고받을 때는 CM33 도 캐시를 비워야 한다**(XCACHE_PS push / clear). CM7 쪽 규칙(4절)과 같다.
+- 새로 쓰는 시스템 버스 메모리(OCRAM 등)를 캐시할지는 MPU 표에 영역으로 적어 정한다. 적지 않으면 기본 맵의 WB 가 된다.
+
+## 7. CLI
 
 ```
 psram info     init, 칩 크기(FLSHB1CR0), CM33 몫, bss 구간, FlexSPI1 MCR0 · 루트 클럭
@@ -163,8 +218,8 @@ psram test     데이터 버스, 주소 버스, CM33 몫 전체 비교, 속도  
 peer read addr CM7 이 그 주소를 읽는다 (CM7 의 캐시를 거친다)
 ```
 
-## 7. 다음
+## 8. 다음
 
-- [ ] CM33 `XCACHE_PS` 를 켤지 정한다. 켜면 HyperRAM 이 빨라지지만 OCRAM2 공유 블록도 캐시되므로, CM33 MPU 로 공유 구간을 non-cacheable 로 먼저 잡아야 한다
-- [ ] newlib-nano 대신 워드 단위 `memcpy` · `memset` 을 쓸지 정한다 (HyperRAM · OCRAM 같은 느린 메모리에서 차이가 크다)
+- [x] CM33 `XCACHE_PS` 를 켠다 — 6절. CM33 MPU 로 OCRAM · CM7 TCM alias · CM7 몫 HyperRAM 을 non-cacheable 로 먼저 잡았다
+- [ ] newlib-nano 대신 워드 단위 `memcpy` 를 쓸지 정한다 — 캐시를 켜면 바이트 `memcpy` 가 오히려 느려진다(3.3 MB/s, 32 bit 루프는 17.5 MB/s, 6절)
 - [x] 링커에 HyperRAM 섹션(`.psram_bss`, NOLOAD)을 둔다 — 5절. CM7 6 MB / CM33 2 MB

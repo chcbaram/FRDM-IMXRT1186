@@ -36,15 +36,15 @@
   <rect x="355" y="244" width="250" height="74" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.4"/>
   <text x="480.0" y="264" class="b" text-anchor="middle" fill="#15803d">0x2800_0000 · 8 MB</text>
   <text x="480.0" y="282" class="s" text-anchor="middle">메모리 맵. 바로 읽고 쓴다</text>
-  <text x="480.0" y="298" class="s" text-anchor="middle">psram test : 8 MB 전부 OK</text>
+  <text x="480.0" y="298" class="s" text-anchor="middle">CM7 6 MB / CM33 2 MB</text>
   <line x1="805" y1="194" x2="520" y2="242" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
   <rect x="30" y="244" width="250" height="140" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
   <text x="155.0" y="264" class="b" text-anchor="middle" fill="#3730a3">CM33 (240 MHz)</text>
-  <text x="155.0" y="282" class="s" text-anchor="middle">XCACHE_PS 꺼짐 → 캐시 안 함</text>
-  <text x="155.0" y="298" class="m" text-anchor="middle">32bit 쓰기  24 MB/s</text>
-  <text x="155.0" y="314" class="m" text-anchor="middle">32bit 읽기  39 MB/s</text>
-  <text x="155.0" y="330" class="m" text-anchor="middle">memset 1 MB  6 MB/s</text>
-  <text x="155.0" y="346" class="s" text-anchor="middle">newlib-nano 바이트 루프</text>
+  <text x="155.0" y="282" class="s" text-anchor="middle">MPU 9 : WB · XCACHE_PS 켬</text>
+  <text x="155.0" y="298" class="m" text-anchor="middle">32bit 쓰기  51 MB/s</text>
+  <text x="155.0" y="314" class="m" text-anchor="middle">32bit 읽기  63 MB/s</text>
+  <text x="155.0" y="330" class="m" text-anchor="middle">memset 26 · memcpy 3 MB/s</text>
+  <text x="155.0" y="346" class="s" text-anchor="middle">32bit 복사 루프 17 MB/s</text>
   <rect x="680" y="244" width="250" height="140" rx="6" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
   <text x="805.0" y="264" class="b" text-anchor="middle" fill="#c2410c">CM7 (792 MHz)</text>
   <text x="805.0" y="282" class="s" text-anchor="middle">MPU 영역 8 : Normal WB</text>

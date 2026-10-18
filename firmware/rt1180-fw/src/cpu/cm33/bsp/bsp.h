@@ -11,6 +11,7 @@ extern "C" {
 
 
 bool bspInit(void);
+void mpuInit(void);
 
 void     delay(uint32_t time_ms);
 uint32_t millis(void);

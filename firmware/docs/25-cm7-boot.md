@@ -61,7 +61,7 @@ titan-mini 의 CPU1 기동과 같은 틀이다. 공유 블록 핸드셰이크, `
 | CM7 DTCM 256 KB | `0x3040_0000` | `0x2000_0000` | cm7 `DTCM` | `.data` `.bss` 힙 4K 스택 8K |
 | OCRAM2 앞 4 KB | `0x2050_0000` | `0x2050_0000` | cm33 · cm7 `SHARED` | `.shared` (`shared_t`) |
 | HyperRAM 앞 6 MB | `0x2800_0000` | `0x2800_0000` | cm7 `PSRAM` | `.psram_bss` (CM7 이 캐시, [27](27-hyperram.md)) |
-| HyperRAM 뒤 2 MB | `0x2860_0000` | `0x2860_0000` | cm33 `PSRAM` | `.psram_bss` (CM33 은 캐시 안 함) |
+| HyperRAM 뒤 2 MB | `0x2860_0000` | `0x2860_0000` | cm33 `PSRAM` | `.psram_bss` (CM33 도 캐시, [27](27-hyperram.md) 6절) |
 | OCRAM1, OCRAM2 나머지 | | | — | 미할당 |
 
 QSPI 의 앱 영역(`0x0404_0000`)과 데이터 영역(`0x04C0_0000`)은 파티션 계획만 있다([02](02-memory-map.md) 5절).
@@ -211,7 +211,7 @@ CM7 `SystemInit()` 이 `.data` 복사와 `.bss` 클리어 **전에** `BOARD_Earl
 - TCM 은 L1 캐시를 거치지 않는다. 3, 4 번은 Normal 속성만 준다.
 - QSPI 는 CM7 이 쓰지 않아 열지 않았다(2 번의 Device 로 남는다). HyperRAM 은 로드맵 27 에서 8 번으로 열었다. CM7 이 캐시하므로 CM33 과 주고받을 때는 캐시를 다뤄야 한다([27](27-hyperram.md) 4절).
 - MPU 영역은 크기가 2^N 이고 주소가 크기의 배수여야 한다. `shared.h` 에 `SHARED_BLOCK_SIZE`(4 KB)를 두고 `_Static_assert` 로 막았다.
-- CM33 쪽은 손대지 않았다. CM33 `SystemInit()` 은 코드 버스 캐시(`XCACHE_PC`)만 켜고, 시스템 버스 캐시(`XCACHE_PS`)는 꺼져 있다(`0x5440_0800` = 0). OCRAM2 는 시스템 버스라 CM33 은 공유 블록을 캐시하지 않는다. `XCACHE_PS` 를 켜게 되면 CM33 MPU 도 같은 구간을 non-cacheable 로 잡아야 한다.
+- 이때 CM33 쪽은 손대지 않았다. CM33 `SystemInit()` 은 코드 버스 캐시(`XCACHE_PC`)만 켜고, 시스템 버스 캐시(`XCACHE_PS`)는 꺼져 있었다(`0x5440_0800` = 0). 로드맵 27 에서 CM33 MPU 로 OCRAM 과 CM7 TCM alias 를 non-cacheable 로 잡은 뒤 `XCACHE_PS` 를 켰다([27](27-hyperram.md) 6절).
 
 ### 확인
 
