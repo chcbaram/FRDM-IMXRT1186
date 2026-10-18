@@ -33,6 +33,7 @@ extern "C" {
 #define SHARED_CM7_TCM_ADDR     0x303C0000UL      // CM33 에서 본 CM7 ITCM (Secure alias)
 
 #define SHARED_BLOCK_ADDR       0x20500000UL      // OCRAM2
+#define SHARED_BLOCK_SIZE       0x1000U           // 4 KB. CM7 MPU 가 이 구간을 non-cacheable 로 잡는다 (2^N, 주소는 크기 배수)
 #define SHARED_MAGIC            0x48535452UL      // "RTSH"
 #define SHARED_VERSION          1
 
