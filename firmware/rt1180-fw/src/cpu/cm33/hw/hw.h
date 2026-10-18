@@ -21,6 +21,7 @@ extern "C" {
 #include "cli.h"
 #include "log.h"
 #include "hw_info.h"
+#include "osal/thread.h"
 
 
 bool hwInit(void);

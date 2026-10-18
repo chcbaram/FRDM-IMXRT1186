@@ -37,30 +37,8 @@ bool hwInfoInit(void)
 }
 
 
+
 #if CLI_USE(HW_INFO)
-void cliHwInfo(cli_args_t *args)
-{
-  bool ret = false;
-
-  if (args->argc == 1 && args->isStr(0, "boot"))
-  {
-    hwInfoShowBoot();
-    ret = true;
-  }
-
-  if (args->argc == 1 && args->isStr(0, "clock"))
-  {
-    hwInfoShowClock();
-    ret = true;
-  }
-
-  if (ret == false)
-  {
-    cliPrintf("hwinfo boot\n");
-    cliPrintf("hwinfo clock\n");
-  }
-}
-
 /*
  * 부팅 관련 상태를 실행 중에 읽는다. docs/01-boot-sequence.md 의 표와 같은 값이다.
  */
@@ -135,6 +113,32 @@ static const char *bootModeStr(uint32_t mode)
     "FlexSPI NOR", "FlexSPI NAND 2K", "Infinite Loop", "Test",
   };
   return str[mode & 0x07];
+}
+#endif
+
+
+#if CLI_USE(HW_INFO)
+void cliHwInfo(cli_args_t *args)
+{
+  bool ret = false;
+
+  if (args->argc == 1 && args->isStr(0, "boot"))
+  {
+    hwInfoShowBoot();
+    ret = true;
+  }
+
+  if (args->argc == 1 && args->isStr(0, "clock"))
+  {
+    hwInfoShowClock();
+    ret = true;
+  }
+
+  if (ret == false)
+  {
+    cliPrintf("hwinfo boot\n");
+    cliPrintf("hwinfo clock\n");
+  }
 }
 #endif
 

@@ -11,7 +11,7 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 | 펌웨어 | `firmware/rt1180-fw` — CM33 **LED · UART(LPUART1) · CLI · 로그 · 240 MHz · 버튼 · swtimer · RTC · reset** + **CM7 기동** (792 MHz) |
 | 부팅 | QSPI(W25Q128, FlexSPI2) XIP · 서명 없는 컨테이너 · 부트 헤더 직접 생성 |
 | 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `hwinfo clock` 로 CCM 실측 ([22](22-clock.md)) |
-| SDK | MCUXpresso SDK 에서 158개 파일만, 커밋 SHA 고정 ([11](11-sdk-vendoring.md)) |
+| SDK | MCUXpresso SDK · FreeRTOS-Kernel 에서 193개 파일만, 커밋/태그 고정 ([11](11-sdk-vendoring.md)) |
 | 빌드 | FLASH 44,360 B / 211 KB · DTCM 18,792 B / 128 KB |
 | 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `hwinfo boot` 로 부트 모드/퓨즈/클럭 확인 |
 | CM7 | **기동 확인** — ELE kick-off, ITCM 실행, 공유 블록 핸드셰이크 ([25](25-cm7-boot.md)). `-DBUILD_CM7=ON` |
@@ -33,7 +33,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **28 FreeRTOS** (코어 간 doorbell → 세마포어, CM7 틱) → **29 모듈** (`cmd_task` 를 `MODULE_DEF` 로)
+1. **28 CM7 FreeRTOS** (`ARM_CM4F` 포트, doorbell → 세마포어로 cmd 태스크 깨우기) → **29 event** · 버튼 스레드
 3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절)
 
 ### 미해결 과제
@@ -93,8 +93,8 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [25](25-cm7-boot.md) | **CM7 기동** — QSPI 슬롯 → ITCM 복사, ELE kick-off, 792 MHz, 공유 블록 핸드셰이크 | ✅ (25b 까지 완료: CM7 디버그 · 캐시/MPU · MU · 코어 간 cmd 패킷 · 전원 재인가) |
 | [26](26-qspi-nor.md) | **QSPI NOR** — XIP 로 돌면서 ROM API 로 지우기/쓰기, `qspi` CLI, 섹터 46 ms · 쓰기 4 KB 10.7 ms · 읽기 28.5 MB/s | ✅ |
 | [27](27-hyperram.md) | **HyperRAM 8 MB** — XMCD 로 ROM 이 설정, `psram test` 8 MB OK, CM7 캐시 규칙 | ✅ |
-| 28 | FreeRTOS | 예정 |
-| 29 | 로그 / 모듈 / 이벤트 | 예정 |
+| [28](28-freertos.md) | **FreeRTOS (CM33)** — V11.1.0 `ARM_CM33_NTZ` (Secure only), main 스레드 구조, `thread info/cpu` | ✅ (CM7 남음) |
+| 29 | 로그 / 모듈 / 이벤트 — `module` 은 28 에서 먼저 들였다 (cmd 가 첫 모듈) | 일부 |
 | 30~33 | USB(tinyusb CDC) · CAN-FD · I2C · SPI | 예정 |
 | 40 | 부트 아키텍처 — 부트로더/앱 분리, 파티션 확정, 진입 조건 (24 의 부트 모드 플래그 · 더블클릭) | 예정 |
 | 41 | 부트로더 골격 — `firmware/rt1180-boot`, 컨테이너 load = ITCM (non-XIP) | 예정 |

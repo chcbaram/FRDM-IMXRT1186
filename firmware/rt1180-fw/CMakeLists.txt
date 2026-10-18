@@ -34,6 +34,7 @@ option(BUILD_CM7 "build Cortex-M7 image" OFF)
 set(SHARED_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(NXP_DIR       ${SHARED_DIR}/lib/nxp)
 set(NXP_DEV_DIR   ${NXP_DIR}/devices/MIMXRT1186)
+set(FREERTOS_DIR  ${SHARED_DIR}/lib/freertos)
 
 file(GLOB_RECURSE SHARED_SRC_FILES CONFIGURE_DEPENDS
   ${SHARED_DIR}/common/*.c
@@ -69,6 +70,18 @@ set(NXP_SRC_FILES
   ${NXP_DIR}/drivers/fsl_pwm.c
   ${NXP_DIR}/drivers/fsl_mu.c
   ${NXP_DIR}/drivers/fsl_romapi.c
+  )
+
+# FreeRTOS 커널 (docs/28). 포트는 코어마다 다르므로 각 코어 CMakeLists 가 더한다.
+#
+set(FREERTOS_SRC_FILES
+  ${FREERTOS_DIR}/tasks.c
+  ${FREERTOS_DIR}/queue.c
+  ${FREERTOS_DIR}/list.c
+  ${FREERTOS_DIR}/timers.c
+  ${FREERTOS_DIR}/event_groups.c
+  ${FREERTOS_DIR}/stream_buffer.c
+  ${FREERTOS_DIR}/portable/MemMang/heap_4.c
   )
 
 

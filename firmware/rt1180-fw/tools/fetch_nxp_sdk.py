@@ -28,6 +28,7 @@ REPOS = {
     'core':     ('nxp-mcuxpresso/mcuxsdk-core',     'c6f4223f45fdab59509f25ee3ea63a71bd29d8aa'),
     'examples': ('nxp-mcuxpresso/mcuxsdk-examples', '3151bc057b8924db54c7395d39b213c05ab94dc3'),
     'cmsis':    ('ARM-software/CMSIS_6',            'v6.4.0'),
+    'freertos': ('FreeRTOS/FreeRTOS-Kernel',        'V11.1.0'),
 }
 
 DEV = 'RT1180/MIMXRT1186'
@@ -80,6 +81,21 @@ FILES = [
                  'nxp/boards/frdmimxrt1186/frdmimxrt1186_flexspi_nor_config.h'),
     ('examples', '_boards/frdmimxrt1186/xip/frdmimxrt1186_flexspi_nor_config.c',
                  'nxp/boards/frdmimxrt1186/frdmimxrt1186_flexspi_nor_config.c.ref'),
+
+    #-- FreeRTOS 커널 (CM33, docs/28). TrustZone 을 쓰지 않으므로 ARM_CM33_NTZ 포트, 힙은 heap_4
+    *[('freertos', f, f'freertos/{f}') for f in [
+        'tasks.c', 'queue.c', 'list.c', 'timers.c', 'event_groups.c', 'stream_buffer.c', 'LICENSE.md',
+        'portable/MemMang/heap_4.c',
+        *[f'include/{h}' for h in [
+            'FreeRTOS.h', 'StackMacros.h', 'atomic.h', 'croutine.h', 'deprecated_definitions.h',
+            'event_groups.h', 'list.h', 'message_buffer.h', 'mpu_prototypes.h', 'mpu_syscall_numbers.h',
+            'mpu_wrappers.h', 'newlib-freertos.h', 'picolibc-freertos.h', 'portable.h', 'projdefs.h',
+            'queue.h', 'semphr.h', 'stack_macros.h', 'stream_buffer.h', 'task.h', 'timers.h',
+        ]],
+        *[f'portable/GCC/ARM_CM33_NTZ/non_secure/{f}' for f in [
+            'port.c', 'portasm.c', 'portasm.h', 'portmacro.h', 'portmacrocommon.h', 'mpu_wrappers_v2_asm.c',
+        ]],
+    ]],
 ]
 
 #-- 주변장치 레지스터 헤더는 디바이스 헤더가 전부 include 하므로 통째로 받는다.

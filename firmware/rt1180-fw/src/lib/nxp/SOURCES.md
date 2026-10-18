@@ -8,6 +8,7 @@
 | nxp-mcuxpresso/mcuxsdk-core | `c6f4223f45fdab59509f25ee3ea63a71bd29d8aa` |
 | nxp-mcuxpresso/mcuxsdk-examples | `3151bc057b8924db54c7395d39b213c05ab94dc3` |
 | ARM-software/CMSIS_6 | `v6.4.0` |
+| FreeRTOS/FreeRTOS-Kernel | `V11.1.0` |
 
 | 저장 경로 (src/lib 기준) | 저장소 | 원본 경로 | sha256 앞 12자 |
 |---|---|---|---|
@@ -24,6 +25,41 @@
 | `cmsis/Core/Include/m-profile/cmsis_gcc_m.h` | ARM-software/CMSIS_6 | `CMSIS/Core/Include/m-profile/cmsis_gcc_m.h` | `56241ce5b479` |
 | `cmsis/Core/Include/tz_context.h` | ARM-software/CMSIS_6 | `CMSIS/Core/Include/tz_context.h` | `2bcc2a5fea05` |
 | `cmsis/LICENSE` | ARM-software/CMSIS_6 | `LICENSE` | `b40930bbcf80` |
+| `freertos/LICENSE.md` | FreeRTOS/FreeRTOS-Kernel | `LICENSE.md` | `508a77d2e7b5` |
+| `freertos/event_groups.c` | FreeRTOS/FreeRTOS-Kernel | `event_groups.c` | `b163f5ccf86f` |
+| `freertos/include/FreeRTOS.h` | FreeRTOS/FreeRTOS-Kernel | `include/FreeRTOS.h` | `189d9626143b` |
+| `freertos/include/StackMacros.h` | FreeRTOS/FreeRTOS-Kernel | `include/StackMacros.h` | `129a0acee3ad` |
+| `freertos/include/atomic.h` | FreeRTOS/FreeRTOS-Kernel | `include/atomic.h` | `499c8e2d4ade` |
+| `freertos/include/croutine.h` | FreeRTOS/FreeRTOS-Kernel | `include/croutine.h` | `2bb704db1951` |
+| `freertos/include/deprecated_definitions.h` | FreeRTOS/FreeRTOS-Kernel | `include/deprecated_definitions.h` | `157c9b113297` |
+| `freertos/include/event_groups.h` | FreeRTOS/FreeRTOS-Kernel | `include/event_groups.h` | `fb936e87b90f` |
+| `freertos/include/list.h` | FreeRTOS/FreeRTOS-Kernel | `include/list.h` | `e18c1bd8dffd` |
+| `freertos/include/message_buffer.h` | FreeRTOS/FreeRTOS-Kernel | `include/message_buffer.h` | `e9a981c053ca` |
+| `freertos/include/mpu_prototypes.h` | FreeRTOS/FreeRTOS-Kernel | `include/mpu_prototypes.h` | `c2e3bb81be1b` |
+| `freertos/include/mpu_syscall_numbers.h` | FreeRTOS/FreeRTOS-Kernel | `include/mpu_syscall_numbers.h` | `6701d2eac55e` |
+| `freertos/include/mpu_wrappers.h` | FreeRTOS/FreeRTOS-Kernel | `include/mpu_wrappers.h` | `b2dd748823dc` |
+| `freertos/include/newlib-freertos.h` | FreeRTOS/FreeRTOS-Kernel | `include/newlib-freertos.h` | `fe93d3f7609f` |
+| `freertos/include/picolibc-freertos.h` | FreeRTOS/FreeRTOS-Kernel | `include/picolibc-freertos.h` | `7c0640a34b31` |
+| `freertos/include/portable.h` | FreeRTOS/FreeRTOS-Kernel | `include/portable.h` | `973c26ded2da` |
+| `freertos/include/projdefs.h` | FreeRTOS/FreeRTOS-Kernel | `include/projdefs.h` | `05308062697b` |
+| `freertos/include/queue.h` | FreeRTOS/FreeRTOS-Kernel | `include/queue.h` | `acaf6a17c7eb` |
+| `freertos/include/semphr.h` | FreeRTOS/FreeRTOS-Kernel | `include/semphr.h` | `454fae279911` |
+| `freertos/include/stack_macros.h` | FreeRTOS/FreeRTOS-Kernel | `include/stack_macros.h` | `022a341340ee` |
+| `freertos/include/stream_buffer.h` | FreeRTOS/FreeRTOS-Kernel | `include/stream_buffer.h` | `7c9b13d0f5c5` |
+| `freertos/include/task.h` | FreeRTOS/FreeRTOS-Kernel | `include/task.h` | `f3a76f99198a` |
+| `freertos/include/timers.h` | FreeRTOS/FreeRTOS-Kernel | `include/timers.h` | `14c35d683003` |
+| `freertos/list.c` | FreeRTOS/FreeRTOS-Kernel | `list.c` | `e0a4d7a061e8` |
+| `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c` | `620a82d24782` |
+| `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/port.c` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/port.c` | `0896f3232a77` |
+| `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c` | `524ffdb51442` |
+| `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.h` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/portasm.h` | `60b8c74c7c73` |
+| `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portmacro.h` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/portmacro.h` | `b6e07a01d7b0` |
+| `freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portmacrocommon.h` | FreeRTOS/FreeRTOS-Kernel | `portable/GCC/ARM_CM33_NTZ/non_secure/portmacrocommon.h` | `d6874ec28d30` |
+| `freertos/portable/MemMang/heap_4.c` | FreeRTOS/FreeRTOS-Kernel | `portable/MemMang/heap_4.c` | `8f7516b63745` |
+| `freertos/queue.c` | FreeRTOS/FreeRTOS-Kernel | `queue.c` | `e66b73eb6dd7` |
+| `freertos/stream_buffer.c` | FreeRTOS/FreeRTOS-Kernel | `stream_buffer.c` | `f2041618919a` |
+| `freertos/tasks.c` | FreeRTOS/FreeRTOS-Kernel | `tasks.c` | `6a5488376544` |
+| `freertos/timers.c` | FreeRTOS/FreeRTOS-Kernel | `timers.c` | `7f91da3b5755` |
 | `nxp/boards/frdmimxrt1186/frdmimxrt1186_flexspi_nor_config.c.ref` | nxp-mcuxpresso/mcuxsdk-examples | `_boards/frdmimxrt1186/xip/frdmimxrt1186_flexspi_nor_config.c` | `827c54f2d5d3` |
 | `nxp/boards/frdmimxrt1186/frdmimxrt1186_flexspi_nor_config.h` | nxp-mcuxpresso/mcuxsdk-examples | `_boards/frdmimxrt1186/xip/frdmimxrt1186_flexspi_nor_config.h` | `81191bea3585` |
 | `nxp/devices/MIMXRT1186/MIMXRT1186_cm33.h` | nxp-mcuxpresso/mcux-devices-rt | `RT1180/MIMXRT1186/MIMXRT1186_cm33.h` | `896e945fb607` |

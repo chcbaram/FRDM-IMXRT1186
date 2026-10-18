@@ -8,6 +8,7 @@ extern "C" {
 #include "def.h"
 #include "fsl_device_registers.h"
 #include <assert.h>
+#include "rtos.h"
 
 
 bool bspInit(void);

@@ -30,6 +30,15 @@ set(NXP_CORE_FILES
   ${NXP_DEV_DIR}/system_MIMXRT1186_cm33.c
   )
 
+# FreeRTOS 포트 : TrustZone 없이 Secure 로만 돈다 (bsp/rtos/FreeRTOSConfig.h)
+#
+set(FREERTOS_PORT_DIR ${FREERTOS_DIR}/portable/GCC/ARM_CM33_NTZ/non_secure)
+set(FREERTOS_CORE_FILES
+  ${FREERTOS_SRC_FILES}
+  ${FREERTOS_PORT_DIR}/port.c
+  ${FREERTOS_PORT_DIR}/portasm.c
+  )
+
 
 add_executable(${EXECUTABLE}
   ${SRC_FILES}
@@ -37,6 +46,7 @@ add_executable(${EXECUTABLE}
   ${SHARED_SRC_FILES}
   ${NXP_SRC_FILES}
   ${NXP_CORE_FILES}
+  ${FREERTOS_CORE_FILES}
   )
 
 
@@ -53,10 +63,13 @@ target_include_directories(${EXECUTABLE} PRIVATE
   ${CORE_DIR}/ap/modules
   ${CORE_DIR}/ap/modules/cmd
   ${CORE_DIR}/bsp
+  ${CORE_DIR}/bsp/rtos
   ${CORE_DIR}/hw
   ${CORE_DIR}/hw/driver
 
   ${SHARED_INC_DIRS}
+  ${FREERTOS_DIR}/include
+  ${FREERTOS_PORT_DIR}
   )
 
 target_compile_definitions(${EXECUTABLE} PRIVATE
@@ -98,6 +111,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
 set_source_files_properties(
   ${NXP_SRC_FILES}
   ${NXP_CORE_FILES}
+  ${FREERTOS_CORE_FILES}
   TARGET_DIRECTORY ${EXECUTABLE}
   PROPERTIES
     COMPILE_OPTIONS "-Os;-w"

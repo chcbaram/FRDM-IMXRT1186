@@ -31,8 +31,9 @@ firmware/rt1180-fw/
     │   ├── cm33/               부트 코어
     │   │   ├── main.c          bspInit → hwInit → apInit → apMain
     │   │   ├── ap/             애플리케이션. 벤더 금지
-    │   │   │   └── modules/cmd/ cmd_task.c · driver/drv_ipc.c · process/cmd_peer.c (N657X0 와 같은 배치)
-    │   │   ├── bsp/            bsp.c (SysTick, delay, millis), syscalls.c
+    │   │   │   └── modules/    module.c (MODULE_DEF) · cmd/ cmd_task.c · driver/drv_ipc.c · process/cmd_peer.c (N657X0 와 같은 배치)
+    │   │   ├── bsp/            bsp.c (delay, millis, micros), mpu.c, clock.c, syscalls.c
+    │   │   │   ├── rtos/       FreeRTOSConfig.h, rtos.c (훅) — docs/28
     │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너
     │   │   │   └── ldscript/   rt1180-fw-cm33.ld
     │   │   └── hw/             hw.c (초기화 순서, 배너), hw_def.h (_USE_HW_*), driver/ led · pwm · uart · cli · log · hw_info …
@@ -40,6 +41,7 @@ firmware/rt1180-fw/
     │   └── shared/             코어 간 규약 shared.h — 이미지 헤더, 공유 블록, 메시지 id, 링, cmd 번호
     └── lib/
         ├── cmsis/              CMSIS 6 Core
+        ├── freertos/           FreeRTOS-Kernel V11.1.0 (커널 · CM33 NTZ 포트 · heap_4)
         └── nxp/                SDK 에서 골라 온 것 (SOURCES.md)
 ```
 
