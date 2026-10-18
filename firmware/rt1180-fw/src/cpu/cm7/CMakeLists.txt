@@ -57,7 +57,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
   ${CORE_DIR}
   ${CORE_DIR}/ap
   ${CORE_DIR}/ap/modules
-  ${CORE_DIR}/ap/modules/cmd
+  ${CORE_DIR}/ap/modules/common/cmd
   ${CORE_DIR}/bsp
   ${CORE_DIR}/bsp/rtos
   ${CORE_DIR}/hw
@@ -122,13 +122,13 @@ target_link_options(${EXECUTABLE} PRIVATE
 
 
 # .elf -> .bin -> .img (헤더 추가)
-#   bin 은 ITCM 0x0 부터 .data 초기값까지 한 덩어리다. NOLOAD 인 .shared 는 빠진다.
+#   bin 은 ITCM 0x0 부터 .data 초기값까지 한 덩어리다. NOLOAD 인 .shared · .psram_bss · .bss 는
+#   원래 빠진다. 섹션을 -j 로 고르지 않는다. 예전에는 골랐는데 .module 을 더하면서 목록에서
+#   빠져 모듈 디스크립터가 0 으로 들어갔다 (docs/28). 크기는 링커의 __image_end ASSERT 가 지킨다.
 #
 add_custom_command(TARGET ${EXECUTABLE}
   POST_BUILD
   COMMAND ${CMAKE_OBJCOPY} ARGS -O binary
-          -j .interrupts -j .text -j .ARM.extab -j .ARM -j .preinit_array
-          -j .init_array -j .fini_array -j .data
           $<TARGET_FILE:${EXECUTABLE}>
           ${CORE_OUT}/${PRJ_NAME}-${CORE_NAME}.bin
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/mkcm7img.py

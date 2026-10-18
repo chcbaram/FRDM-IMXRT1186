@@ -37,7 +37,7 @@ firmware/rt1180-fw/
     │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너
     │   │   │   └── ldscript/   rt1180-fw-cm33.ld
     │   │   └── hw/             hw.c (초기화 순서, 배너), hw_def.h (_USE_HW_*), driver/ led · pwm · uart · cli · log · hw_info …
-    │   ├── cm7/                CM7 (로드맵 25). 같은 ap/bsp/hw 구조
+    │   ├── cm7/                CM7 (로드맵 25). 같은 ap/bsp/hw 구조 — modules/common/cmd, osal/thread, log (버퍼만)
     │   └── shared/             코어 간 규약 shared.h — 이미지 헤더, 공유 블록, 메시지 id, 링, cmd 번호
     └── lib/
         ├── cmsis/              CMSIS 6 Core

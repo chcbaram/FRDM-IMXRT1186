@@ -96,10 +96,35 @@ main()
 | 핸들러 | 포트 이름(`vPortSVCHandler` · `xPortPendSVHandler` · `xPortSysTickHandler`)을 `FreeRTOSConfig.h` 에서 벡터 이름으로 바꾼다 |
 | 우선순위 | NVIC 4 bit (0~15). `FromISR` 는 2 이상. MU 는 5 |
 | 힙 | 32 KB (DTCM, heap_4) |
-| 구조 | CM33 과 같은 main 스레드. 그 위에 **cmd 스레드**(pri 3, 4 KB) |
+| 구조 | CM33 과 같은 main 스레드 · `module` · `thread`. cmd 모듈이 **cmd 스레드**(pri 3, 4 KB)를 등록한다 |
 | 훅 | CM7 에는 로그가 없다. 디버거가 붙어 있으면 BKPT, 아니면 멈춘다. CM33 은 alive 가 멈춘 것으로 안다 |
 
-CM7 은 아직 `module` · `thread` 를 들이지 않았다. 두 파일이 `logPrintf` · `cliAdd` 를 쓰는데 CM7 에는 로그 · CLI 드라이버가 없다. CM7 로그 경로(예: IPC 로 CM33 에 보내기)가 생기면 같은 구조로 맞춘다.
+### CM7 도 module 구조 — 로그는 CM33 이 가져간다
+
+`module.c` · `osal/thread.c` 는 CM33 것을 그대로 쓴다. 두 파일은 `logPrintf()` 와 `cliAdd()` 를 쓰는데, `cliAdd()` 는 `CLI_USE()` 안에 있어 CM7(CLI 없음)에서는 빠진다. 로그만 있으면 됐다.
+
+| 파일 (CM7) | 내용 |
+|---|---|
+| `hw/driver/log.c` | 새로 만들었다. 공통 `log.h` API 그대로. `logPrintf()` 가 DTCM 버퍼(2 KB)에 쌓기만 한다 |
+| `ap/modules/module.{h,c}` · `hw/driver/osal/thread.c` | CM33 것 그대로 |
+| `ap/modules/common/cmd/` | CM33 과 같은 자리로 옮겼다. `MODULE_DEF(cmd)` 의 `init()` 이 cmd 스레드를 `threadCreate()` 로 등록한다 |
+| `hw/hw.h` | `cli.h` 를 include 한다 — `CLI_USE()` 매크로만 쓴다 |
+| 링커 | `.module` 섹션 (ITCM) |
+
+CM33 의 `peer log` 가 cmd 명령 `SHARED_CMD_PEER_LOG`(offset → 256 B 씩)로 그 버퍼를 가져와 찍는다. 공통 `log.h` 에 `logReadBoot()` 를 더했다(상대 코어 쪽 구현).
+
+```
+cli# peer log
+[ CM7 Firmware Begin... ]
+Booting..Clock 		: 792 MHz
+[OK] psramInit()
+[OK] moduleInit()
+     count : 1
+     cmd              OK
+[  ] Thread Started : cmd
+```
+
+**걸렸던 것: `.module` 이 이미지에 들어가지 않았다.** 처음엔 `peer log` 가 시간 초과였고 CM7 링의 1023 B 가 읽히지 않고 쌓였다. 디버거로 CM7 로그 버퍼를 읽으니 `[E_] moduleInit()`, 모듈 이름이 빈칸이었다. ITCM 의 `.module` 자리(`0x5CEC`)가 0 이었다. CM7 CMake 가 `objcopy -O binary` 에 섹션을 `-j` 로 하나씩 골라 넣는데 `.module` 이 목록에 없어서, bin 에서 그 자리가 0 으로 채워졌다. `-j` 없이 만든 bin 이 바이트까지 같은 것을 확인하고 목록을 없앴다. NOLOAD 섹션은 원래 빠지고, 크기는 링커의 `__image_end` ASSERT 가 지킨다.
 
 ### cmd 가 이벤트로 깨어난다
 
@@ -131,6 +156,6 @@ CM33 ipcStreamWrite → 링 m2p → MU GP0 ─IRQ→ CM7 MU1_IRQHandler
 ## 6. 다음
 
 - [x] **CM7 FreeRTOS** — 5절
-- [ ] CM7 에 `module` · `thread` (로그 경로가 생긴 뒤)
+- [x] CM7 에 `module` · `thread` — 5절. 로그는 CM33 의 `peer log` 로 본다
 - [ ] 버튼을 1 ms 스레드로 (원본과 같이)
 - [ ] event 모듈 (`eventPub` / `eventSub`, titan-mini · N657X0)

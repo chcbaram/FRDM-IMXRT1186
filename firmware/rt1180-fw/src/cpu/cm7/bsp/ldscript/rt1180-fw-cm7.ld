@@ -81,6 +81,16 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } > ITCM
 
+  /* 모듈 등록 테이블 (CM33 과 같은 MODULE_DEF 구조, docs/28) */
+  .module :
+  {
+    . = ALIGN(4);
+    _smodule = .;
+    KEEP (*(.module))
+    KEEP (*(.module*))
+    _emodule = .;
+  } > ITCM
+
   __etext = .;
 
   __data_flash_start = .;

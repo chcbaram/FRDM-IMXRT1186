@@ -17,6 +17,14 @@
 #define _USE_HW_RTOS
 #define _USE_HW_PSRAM
 
+#define _USE_HW_THREAD
+#define      HW_THREAD_MAX_CNT      4
+
+#define _USE_HW_LOG
+#define      HW_LOG_CH              0
+#define      HW_LOG_BOOT_BUF_MAX    2048
+#define      HW_LOG_LIST_BUF_MAX    0
+
 #define _USE_HW_IPC
 #define      HW_IPC_MSG_Q_MAX       16
 

@@ -72,6 +72,23 @@ bool cmdPeerProcess(cmd_t *p_cmd)
       break;
 #endif
 
+    case SHARED_CMD_PEER_LOG:
+      if (p_packet->length == 4)
+      {
+        static uint8_t log_buf[256];
+        uint32_t       offset;
+        uint32_t       n;
+
+        memcpy(&offset, p_packet->data, 4);
+        n = logReadBoot(offset, log_buf, sizeof(log_buf));
+        cmdSendResp(p_cmd, p_packet->cmd, CMD_OK, log_buf, n);
+      }
+      else
+      {
+        cmdSendResp(p_cmd, p_packet->cmd, ERR_CMD_MAX_LENGTH, NULL, 0);
+      }
+      break;
+
     default:
       cmdSendResp(p_cmd, p_packet->cmd, ERR_CMD_NO_CMD, NULL, 0);
       break;

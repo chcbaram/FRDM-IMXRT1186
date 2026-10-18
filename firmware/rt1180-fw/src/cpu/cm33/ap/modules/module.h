@@ -51,7 +51,7 @@ typedef struct
  * 목록을 따로 관리할 필요가 없다.
  *
  * const + used 라 링커가 지우지 않고 .module 섹션에 모인다 (bsp/ldscript 의 .module).
- * 섹션은 QSPI(XIP) 에 있다. 읽기만 하므로 RAM 으로 복사할 것이 없다.
+ * 섹션은 CM33 에서는 QSPI(XIP), CM7 에서는 ITCM 에 있다. 읽기만 하므로 복사할 것이 없다.
  */
 #define MODULE_DEF(x_name) \
   static const __attribute__((section(".module"), used)) module_t module_##x_name =

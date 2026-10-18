@@ -322,7 +322,7 @@ GP 인터럽트는 데이터 없이 비트만 세운다. 이미 서 있으면 �
 | 패킷 | `common/hw/src/cmd.c` | STX `02 FD`, type, cmd, err, len, data, checksum. **두 코어가 같은 파일** (벤더 코드 없음) |
 | 스트림 | `hw/driver/ipc.c` | `ipcStreamWrite/Read/Available/Flush` — 공유 링 버퍼 + MU GP0 |
 
-배치는 N657X0 의 `ap/modules/cmd/{cmd_task, driver, process}` 와 같다. CM33 은 로드맵 28 에서 모듈 구조(`MODULE_DEF`)를 들이면서 cli 와 함께 `ap/modules/common/cmd` 로 옮겼다([28](28-freertos.md)). CM7 은 아직 `ap/modules/cmd` 이고 `ap.c` 가 `cmdTaskInit()` / `cmdTaskUpdate()` 를 부른다.
+배치는 N657X0 의 `ap/modules/cmd/{cmd_task, driver, process}` 와 같다. CM33 은 로드맵 28 에서 모듈 구조(`MODULE_DEF`)를 들이면서 cli 와 함께 `ap/modules/common/cmd` 로 옮겼다([28](28-freertos.md)). CM7 도 로드맵 28 에서 같은 자리(`ap/modules/common/cmd`)와 모듈 구조로 맞췄다.
 
 ### 스트림 (`shared.h` 4절)
 

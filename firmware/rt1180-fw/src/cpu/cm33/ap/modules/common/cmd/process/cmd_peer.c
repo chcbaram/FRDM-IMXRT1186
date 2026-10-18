@@ -69,6 +69,31 @@ void cliPeer(cli_args_t *args)
     ret = true;
   }
 
+  if (args->argc == 1 && args->isStr(0, "log"))
+  {
+    //-- CM7 의 부팅 로그를 256 B 씩 가져와 그대로 찍는다 (CM7 hw/driver/log.c)
+    cmd_packet_t *p_packet = &p_cmd->packet;
+    uint32_t      offset   = 0;
+
+    while (1)
+    {
+      cmdSendCmdRxResp(p_cmd, SHARED_CMD_PEER_LOG, (uint8_t *)&offset, 4, CMD_PEER_RESP_TIMEOUT);
+      if (p_packet->err_code != CMD_OK || p_packet->type != PKT_TYPE_RESP)
+      {
+        cliPrintf("E_ err 0x%04X\n", p_packet->err_code);
+        break;
+      }
+      if (p_packet->length == 0)
+        break;
+      for (uint32_t i = 0; i < p_packet->length; i++)
+      {
+        cliPutch(p_packet->data[i]);
+      }
+      offset += p_packet->length;
+    }
+    ret = true;
+  }
+
   if (args->argc == 1 && args->isStr(0, "cpu"))
   {
     //-- CM7 의 idle 비율. 1 초 간격으로 두 번 받아 런타임 카운터 차이로 구한다.
@@ -185,6 +210,7 @@ void cliPeer(cli_args_t *args)
     cliPrintf("peer info\n");
     cliPrintf("peer read addr        (CM7 이 읽는다)\n");
     cliPrintf("peer cpu              (CM7 idle 비율, 1 초)\n");
+    cliPrintf("peer log              (CM7 부팅 로그)\n");
     cliPrintf("peer echo 0~%d [count]\n", CMD_MAX_DATA_LENGTH);
   }
 
