@@ -52,12 +52,14 @@ python3 tools/download.py my.bin --target data --offset 0x10000
 |---|---|
 | `--target fw\|cm7\|data` | 기본 `fw`. `boot` 는 없다 (6절) |
 | `--baud B` | 전송 보율. 기본 4000000, `0` 이면 115200 그대로 |
-| `--port P` | 없으면 MCU-Link(VID 0x1FC9, PID 0x0143)를 찾는다. 맥에 다른 보드가 붙어 있어도 고르지 않는다 |
+| `--port P` | 없거나 `auto` 면 MCU-Link(VID 0x1FC9, PID 0x0143)를 찾는다. 맥에 다른 보드가 붙어 있어도 고르지 않는다 |
+| `--list` | 시리얼 포트 목록. `*` 가 `auto` 가 고르는 포트 |
 | `--no-reset` | 끝난 뒤 앱으로 점프하지 않는다 (부트로더에 머문다) |
 | `--no-baram` | baram-term 이 포트를 쥐고 있어도 놓게 하지 않는다 |
 
 - `fw` 는 **TAG 를 붙이지 않은 bin** 을 보낸다. TAG 는 부트로더가 쓴다. (probe-rs 기록은 `-tag.bin`, [42](42-app-jump.md) 5절)
 - pyserial 이 필요하다.
+- VSCode 태스크 `download-cm33` · `download-cm7` 은 포트를 Firmware Task Manager 확장(`baram-dev.firmware-task-manager`)의 시리얼 포트 선택(`firmware-task.pickSerialPort`)으로 고른다. 확장이 태스크마다 마지막 포트를 기억한다. 포트 목록과 `auto` 가 고르는 포트는 태스크 `download-list`.
 
 ## 3. 같은 UART 에서 CLI 와 cmd 를 나눈다
 
@@ -129,12 +131,13 @@ RT1180 ROM 의 이중 이미지 부팅(컨테이너 두 벌)은 48 에서 조사
 | 증상 | 원인 | 해결 |
 |---|---|---|
 | `--target cm7` 에 잘못된 파일을 준 뒤 다음 명령이 응답 없음(받은 49 B) | `download.py` 가 보율을 4 Mbps 로 바꾼 **뒤에** RMC7 헤더를 검사하고 끝났다. 보드는 3 초 동안 4 Mbps 에 남는다 | 헤더 검사를 보드에 붙기 전으로 옮겼다 |
+| VSCode 태스크에서 쓰기 84 % 에 `device reports readiness to read but returned no data` | 태스크의 PATH 에 Claude 플러그인 폴더가 없어 `baram-ctl` 을 못 찾았다. baram-term 이 포트를 놓지 않아 두 프로그램이 같은 포트를 읽었다 | `find_baram_ctl()` — PATH 의 `baram-ctl` · `baram-term ctl` → 플러그인의 `ctl.py` → `/Applications/baram-term.app` 순으로 찾는다 |
 | 수신 시험에서 앱도 다 받음 | 보드가 앞 시험 때문에 부트로더에 머물러 있었다 / 명령이 FIFO 보다 짧았다 | 앱으로 점프한 뒤, FIFO 보다 긴 명령으로 다시 |
 
 ## 9. 확인 필요
 
 - [ ] 6 Mbps (`--baud 6000000`) — MCU-Link VCOM 이 받는지. 4 Mbps 까지 확인
-- [ ] 전송 중 케이블을 뽑았을 때: TAG 가 지워진 채 부트로더에 머물고(no valid app), 다시 받으면 복구되는지
+- [x] 전송이 중간에 끊겼을 때 — 위 84 % 에서 끊긴 뒤 보드는 TAG 가 지워진 채(`[VER] 0 B`) 부트로더에 머물렀고, 다시 받아 복구됐다. 케이블을 뽑는 경우는 따로 확인하지 않았다
 - [ ] Windows · Linux 에서 포트 찾기 (`list_ports` 의 VID/PID)
 
 ## 10. 다음

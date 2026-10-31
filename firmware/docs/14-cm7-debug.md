@@ -76,7 +76,7 @@ CM33 은 리셋하면 ROM 이 QSPI 에서 바로 실행한다. 그래서 디버�
 
 CM7 은 다르다. CM7 이미지는 QSPI `0x0480_0000` 에 보관만 되어 있고, **CM33 펌웨어가 ITCM 으로 복사한 뒤 깨운다**([25-cm7-boot.md](25-cm7-boot.md) 4절). 디버거가 CM7 을 리셋해서 처음부터 돌릴 방법이 없다. 그래서 CM7 은 언제나 이 순서다.
 
-1. `flash` 태스크로 CM7 이미지(`.img` → `0x0480_0000`)와 CM33 elf 를 쓰고 리셋한다.
+1. `flash-all` 태스크로 CM7 이미지(`.img` → `0x0480_0000`)와 CM33 앱을 쓰고 리셋한다.
 2. CM33 이 부팅하면서 CM7 을 깨운다(약 10 ms).
 3. 디버거가 AP 2 로 **돌고 있는 CM7 에 붙는다(attach).**
 
@@ -109,7 +109,7 @@ arm-none-eabi-gdb build/cm7/rt1180-fw-cm7.elf -ex "target extended-remote :1337"
 
 | 구성 | 하는 일 |
 |---|---|
-| **Flash + Attach CM7** | `flash` 태스크(빌드 → CM7 이미지 · CM33 elf 기록 → 리셋) 후 CM7 에 붙는다 |
+| **Flash + Attach CM7** | `flash-all` 태스크(빌드 → CM7 이미지 · CM33 앱 기록 → 리셋) 후 CM7 에 붙는다 |
 | **Attach CM7** | 돌고 있는 CM7 에 그대로 붙는다 |
 
 ```json

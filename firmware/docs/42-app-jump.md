@@ -125,7 +125,7 @@ MPU · `XCACHE_PS` 는 부트로더가 켜지 않았으므로 되돌릴 것이 �
 
 ### 디버그 — 모두 attach 로
 
-elf 를 디버거가 직접 쓰면 앱 코드만 바뀌고 TAG 는 옛 것으로 남는다. 크기가 달라지면 부트로더가 옛 TAG 로 보고 머문다. 그래서 CM33 워크스페이스의 `Debug CM33`(launch)을 **`Flash + Attach CM33`** 으로 바꿨다. `flash` 태스크로 TAG 와 함께 쓰고 리셋한 뒤 붙는다. CM7 워크스페이스와 같은 방식이다.
+elf 를 디버거가 직접 쓰면 앱 코드만 바뀌고 TAG 는 옛 것으로 남는다. 크기가 달라지면 부트로더가 옛 TAG 로 보고 머문다. 그래서 CM33 워크스페이스의 `Debug CM33`(launch)을 **`Flash + Attach CM33`** 으로 바꿨다. `flash-all` 태스크로 TAG 와 함께 쓰고 리셋한 뒤 붙는다. CM7 워크스페이스와 같은 방식이다.
 
 앱 초기화를 처음부터 보려면 부트로더에 머물게 한 뒤 붙는다. 명령줄 gdb 로 확인했다.
 
@@ -182,7 +182,7 @@ mem 0x0ffc0000 0x10000000 ro      ← Code TCM : 이제 하드웨어 브레이�
 
 | 구성 | 순서 |
 |---|---|
-| **Flash + Debug CM33 (Cortex-Debug)** | `flash` 태스크 → `gdb-server` 태스크 → GDB 연결 → 메모리 맵 → `monitor reset halt` → `main` 에서 멈춤. 앱 구성은 ROM → 부트로더 → 점프 → **앱 `main`** 에서 멈춘다 |
+| **Flash + Debug CM33 (Cortex-Debug)** | `flash-all`(부트로더는 `flash-boot`) 태스크 → `gdb-server` 태스크 → GDB 연결 → 메모리 맵 → `monitor reset halt` → `main` 에서 멈춤. 앱 구성은 ROM → 부트로더 → 점프 → **앱 `main`** 에서 멈춘다 |
 | **Attach CM33 (Cortex-Debug)** | `gdb-server` → 연결 (리셋 없음) |
 | 끝낼 때 | `gdb-server-stop` 이 서버를 내린다. 서버가 프로브를 잡고 있으면 다음 `flash` 가 실패한다 |
 

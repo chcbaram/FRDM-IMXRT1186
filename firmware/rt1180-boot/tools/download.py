@@ -2,6 +2,7 @@
 """UART(MCU-Link VCOM) 로 앱 / CM7 / 데이터를 내려받는다. (macOS / Linux / Windows, docs/43)
 
   python3 tools/download.py [bin] [--target fw|cm7|data] [--offset N] [--port P] [--baud B]
+  python3 tools/download.py --list          # 시리얼 포트 목록 (* = auto 가 고르는 것)
 
   대상
     fw   : 앱 (기본 bin: ../rt1180-fw/build/cm33/rt1180-fw-cm33.bin). TAG 를 붙이지 않은 bin 이다.
@@ -39,6 +40,15 @@ CHUNK     = 1016                 # cmd 데이터 최대 1024 B - offset 4 B
 CM7_MAGIC = b"RMC7"
 
 
+def list_ports_print():
+  from serial.tools import list_ports
+  auto = find_port()
+  for p in sorted(list_ports.comports(), key=lambda p: p.device):
+    vid = f"{p.vid:04X}:{p.pid:04X}" if p.vid is not None else "----:----"
+    mark = "*" if p.device == auto else " "
+    print(f"{mark} {p.device:<36} {vid}  {p.product or p.description or ''}")
+
+
 def find_port():
   try:
     from serial.tools import list_ports
@@ -53,17 +63,38 @@ def find_port():
   return ports[0] if ports else None
 
 
+def find_baram_ctl():
+  """baram-term 제어(ctl) 명령을 찾는다. VSCode 태스크처럼 PATH 에 플러그인 폴더가 없어도 찾게 한다."""
+  for name, extra in (("baram-ctl", []), ("baram-term", ["ctl"])):
+    path = shutil.which(name)
+    if path:
+      return [path] + extra
+  #-- Claude Code 플러그인으로 깐 baram-term : ctl.py 는 표준 라이브러리만 쓴다
+  home = os.path.expanduser("~")
+  ctl = sorted(glob.glob(os.path.join(home, ".claude", "plugins", "cache", "*", "baram-term", "*",
+                                      "baram-term", "src", "baram_term", "ctl.py")))
+  if ctl:
+    return [sys.executable, ctl[-1]]
+  app = "/Applications/baram-term.app/Contents/MacOS/baram-term"
+  if os.path.isfile(app):
+    return [app, "ctl"]
+  return None
+
+
 class BaramTerm:
-  """baram-term 이 포트를 쥐고 있으면 놓게 하고, 끝나면 다시 열게 한다."""
+  """baram-term 이 포트를 쥐고 있으면 놓게 하고, 끝나면 다시 열게 한다.
+
+  놓지 않은 채 같은 포트를 열면 macOS 는 열어 주지만 받은 바이트를 나눠 가져가 응답이 깨진다
+  (VSCode 태스크에서 PATH 에 baram-ctl 이 없어 겪었다, docs/43)."""
 
   def __init__(self, port, enable):
     self.port = port
-    self.ctl  = shutil.which("baram-ctl") if enable else None
+    self.ctl  = find_baram_ctl() if enable else None
     self.released = False
 
   def __enter__(self):
     if self.ctl:
-      r = subprocess.run([self.ctl, "--port", self.port, "release"], capture_output=True)
+      r = subprocess.run(self.ctl + ["--port", self.port, "release"], capture_output=True)
       self.released = (r.returncode == 0)
       if self.released:
         print("baram-term : 포트를 잠시 놓음")
@@ -71,7 +102,7 @@ class BaramTerm:
 
   def __exit__(self, *exc):
     if self.released:
-      subprocess.run([self.ctl, "--port", self.port, "resume"], capture_output=True)
+      subprocess.run(self.ctl + ["--port", self.port, "resume"], capture_output=True)
       print("baram-term : 포트 다시 엶")
 
 
@@ -153,7 +184,12 @@ def main():
   ap.add_argument("--baud", type=int, default=4000000, help="전송 보율 (기본 4 Mbps, 0 이면 115200 그대로)")
   ap.add_argument("--no-reset", action="store_true", help="끝난 뒤 앱으로 점프하지 않는다 (부트로더에 머문다)")
   ap.add_argument("--no-baram", action="store_true", help="baram-term 포트 놓기/다시 열기를 하지 않는다")
+  ap.add_argument("--list", action="store_true", help="시리얼 포트 목록만 보여 준다")
   args = ap.parse_args()
+
+  if args.list:
+    list_ports_print()
+    return
 
   # 줄 단위로 내보내 진행 표시가 바로 보이게 한다
   sys.stdout.reconfigure(line_buffering=True)

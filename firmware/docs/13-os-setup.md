@@ -149,7 +149,7 @@ probe-rs 확장은 이름이 세 가지라 헷갈린다. 모두 같은 확장이
 | 작업 | 방법 |
 |---|---|
 | 빌드 | `Cmd/Ctrl + Shift + B` (`build-build`) |
-| 기록 | 태스크 `flash` |
+| 기록 | 태스크 `flash-all` (`flash-cm33` · `flash-cm7` 따로도) |
 | 디버그 | 실행 및 디버그 → `Flash + Debug CM33 (Cortex-Debug)` (빌드 → TAG 붙여 기록 → GDB 서버 → 리셋 → 앱 `main` 에서 멈춤) 또는 `Flash + Attach CM33` (probe-rs 확장, 점프한 뒤 붙는다) |
 | 실행 중 붙기 | `Attach CM33` (기록하지 않는다) |
 

@@ -19,7 +19,23 @@ find_program(PROBE_RS_EXECUTABLE NAMES probe-rs probe-rs.exe)
 
 set(PROBE_RS_CHIP "MIMXRT1180" CACHE STRING "probe-rs chip name")
 
+#   flash       CM33(TAG + 앱) + CM7 슬롯 (BUILD_CM7=ON 일 때) → 리셋
+#   flash-cm33  CM33 만 → 리셋
+#   flash-cm7   CM7 슬롯만 → 리셋 (BUILD_CM7=ON)
+#
 if(PROBE_RS_EXECUTABLE)
+  set(_flash_cm33_cmds
+    COMMAND ${PROBE_RS_EXECUTABLE} download
+            --chip ${PROBE_RS_CHIP}
+            --verify
+            --binary-format bin
+            --base-address 0x04040000
+            ${CMAKE_BINARY_DIR}/cm33/${PRJ_NAME}-cm33-tag.bin
+    )
+  set(_flash_reset_cmds
+    COMMAND ${PROBE_RS_EXECUTABLE} reset
+            --chip ${PROBE_RS_CHIP}
+    )
   set(_flash_deps ${PRJ_NAME}-cm33.elf)
 
   #-- CM7 이미지는 elf 가 아니라 헤더를 붙인 bin(.img)을 CM7 슬롯에 쓴다.
@@ -36,21 +52,31 @@ if(PROBE_RS_EXECUTABLE)
               --base-address 0x04800000
               ${CMAKE_BINARY_DIR}/cm7/${PRJ_NAME}-cm7.img
       )
+
+    add_custom_target(flash-cm7
+      ${_flash_cm7_cmds}
+      ${_flash_reset_cmds}
+      DEPENDS ${PRJ_NAME}-cm7.elf
+      USES_TERMINAL
+      COMMENT "probe-rs download CM7 (${PROBE_RS_CHIP})"
+      )
   endif()
 
   add_custom_target(flash
     ${_flash_cm7_cmds}
-    COMMAND ${PROBE_RS_EXECUTABLE} download
-            --chip ${PROBE_RS_CHIP}
-            --verify
-            --binary-format bin
-            --base-address 0x04040000
-            ${CMAKE_BINARY_DIR}/cm33/${PRJ_NAME}-cm33-tag.bin
-    COMMAND ${PROBE_RS_EXECUTABLE} reset
-            --chip ${PROBE_RS_CHIP}
+    ${_flash_cm33_cmds}
+    ${_flash_reset_cmds}
     DEPENDS ${_flash_deps}
     USES_TERMINAL
     COMMENT "probe-rs download (${PROBE_RS_CHIP})"
+    )
+
+  add_custom_target(flash-cm33
+    ${_flash_cm33_cmds}
+    ${_flash_reset_cmds}
+    DEPENDS ${PRJ_NAME}-cm33.elf
+    USES_TERMINAL
+    COMMENT "probe-rs download CM33 (${PROBE_RS_CHIP})"
     )
 else()
   add_custom_target(flash

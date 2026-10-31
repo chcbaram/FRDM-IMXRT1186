@@ -135,14 +135,16 @@ titan-mini 의 규칙을 그대로 지킨다. 실제로 돌려 본 것은 macOS 
 | 태스크 | 내용 |
 |---|---|
 | `build-configure` · `build-build` · `build-clean` | CMake. 앱은 configure 가 `-DBUILD_CM7=ON` 으로 돈다 |
-| `flash` | `cmake --build build --target flash` |
+| `flash-all` · `flash-cm33` · `flash-cm7` | probe-rs 기록. CMake 타깃 `flash`(CM33 + CM7) · `flash-cm33` · `flash-cm7`. 부트로더 쪽은 `flash-boot` |
+| `download-cm33` · `download-cm7` | UART 로 앱 · CM7 이미지 쓰기 (`rt1180-boot/tools/download.py`, [43](43-uart-download.md)). 포트는 Firmware Task Manager 확장의 시리얼 포트 선택으로 고르고, 마지막 값을 기억한다. 앱 쪽은 빌드한 뒤 보낸다 |
+| `download-list` | 시리얼 포트 목록 (`*` = `auto` 가 고르는 것) |
 | `gdb-server` | `tools/gdbserver.py start` — `probe-rs gdb` 를 떼어 낸 프로세스로 띄우고 `Firing up GDB stub` 이 나오면 끝난다. 남아 있던 서버는 먼저 내린다 |
 | `flash + gdb-server` | 기록한 뒤 서버. Cortex-Debug 의 `preLaunchTask` |
 | `gdb-server-stop` | `tools/gdbserver.py stop` (`build/probe-rs-gdb.pid`). Cortex-Debug 의 `postDebugTask` |
 
 > 처음에는 구성을 워크스페이스 파일에 두었다. 같은 폴더를 여는 워크스페이스 셋이 서로 다른 구성을 가지게 하려던 것이다. 이때 launch 는 워크스페이스에, 태스크는 `.vscode/tasks.json` 에 두었더니 *"Could not find the task 'build-build'"* 가 떴다(launch 와 태스크는 같은 곳에 있어야 한다). 그 뒤 폴더만 열면 구성이 보이지 않는 불편이 커서 둘 다 `.vscode` 로 옮겼다.
 
-디버그 타입은 둘이다. 로드맵 42 부터 앱은 부트로더가 점프해 들어오므로 probe-rs 구성은 **모두 attach** 다. `Flash + Attach` 는 `flash` 태스크(TAG 를 붙인 bin 기록 → 리셋) 뒤에 붙는다. elf 를 디버거가 직접 쓰면 TAG 가 옛 것으로 남아 부트로더가 앱을 실행하지 않기 때문이다. Cortex-Debug 구성도 GDB 로 elf 를 쓰지 않고(`overrideLaunchCommands`), `flash` 태스크로 쓴 뒤 `monitor reset halt` 부터 시작한다([42](42-app-jump.md) 5절).
+디버그 타입은 둘이다. 로드맵 42 부터 앱은 부트로더가 점프해 들어오므로 probe-rs 구성은 **모두 attach** 다. `Flash + Attach` 는 `flash-all` 태스크(TAG 를 붙인 bin · CM7 기록 → 리셋) 뒤에 붙는다. elf 를 디버거가 직접 쓰면 TAG 가 옛 것으로 남아 부트로더가 앱을 실행하지 않기 때문이다. Cortex-Debug 구성도 GDB 로 elf 를 쓰지 않고(`overrideLaunchCommands`), `flash-all`(부트로더는 `flash-boot`) 태스크로 쓴 뒤 `monitor reset halt` 부터 시작한다([42](42-app-jump.md) 5절).
 
 SVD 는 `tools/svd/MIMXRT1186_cm33.xml` 이다(`setup_tools.py` 가 준비).
 

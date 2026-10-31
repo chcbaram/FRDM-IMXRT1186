@@ -58,7 +58,7 @@
       "request": "attach",
       "cwd": "${workspaceFolder}",
       "chip": "MIMXRT1180",
-      "preLaunchTask": "flash",
+      "preLaunchTask": "flash-all",
       "coreConfigs": [
         {
           "coreIndex": 0,
@@ -88,7 +88,7 @@
       "cwd": "${workspaceFolder}",
       "chip": "MIMXRT1186",
       "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
-      "preLaunchTask": "flash",
+      "preLaunchTask": "flash-all",
       "coreConfigs": [
         {
           "coreIndex": 1,
@@ -119,7 +119,7 @@
       "cwd": "${workspaceFolder}",
       "chip": "MIMXRT1186",
       "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
-      "preLaunchTask": "flash",
+      "preLaunchTask": "flash-all",
       "coreConfigs": [
         {
           "coreIndex": 0,

@@ -56,7 +56,7 @@
       }
     },
     {
-      "label": "flash",
+      "label": "flash-all",
       "type": "process",
       "command": "cmake",
       "args": [
@@ -67,6 +67,94 @@
       ],
       "problemMatcher": [],
       "dependsOn": "build-build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "flash-cm33",
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "--target",
+        "flash-cm33"
+      ],
+      "problemMatcher": [],
+      "dependsOn": "build-build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "flash-cm7",
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "--target",
+        "flash-cm7"
+      ],
+      "problemMatcher": [],
+      "dependsOn": "build-build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "download-cm33",
+      "type": "process",
+      "command": "python3",
+      "windows": {
+        "command": "python"
+      },
+      "args": [
+        "${workspaceFolder}/../rt1180-boot/tools/download.py",
+        "--target",
+        "fw",
+        "--port",
+        "${input:downloadPort}"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "build-build"
+    },
+    {
+      "label": "download-cm7",
+      "type": "process",
+      "command": "python3",
+      "windows": {
+        "command": "python"
+      },
+      "args": [
+        "${workspaceFolder}/../rt1180-boot/tools/download.py",
+        "--target",
+        "cm7",
+        "--port",
+        "${input:downloadPort}"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "build-build"
+    },
+    {
+      "label": "download-list",
+      "type": "process",
+      "command": "python3",
+      "windows": {
+        "command": "python"
+      },
+      "args": [
+        "${workspaceFolder}/../rt1180-boot/tools/download.py",
+        "--list"
+      ],
+      "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
       }
@@ -93,7 +181,7 @@
       "label": "flash + gdb-server",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "flash",
+        "flash-all",
         "gdb-server"
       ],
       "problemMatcher": []
@@ -114,6 +202,16 @@
       "problemMatcher": [],
       "options": {
         "cwd": "${workspaceFolder}"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "downloadPort",
+      "type": "command",
+      "command": "firmware-task.pickSerialPort",
+      "args": {
+        "placeholder": "MCU-Link VCOM 포트 (download.py --list 의 * 표시)"
       }
     }
   ]
