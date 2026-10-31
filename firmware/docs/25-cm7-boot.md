@@ -365,7 +365,29 @@ rtt min 536 us  avg 537 us  max 571 us  (931 KB/s each way)
 
 받는 쪽은 지금 깨어 있는 루프에서 `cmdTaskUpdate()` 를 돈다. `WFI` 로 재우면 doorbell(IRQ)에 깨지만 **SysTick 이 멈춘다**. RTOS(로드맵 28)를 넣을 때는 doorbell ISR 에서 세마포어를 주고 cmd 태스크가 깨어 처리하게 한다. CM7 쪽 틱은 하드웨어 타이머 IRQ 로 옮기거나 tickless 로 한다.
 
-## 12. 다음 (25b)
+## 12. 메모 — CM7 코드가 ITCM 256 KB 를 넘으면
+
+지금은 CM7 이미지 전체를 ITCM 에서 돌린다. 이유는 다섯 가지다.
+
+- SDK 도 RAM 타깃만 켜 두었다.
+- `INITVTOR = 0` 이 곧 ITCM 이다.
+- 792 MHz 에서 대기 없이 돈다.
+- CM33 이 QSPI 를 지우고 쓰는 동안에도 멈추지 않는다([26](26-qspi-nor.md) 1절).
+- 크기가 넉넉하다.
+
+네트워크 스택(50번대)을 넣어 256 KB 를 넘으면 아래 순서로 정한다. **넘친 뒤에 측정해서 정한다.**
+
+| 순서 | 방법 | 메모 |
+|---|---|---|
+| 0 | **TCM 분할 바꾸기** | CM7 TCM 은 합계 512 KB 이고 기본은 절반씩이다. RM 에 분할을 바꾸는 SW 설정 옵션이 있다([02](02-memory-map.md)). DTCM 이 덜 필요하면 가장 간단하다. 가능한 값은 확인 필요 |
+| 1 | **자주 도는 코드만 ITCM** | ISR · 네트워크 송수신 경로 · EtherCAT 처리만 ITCM 에 둔다. 초기화 · CLI · 로그는 밖으로. 링커 섹션 이름(`CodeQuickAccess` 등)이나 파일 단위로 나눈다 |
+| 2 | **넘치는 코드는 OCRAM** | 칩 안이라 캐시를 빗나가도 손해가 작다. OCRAM1 512 KB · OCRAM2 256 KB. 피할 곳: OCRAM1 앞 16 KB(TRDC), OCRAM2 앞 4 KB(공유 블록). ROM 이 쓰는 72 KB 는 CM33 이 부팅 뒤에 복사하므로 괜찮다 |
+| 3 | **HyperRAM** (OCRAM 도 모자랄 때) | 큰 코드 · 가끔 도는 코드용. QSPI 와 FlexSPI 가 달라 플래시 쓰기에 멈추지 않는다. 대신 칩 밖이라 캐시를 빗나가면 느리고, CM33 몫(2 MB)과 버스를 나눈다. MPU region 8 을 실행 가능으로 바꾸고, CM33 이 이 부분도 복사해야 한다 |
+| ✗ | CM7 QSPI XIP | CM33 이 플래시를 지우고 쓰는 동안 CM7 이 같이 멈춘다. 쓰지 않는다 |
+
+- [ ] CM7 에서 OCRAM · HyperRAM 코드 실행 속도 측정 (같은 코드로 ITCM 과 비교). CM7 HyperRAM 속도는 아직 재지 않았다
+
+## 13. 다음 (25b)
 
 - [x] probe-rs 에 CM7 코어 정의 추가 (AP 2) — `tools/probe-rs/MIMXRT1186.yaml`, CM7 워크스페이스 디버그 구성 ([14](14-cm7-debug.md))
 - [x] CM7 캐시 켜기 + MPU 로 공유 구간 non-cacheable (9절)
