@@ -149,7 +149,7 @@ __data_flash_start = ORIGIN(ITCM) + (LOADADDR(.data) - LOADADDR(.interrupts))
 
 지우기는 플래시가 정하므로 같다. 쓰기 · 읽기는 CPU 가 플래시에서 코드를 가져오지 않아 조금 빠르다.
 
-`qspi.c` 는 아직 ROM 호출마다 인터럽트를 막는다(XIP 용, [26](26-qspi-nor.md) 3절). 부트로더에서는 막을 필요가 없다. UART 다운로드(43)에서 지우는 동안 수신을 받아야 하므로 그때 TCM 실행일 때는 막지 않도록 고친다.
+`qspi.c` 는 ROM 호출마다 인터럽트를 막는다(XIP 용, [26](26-qspi-nor.md) 3절). 43 에서 `HW_QSPI_XIP` 를 두어 부트로더(0)는 막지 않게 했다([43](43-uart-download.md) 7절).
 
 ## 6. 기록과 디버그
 
@@ -176,9 +176,9 @@ cmake --build build --target flash        # 부트 슬롯만 쓴다 → D4 파�
 - [x] non-XIP 컨테이너에서 해시 검사 — 서명 · 해시 없이 부팅된다
 - [ ] **전원을 껐다 켜서(POR)** 부팅. 지금은 probe-rs 소프트 리셋(SRSR `CM33_REQUEST`)으로만 확인했다. 소프트 리셋도 BootROM 부터 다시 돌기 때문에 같을 것으로 본다
 - [x] probe-rs 로 TCM 에서 도는 부트로더 디버그 — gdb 로 붙어 PC 를 읽었다 ([42](42-app-jump.md) 5절). VSCode 로는 확인 필요
-- [ ] QSPI 를 지우는 동안 UART 수신 (43, 5절)
+- [x] QSPI 를 지우는 동안 UART 수신 — 된다 ([43](43-uart-download.md) 7절)
 
 ## 9. 다음
 
 - [x] 42 — TAG 검증과 점프. 앱을 `0x0404_1000` 으로 옮기고 `firm_ver_t` 를 넣고 `HW_RESET_BOOT 0`. 부트로더는 module 구조로 ([42](42-app-jump.md))
-- [ ] 43 — UART 다운로드 (cmd · `download.py`)
+- [x] 43 — UART 다운로드 ([43](43-uart-download.md))

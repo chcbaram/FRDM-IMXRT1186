@@ -5,18 +5,14 @@
 #include "bsp.h"
 
 
-#define _DEF_FIRMWATRE_VERSION    "B261031R2"
+#define _DEF_FIRMWATRE_VERSION    "B261031R3"
 #define _DEF_BOARD_NAME           "FRDM-IMXRT1186-BOOT"
 
 
 #define _USE_HW_INFO
-#define _USE_HW_QSPI
 
-#define      FLASH_ADDR_FIRM        0x04040000
-#define      FLASH_SIZE_TAG         0x1000
-#define      FLASH_ADDR_FIRM_VEC    0x04041000
-#define      FLASH_SIZE_VEC         0x400
-#define      FLASH_SIZE_FIRM        (0x04800000 - FLASH_ADDR_FIRM)
+#define _USE_HW_QSPI
+#define      HW_QSPI_XIP            0
 
 #define _USE_HW_LED
 #define      HW_LED_MAX_CH          3
@@ -47,10 +43,29 @@
 #define      HW_CLI_LINE_HIS_MAX    8
 #define      HW_CLI_LINE_BUF_MAX    64
 
+#define _USE_HW_CMD
+#define      HW_CMD_MAX_DATA_LENGTH 1024
+#define      HW_CMD_UART_CH         HW_UART_CH_CLI
+
 #define _USE_HW_LOG
 #define      HW_LOG_CH              HW_UART_CH_LOG
 #define      HW_LOG_BOOT_BUF_MAX    1024
 #define      HW_LOG_LIST_BUF_MAX    1024
+
+
+#define HW_DEV_MODE                 HW_DEV_MODE_BOOT
+
+#define FLASH_ADDR_BOOT             0x04000000
+#define FLASH_SIZE_BOOT             (256*1024)
+#define FLASH_ADDR_FIRM             0x04040000
+#define FLASH_SIZE_FIRM             (FLASH_ADDR_CM7 - FLASH_ADDR_FIRM)
+#define FLASH_SIZE_TAG              0x1000
+#define FLASH_SIZE_VEC              0x400
+#define FLASH_ADDR_FIRM_VEC         (FLASH_ADDR_FIRM + FLASH_SIZE_TAG)
+#define FLASH_ADDR_CM7              0x04800000
+#define FLASH_SIZE_CM7              (4*1024*1024)
+#define FLASH_ADDR_DATA             0x04C00000
+#define FLASH_SIZE_DATA             (4*1024*1024)
 
 
 //-- CLI

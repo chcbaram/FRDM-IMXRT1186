@@ -14,6 +14,7 @@ extern "C" {
 #include "uart.h"
 #include "cli.h"
 #include "log.h"
+#include "cmd.h"
 #include "hw_info.h"
 
 

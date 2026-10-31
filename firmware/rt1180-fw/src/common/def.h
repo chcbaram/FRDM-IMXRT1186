@@ -107,6 +107,9 @@
 #define VERSION_MAGIC_NUMBER      0x56455220    // "VER "
 #define TAG_MAGIC_NUMBER          0x54414720    // "TAG "
 
+#define HW_DEV_MODE_BOOT          0
+#define HW_DEV_MODE_APP           1
+
 typedef union
 {
   uint8_t  u8Data[4];

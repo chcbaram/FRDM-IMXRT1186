@@ -28,6 +28,21 @@
 #define QSPI_FCB_ADDR         (QSPI_XIP_BASE + 0x400U)
 #define QSPI_PAGE_MAX         256U
 
+//-- XIP 로 도는 앱은 ROM 호출 동안 인터럽트를 막는다 (ISR 이 플래시를 읽으면 멈춘다).
+//   Code TCM 에서 도는 부트로더는 hw_def.h 에 HW_QSPI_XIP 0 을 두어 막지 않는다.
+//   지우는 동안에도 UART 수신 · SysTick 이 돈다 (docs/43).
+#ifndef HW_QSPI_XIP
+#define HW_QSPI_XIP           1
+#endif
+
+#if HW_QSPI_XIP
+#define qspiLock(p)           do { *(p) = __get_PRIMASK(); __disable_irq(); } while (0)
+#define qspiUnlock(p)         __set_PRIMASK(*(p))
+#else
+#define qspiLock(p)           (void)(p)
+#define qspiUnlock(p)         (void)(p)
+#endif
+
 
 #if CLI_USE(HW_QSPI)
 static void cliQspi(cli_args_t *args);
@@ -58,12 +73,11 @@ bool qspiInit(void)
 
   if (nor_cfg.memConfig.tag == FLEXSPI_CFG_BLK_TAG)
   {
-    primask = __get_PRIMASK();
-    __disable_irq();
+    qspiLock(&primask);
     last_status = ROM_FLEXSPI_NorFlash_Init(QSPI_INSTANCE, &nor_cfg);
     ROM_FLEXSPI_NorFlash_ClearCache(QSPI_INSTANCE);
     qspiCacheClear();
-    __set_PRIMASK(primask);
+    qspiUnlock(&primask);
 
     if (last_status == kStatus_Success && qspiReadId(device_id) == true)
     {
@@ -118,12 +132,11 @@ bool qspiWrite(uint32_t addr, uint8_t *p_data, uint32_t length)
     memset(page_buf, 0xFF, page);
     memcpy((uint8_t *)page_buf + offset, p_data, n);
 
-    primask = __get_PRIMASK();
-    __disable_irq();
+    qspiLock(&primask);
     last_status = ROM_FLEXSPI_NorFlash_ProgramPage(QSPI_INSTANCE, &nor_cfg, page_addr, page_buf);
     ROM_FLEXSPI_NorFlash_ClearCache(QSPI_INSTANCE);
     qspiCacheClear();
-    __set_PRIMASK(primask);
+    qspiUnlock(&primask);
 
     if (last_status != kStatus_Success)
       return false;
@@ -176,12 +189,11 @@ bool qspiEraseBlock(uint32_t block_addr)
   if (is_init != true || block_addr >= qspiGetLength())
     return false;
 
-  primask = __get_PRIMASK();
-  __disable_irq();
+  qspiLock(&primask);
   last_status = ROM_FLEXSPI_NorFlash_EraseBlock(QSPI_INSTANCE, &nor_cfg, block_addr);
   ROM_FLEXSPI_NorFlash_ClearCache(QSPI_INSTANCE);
   qspiCacheClear();
-  __set_PRIMASK(primask);
+  qspiUnlock(&primask);
 
   return (last_status == kStatus_Success);
 }
@@ -193,12 +205,11 @@ bool qspiEraseSector(uint32_t sector_addr)
   if (is_init != true || sector_addr >= qspiGetLength())
     return false;
 
-  primask = __get_PRIMASK();
-  __disable_irq();
+  qspiLock(&primask);
   last_status = ROM_FLEXSPI_NorFlash_EraseSector(QSPI_INSTANCE, &nor_cfg, sector_addr);
   ROM_FLEXSPI_NorFlash_ClearCache(QSPI_INSTANCE);
   qspiCacheClear();
-  __set_PRIMASK(primask);
+  qspiUnlock(&primask);
 
   return (last_status == kStatus_Success);
 }
@@ -249,14 +260,13 @@ static bool qspiReadId(uint8_t *p_id)
   xfer.rxBuffer             = &id;
   xfer.rxSize               = 4U;
 
-  primask = __get_PRIMASK();
-  __disable_irq();
+  qspiLock(&primask);
   last_status = ROM_FLEXSPI_NorFlash_UpdateLut(QSPI_INSTANCE, NOR_CMD_LUT_SEQ_IDX_READID, lut_seq, 1U);
   if (last_status == kStatus_Success)
   {
     last_status = ROM_FLEXSPI_NorFlash_CommandXfer(QSPI_INSTANCE, &xfer);
   }
-  __set_PRIMASK(primask);
+  qspiUnlock(&primask);
 
   memcpy(p_id, &id, 4);
   return (last_status == kStatus_Success);

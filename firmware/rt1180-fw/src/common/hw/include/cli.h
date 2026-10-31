@@ -38,6 +38,11 @@ bool cliOpen(uint8_t ch, uint32_t baud);
 bool cliIsBusy(void);
 bool cliOpenLog(uint8_t ch, uint32_t baud);
 bool cliMain(void);
+
+// 수신 바이트를 cli 보다 먼저 보는 필터. true 를 돌려주면 그 바이트는 cli 로 가지 않는다.
+//   같은 UART 에 cmd 패킷을 얹을 때 쓴다 (N657X0 와 같다, docs/43).
+typedef bool (*cli_rx_filter_t)(uint8_t rx_data);
+bool cliSetRxFilter(cli_rx_filter_t filter);
 void cliPrintf(const char *fmt, ...);
 bool cliAdd(const char *cmd_str, void (*p_func)(cli_args_t *));
 bool cliKeepLoop(void);

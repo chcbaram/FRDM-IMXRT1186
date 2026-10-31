@@ -208,4 +208,4 @@ mem 0x0ffc0000 0x10000000 ro      ← Code TCM : 이제 하드웨어 브레이�
 
 ## 8. 다음
 
-- [ ] 43 — UART 다운로드. 부트로더에 `cmd` 모듈(N657X0 `cmd_boot.c` — INFO · FW_BEGIN/WRITE/END · FW_JUMP), PC 쪽 `cmdproto.py` · `download.py`. 앱 cmd 에 `FW_UPDATE` → `resetToBoot()`. TCM 실행이므로 `qspi.c` 가 ROM 호출 중 인터럽트를 막지 않게 고친다([41](41-bootloader.md) 5절)
+- [x] 43 — UART 다운로드 ([43](43-uart-download.md))

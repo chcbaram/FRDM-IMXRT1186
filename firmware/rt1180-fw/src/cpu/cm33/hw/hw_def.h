@@ -5,7 +5,7 @@
 #include "bsp.h"
 
 
-#define _DEF_FIRMWATRE_VERSION    "V261031R1"
+#define _DEF_FIRMWATRE_VERSION    "V261031R2"
 #define _DEF_BOARD_NAME           "FRDM-IMXRT1186-CM33"
 
 #define _HW_DEF_THREAD_MAIN_PRI       2
@@ -62,6 +62,7 @@
 
 #define _USE_HW_CMD
 #define      HW_CMD_MAX_DATA_LENGTH 512
+#define      HW_CMD_UART_CH         HW_UART_CH_CLI
 
 #define _USE_HW_UART
 #define      HW_UART_MAX_CH         1
@@ -78,6 +79,21 @@
 #define      HW_LOG_CH              HW_UART_CH_LOG
 #define      HW_LOG_BOOT_BUF_MAX    1024
 #define      HW_LOG_LIST_BUF_MAX    1024
+
+
+#define HW_DEV_MODE                 HW_DEV_MODE_APP
+
+#define FLASH_ADDR_BOOT             0x04000000
+#define FLASH_SIZE_BOOT             (256*1024)
+#define FLASH_ADDR_FIRM             0x04040000
+#define FLASH_SIZE_FIRM             (FLASH_ADDR_CM7 - FLASH_ADDR_FIRM)
+#define FLASH_SIZE_TAG              0x1000
+#define FLASH_SIZE_VEC              0x400
+#define FLASH_ADDR_FIRM_VEC         (FLASH_ADDR_FIRM + FLASH_SIZE_TAG)
+#define FLASH_ADDR_CM7              0x04800000
+#define FLASH_SIZE_CM7              (4*1024*1024)
+#define FLASH_ADDR_DATA             0x04C00000
+#define FLASH_SIZE_DATA             (4*1024*1024)
 
 
 //-- CLI

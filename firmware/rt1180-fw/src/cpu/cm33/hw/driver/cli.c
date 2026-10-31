@@ -90,6 +90,8 @@ typedef struct
 
 cli_t   cli_node;
 
+static cli_rx_filter_t rx_filter = NULL;
+
 
 
 static bool cliUpdate(cli_t *p_cli, uint8_t rx_data);
@@ -219,11 +221,26 @@ bool cliMain(void)
     return false;
   }
 
-  if (uartAvailable(cli_node.ch) > 0)
+  //-- 받은 것을 다 꺼낸다. cmd 패킷은 필터가 가져가고 나머지만 cli 로 간다.
+  //   한 번에 한 바이트만 꺼내면 앱의 cli 스레드(2 ms 주기)에서 패킷이 느려진다.
+  //
+  while (uartAvailable(cli_node.ch) > 0)
   {
-    cliUpdate(&cli_node, uartRead(cli_node.ch));
+    uint8_t rx_data = uartRead(cli_node.ch);
+
+    if (rx_filter != NULL && rx_filter(rx_data) == true)
+    {
+      continue;
+    }
+    cliUpdate(&cli_node, rx_data);
   }
 
+  return true;
+}
+
+bool cliSetRxFilter(cli_rx_filter_t filter)
+{
+  rx_filter = filter;
   return true;
 }
 

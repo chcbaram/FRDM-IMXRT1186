@@ -61,6 +61,9 @@ set(FW_SRC_FILES
   ${FW_CORE_DIR}/hw/driver/hw_info.c
 
   ${FW_CORE_DIR}/ap/modules/module.c
+  ${FW_CORE_DIR}/ap/modules/common/cmd/driver/drv_uart.c
+
+  ${FW_DIR}/common/hw/src/cmd.c
   )
 
 file(GLOB_RECURSE FW_CORE_SRC_FILES CONFIGURE_DEPENDS
@@ -98,10 +101,12 @@ target_include_directories(${EXECUTABLE} PRIVATE
   src
   src/ap
   src/ap/modules
+  src/ap/modules/cmd
   src/bsp
   src/hw
 
   ${FW_CORE_DIR}/ap/modules
+  ${FW_CORE_DIR}/ap/modules/common/cmd
   ${FW_CORE_DIR}/bsp
   ${FW_CORE_DIR}/hw/driver
 
