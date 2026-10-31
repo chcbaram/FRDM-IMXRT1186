@@ -22,6 +22,7 @@ extern "C" {
 #include "log.h"
 #include "hw_info.h"
 #include "osal/thread.h"
+#include "event.h"
 
 
 bool hwInit(void);

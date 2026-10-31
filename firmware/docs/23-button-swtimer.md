@@ -3,6 +3,8 @@
 > SysTick 1 ms 에서 도는 소프트웨어 타이머와, 그 위에서 갱신되는 사용자 버튼 드라이버. RTOS 가 들어오기 전까지 주기 작업은 swtimer 로 돌린다.
 > 관련: [03-board-mapping.md](03-board-mapping.md) 4절 · [21-uart-cli.md](21-uart-cli.md) · [22-clock.md](22-clock.md)
 
+>
+> **로드맵 29 에서 버튼 갱신을 swtimer 에서 1 ms 스레드로 옮겼다**(원본과 같다). 아래 swtimer 갱신 설명은 RTOS 전의 기록이다. 지금 구조는 [29-event.md](29-event.md) 3절.
 ---
 
 ## 1. 가져온 것

@@ -12,6 +12,8 @@
 #define _HW_DEF_THREAD_MAIN_STACK     (4 * 1024)
 #define _HW_DEF_THREAD_CLI_PRI        3
 #define _HW_DEF_THREAD_CLI_STACK      (4 * 1024)
+#define _HW_DEF_THREAD_BUTTON_PRI     4
+#define _HW_DEF_THREAD_BUTTON_STACK   (1 * 1024)
 
 
 #define _USE_HW_RTOS
@@ -21,6 +23,10 @@
 
 #define _USE_HW_THREAD
 #define      HW_THREAD_MAX_CNT      8
+
+#define _USE_HW_EVENT
+#define      HW_EVENT_Q_MAX         16
+#define      HW_EVENT_NODE_MAX      16
 
 #define _USE_HW_LED
 #define      HW_LED_MAX_CH          3
@@ -88,6 +94,7 @@
 #define _USE_CLI_HW_QSPI             1
 #define _USE_CLI_HW_THREAD           1
 #define _USE_CLI_HW_MODULE           1
+#define _USE_CLI_HW_EVENT            1
 #define _USE_CLI_HW_PSRAM            1
 
 

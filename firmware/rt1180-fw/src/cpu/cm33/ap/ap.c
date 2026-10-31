@@ -21,6 +21,11 @@ void apMain(void)
   //
   threadBegin();
 
+  //-- 부팅 로그는 여기까지다 (log boot 로 다시 본다). 부팅이 끝났음을 알린다 (titan-mini 와 같다).
+  //
+  logBoot(false);
+  eventPub(EVENT_BOOT_DONE, 0);
+
   pre_time = millis();
   while (1)
   {
@@ -30,6 +35,7 @@ void apMain(void)
       ledToggle(_DEF_LED2);
     }
 
+    eventUpdate();            // 큐에 쌓인 이벤트를 구독자에게 뿌린다
     moduleUpdate();           // update() 를 등록한 모듈들
     delay(1);                 // main 스레드가 CPU 를 혼자 잡지 않게 (docs/28)
   }

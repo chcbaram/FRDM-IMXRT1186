@@ -33,8 +33,9 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 
 ### 다음 작업
 
-1. **29 event** · 버튼 1 ms 스레드 → **30~33** 주변장치 → **40~** 부트로더
-3. 손으로 하는 시험 — SW4 누름 ([23](23-button-swtimer.md) 6절)
+1. **40~43 부트로더** 또는 **50~ 네트워크 (CM7)** — 하나를 고른다. 30~33 주변장치는 필요할 때 끼운다
+2. 손으로 하는 시험 — SW4 누름 → `EVENT_BUTTON` ([29](29-event.md) 4절, [23](23-button-swtimer.md) 6절)
+3. TODO — `cli cm7` 원격 CLI ([90](90-todo-cm7-remote-cli.md))
 
 ### 미해결 과제
 
@@ -95,7 +96,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [26](26-qspi-nor.md) | **QSPI NOR** — XIP 로 돌면서 ROM API 로 지우기/쓰기, `qspi` CLI, 섹터 46 ms · 쓰기 4 KB 10.7 ms · 읽기 28.5 MB/s | ✅ |
 | [27](27-hyperram.md) | **HyperRAM 8 MB** — XMCD 로 ROM 이 설정, `psram test` 8 MB OK, CM7 캐시 규칙 | ✅ |
 | [28](28-freertos.md) | **FreeRTOS** — CM33 `ARM_CM33_NTZ` (Secure only) · CM7 `ARM_CM4F`, thread · module, CM7 cmd 가 doorbell 에 깨어남 (idle 99.9 %) | ✅ |
-| 29 | 로그 / 모듈 / 이벤트 — `module` 은 28 에서 먼저 들였다 (cmd 가 첫 모듈) | 일부 |
+| [29](29-event.md) | **event · 버튼 스레드** — titan-mini event (발행 · 구독, `EVENT_BOOT_DONE`), 버튼 1 ms 스레드 + `EVENT_BUTTON` | ✅ (SW4 눌러 확인 남음) |
 | 30~33 | USB(tinyusb CDC) · CAN-FD · I2C · SPI | 예정 |
 | 40 | 부트 아키텍처 — 부트로더/앱 분리, 파티션 확정, 진입 조건 (24 의 부트 모드 플래그 · 더블클릭) | 예정 |
 | 41 | 부트로더 골격 — `firmware/rt1180-boot`, 컨테이너 load = ITCM (non-XIP) | 예정 |

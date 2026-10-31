@@ -4,7 +4,8 @@
 #ifdef _USE_HW_BUTTON
 #include "cli.h"
 #include "log.h"
-#include "swtimer.h"
+#include "event.h"
+#include "osal/thread.h"
 #include "fsl_rgpio.h"
 #include "fsl_iomuxc.h"
 #include "fsl_clock.h"
@@ -68,7 +69,7 @@ typedef struct
 #if CLI_USE(HW_BUTTON)
 static void cliButton(cli_args_t *args);
 #endif
-static void buttonISR(void *arg);
+static void buttonThread(void *arg);
 static void buttonUpdate(void);
 static void buttonPublish(void);
 static void buttonCopy(button_pub_t *p_dst);
@@ -141,18 +142,13 @@ bool buttonInit(void)
   }
   buttonPublish();
 
-  //-- RTOS 가 없으므로 원본(NUCLEO-C5A3ZG)의 1 ms 버튼 스레드 대신 swtimer 로
-  //   SysTick 인터럽트에서 갱신한다. RTOS 를 붙이면(로드맵 28) 스레드로 되돌린다.
+  //-- 원본(NUCLEO-C5A3ZG stm32c5-ai)과 같이 1 ms 버튼 스레드에서 갱신한다 (docs/29).
+  //   스레드는 등록만 하고 apMain() 의 threadBegin() 에서 만들어진다.
   //
-  swtimer_handle_t h = swtimerGetHandle();
-  if (h < 0)
+  if (threadCreate("button", buttonThread, NULL,
+                   _HW_DEF_THREAD_BUTTON_PRI, _HW_DEF_THREAD_BUTTON_STACK) < 0)
   {
     ret = false;
-  }
-  else
-  {
-    swtimerSet(h, BUTTON_UPDATE_TIME, LOOP_TIME, buttonISR, NULL);
-    swtimerStart(h);
   }
 
   is_init = ret;
@@ -165,12 +161,21 @@ bool buttonInit(void)
   return ret;
 }
 
-void buttonISR(void *arg)
+void buttonThread(void *arg)
 {
+  TickType_t pre_tick;
+
   (void)arg;
 
-  buttonUpdate();
-  buttonPublish();
+  pre_tick = xTaskGetTickCount();
+
+  while (1)
+  {
+    buttonUpdate();
+    buttonPublish();
+
+    vTaskDelayUntil(&pre_tick, pdMS_TO_TICKS(BUTTON_UPDATE_TIME));
+  }
 }
 
 void buttonUpdate(void)
@@ -204,6 +209,9 @@ void buttonUpdate(void)
 
         button_pub.data |= BUTTON_BIT(i);
         button_pub.press_cnt[i]++;
+
+        //-- 누가 받는지는 모른다. 받는 쪽(모듈)이 event_cb 로 고른다 (docs/29)
+        eventPub(EVENT_BUTTON, i);
       }
       if (pin != true && p_btn->pressed == true)
       {
@@ -244,22 +252,21 @@ void buttonUpdate(void)
 }
 
 // 공유본 갱신/복사.
-//   writer 는 SysTick 인터럽트(swtimer)이고 reader 는 메인 루프다. writer 는
-//   reader 에게 선점되지 않으므로 그대로 복사하고, reader 쪽만 인터럽트를 막고
-//   복사한다. (원본은 RTOS 임계구간 taskENTER_CRITICAL)
+//   1ms 주기의 버튼 스레드(writer)와 임의 스레드(reader)가 서로를 선점할 수
+//   있으므로, 양쪽 모두 memcpy 구간만 임계구간으로 보호한다 (원본과 같다).
 //
 void buttonPublish(void)
 {
+  taskENTER_CRITICAL();
   memcpy(&button_shared, &button_pub, sizeof(button_pub_t));
+  taskEXIT_CRITICAL();
 }
 
 void buttonCopy(button_pub_t *p_dst)
 {
-  uint32_t primask = __get_PRIMASK();
-
-  __disable_irq();
+  taskENTER_CRITICAL();
   memcpy(p_dst, &button_shared, sizeof(button_pub_t));
-  __set_PRIMASK(primask);
+  taskEXIT_CRITICAL();
 }
 
 bool buttonGetPin(uint8_t ch)

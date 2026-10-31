@@ -13,6 +13,7 @@ bool hwInit(void)
   cliInit();
   logInit();
   threadInit();
+  eventInit();
 
   swtimerInit();
   uartInit();
