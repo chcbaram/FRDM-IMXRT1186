@@ -5,12 +5,18 @@
 #include "bsp.h"
 
 
-#define _DEF_FIRMWATRE_VERSION    "B261031R1"
+#define _DEF_FIRMWATRE_VERSION    "B261031R2"
 #define _DEF_BOARD_NAME           "FRDM-IMXRT1186-BOOT"
 
 
 #define _USE_HW_INFO
 #define _USE_HW_QSPI
+
+#define      FLASH_ADDR_FIRM        0x04040000
+#define      FLASH_SIZE_TAG         0x1000
+#define      FLASH_ADDR_FIRM_VEC    0x04041000
+#define      FLASH_SIZE_VEC         0x400
+#define      FLASH_SIZE_FIRM        (0x04800000 - FLASH_ADDR_FIRM)
 
 #define _USE_HW_LED
 #define      HW_LED_MAX_CH          3
@@ -55,6 +61,8 @@
 #define _USE_CLI_HW_RTC              1
 #define _USE_CLI_HW_RESET            1
 #define _USE_CLI_HW_QSPI             1
+#define _USE_CLI_HW_MODULE           1
+#define _USE_CLI_HW_BOOT             1
 
 
 #endif

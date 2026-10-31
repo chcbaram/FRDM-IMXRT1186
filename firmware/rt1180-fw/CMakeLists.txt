@@ -85,12 +85,13 @@ set(FREERTOS_SRC_FILES
   )
 
 
-# Python 은 코어별 compile_commands 분리와 CM7 이미지 헤더(tools/mkcm7img.py)에 쓴다.
+# Python 은 앱 TAG(tools/mkfwtag.py), 코어별 compile_commands 분리,
+# CM7 이미지 헤더(tools/mkcm7img.py)에 쓴다.
 #
 find_package(Python3 COMPONENTS Interpreter)
 
-if(BUILD_CM7 AND NOT Python3_FOUND)
-  message(FATAL_ERROR "BUILD_CM7=ON 에는 python3 가 필요하다 (tools/mkcm7img.py)")
+if(NOT Python3_FOUND)
+  message(FATAL_ERROR "python3 가 필요하다 (tools/mkfwtag.py, tools/mkcm7img.py)")
 endif()
 
 

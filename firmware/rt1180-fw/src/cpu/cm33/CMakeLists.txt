@@ -134,14 +134,16 @@ target_link_options(${EXECUTABLE} PRIVATE
   )
 
 
-# .elf -> .bin
-#   bin 은 0x0400_0400(FCB) 부터 시작한다. objcopy 는 가장 낮은 로드 주소부터
-#   잘라 내기 때문이다. 플래시에 쓸 때는 elf 를 쓴다(probe-rs 가 주소를 안다).
+# .elf -> .bin -> -tag.bin
+#   bin 은 0x0404_1000(벡터) 부터 시작한다. objcopy 는 가장 낮은 로드 주소부터 잘라 내기 때문이다.
+#   -tag.bin 은 앞에 TAG 4 KB 를 붙인 것으로 0x0404_0000 에 쓴다 (tools/mkfwtag.py, docs/42).
 #
 add_custom_command(TARGET ${EXECUTABLE}
   POST_BUILD
   COMMAND ${CMAKE_OBJCOPY} ARGS -O binary
           $<TARGET_FILE:${EXECUTABLE}>
           ${CORE_OUT}/${PRJ_NAME}-${CORE_NAME}.bin
-  COMMENT "Invoking: Make Bin"
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/mkfwtag.py
+          ${CORE_OUT}/${PRJ_NAME}-${CORE_NAME}.bin
+  COMMENT "Invoking: Make Bin + TAG"
   )

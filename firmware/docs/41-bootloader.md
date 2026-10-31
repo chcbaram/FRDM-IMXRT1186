@@ -160,7 +160,7 @@ cmake --build build
 cmake --build build --target flash        # 부트 슬롯만 쓴다 → D4 파랑 점멸
 ```
 
-- **부트로더를 쓰면 부트 슬롯에 있던 앱(지금의 `rt1180-fw`, `0x0400_B000`)이 덮인다.** 42 에서 앱을 `0x0404_1000` 으로 옮길 때까지는 둘 중 하나만 돈다. 앱으로 돌아가려면 `rt1180-fw` 의 `flash` 를 다시 한다.
+- 41 시점에는 앱도 부트 슬롯(`0x0400_B000`)에 있어서 마지막에 기록한 쪽만 돌았다. 42 에서 앱을 `0x0404_1000` 으로 옮겨 이제 둘 다 기록해 두면 된다 ([42](42-app-jump.md)).
 - VSCode 는 `firmware/rt1180-boot/prj/rt1180-boot.code-workspace`. 디버그 구성은 앱 CM33 것과 같고 elf · SVD 경로만 바꿨다.
 
 ## 7. 걸렸던 것
@@ -175,10 +175,10 @@ cmake --build build --target flash        # 부트 슬롯만 쓴다 → D4 파�
 - [x] ROM 이 컨테이너 load address 로 Code TCM 을 받는지 — **NS `0x0FFE_0000` 으로 된다**
 - [x] non-XIP 컨테이너에서 해시 검사 — 서명 · 해시 없이 부팅된다
 - [ ] **전원을 껐다 켜서(POR)** 부팅. 지금은 probe-rs 소프트 리셋(SRSR `CM33_REQUEST`)으로만 확인했다. 소프트 리셋도 BootROM 부터 다시 돌기 때문에 같을 것으로 본다
-- [ ] probe-rs 로 TCM 에서 도는 부트로더 디버그 (VSCode `Debug CM33` · 브레이크포인트)
+- [x] probe-rs 로 TCM 에서 도는 부트로더 디버그 — gdb 로 붙어 PC 를 읽었다 ([42](42-app-jump.md) 5절). VSCode 로는 확인 필요
 - [ ] QSPI 를 지우는 동안 UART 수신 (43, 5절)
 
 ## 9. 다음
 
-- [ ] 42 — TAG 검증과 점프. 앱을 `0x0404_1000` 으로 옮기고 `firm_ver_t` 를 넣고 `HW_RESET_BOOT 0`. 부트로더는 module 구조(boot · cmd)로
+- [x] 42 — TAG 검증과 점프. 앱을 `0x0404_1000` 으로 옮기고 `firm_ver_t` 를 넣고 `HW_RESET_BOOT 0`. 부트로더는 module 구조로 ([42](42-app-jump.md))
 - [ ] 43 — UART 다운로드 (cmd · `download.py`)

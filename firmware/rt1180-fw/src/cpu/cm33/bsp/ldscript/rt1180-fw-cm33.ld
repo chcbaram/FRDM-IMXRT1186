@@ -1,19 +1,18 @@
 /*
- * rt1180-fw CM33 — FlexSPI2 QSPI NOR 에서 XIP 로 실행
+ * rt1180-fw CM33 (앱) — FlexSPI2 QSPI NOR 에서 XIP 로 실행, 부트로더가 점프해 들어온다
  *
- * 근거: docs/01-boot-sequence.md 4절, docs/02-memory-map.md 4~5절
+ * 근거: docs/40-boot-architecture.md 2절, docs/42-app-jump.md
  * SDK 의 MIMXRT1186xxxxx_cm33_flexspi_nor.ld 를 바탕으로 쓰지 않는 영역
  * (rpmsg, core1 이미지, non-cacheable)을 걷어냈다. HyperRAM 은 SDK 처럼 .data 를 옮기지 않고
  * .psram_bss 로 큰 버퍼만 둔다.
  *
- *   0x0400_0400  FCB        .boot_hdr.conf       ROM 이 FlexSPI 설정을 읽는다
- *   0x0400_0800  XMCD       .boot_hdr.xmcd_data  ROM 이 HyperRAM 을 설정한다 (docs/27)
- *   0x0400_1000  컨테이너   .boot_hdr.container  ROM/ELE 가 이미지 위치를 읽는다
- *   0x0400_B000  벡터 테이블 → 코드 → .data 초기값
+ *   0x0400_0000  부트 슬롯 256 KB  부트 헤더 + 부트로더 (rt1180-boot, 이 이미지에는 없다)
+ *   0x0404_0000  TAG 4 KB          firm_tag_t (tools/mkfwtag.py 가 붙인다)
+ *   0x0404_1000  벡터 테이블 1 KB   부트로더가 VTOR · MSP · PC 를 여기서 읽는다
+ *   0x0404_1400  firm_ver_t        .version (hw.c)
+ *                코드 → .data 초기값 → .ram_function
+ *   0x0480_0000  CM7 슬롯 (넘으면 링크 단계에서 멈춘다)
  *   0x2860_0000  HyperRAM 뒤 2 MB → .psram_bss (CM7 몫은 앞 6 MB, docs/27)
- *
- * 이미지는 파티션 계획의 첫 256 KB(부트로더 자리) 안에 있어야 한다.
- * 넘치면 링크 단계에서 멈춘다.
  *
  * startup_MIMXRT1186_cm33.S 와 newlib crt0 가 쓰는 심볼 이름은 SDK 와 같게 둔다.
  */
@@ -23,19 +22,14 @@ ENTRY(Reset_Handler)
 __stack_size__ = DEFINED(__stack_size__) ? __stack_size__ : 0x2000;
 __heap_size__  = DEFINED(__heap_size__)  ? __heap_size__  : 0x1000;
 
-flash_start      = 0x04000000;
-slot_size        = 0x00040000;    /* 256 KB : 부트 헤더 + 이 이미지 */
-image_offset     = 0x0000B000;    /* SDK 와 같은 위치 */
+firm_start       = 0x04041000;    /* TAG(0x0404_0000) 바로 뒤 */
+firm_end         = 0x04800000;    /* CM7 슬롯 */
 vector_size      = 0x00000400;    /* 16 + 240 엔트리 */
 
 MEMORY
 {
-  FCB        (RX)  : ORIGIN = flash_start + 0x0400, LENGTH = 0x200
-  XMCD       (RX)  : ORIGIN = flash_start + 0x0800, LENGTH = 0x200
-  CONTAINER  (RX)  : ORIGIN = flash_start + 0x1000, LENGTH = 0x2000
-  VECTORS    (RX)  : ORIGIN = flash_start + image_offset, LENGTH = vector_size
-  FLASH      (RX)  : ORIGIN = flash_start + image_offset + vector_size,
-                     LENGTH = slot_size - image_offset - vector_size
+  VECTORS    (RX)  : ORIGIN = firm_start, LENGTH = vector_size
+  FLASH      (RX)  : ORIGIN = firm_start + vector_size, LENGTH = firm_end - firm_start - vector_size
 
   ITCM       (RWX) : ORIGIN = 0x0FFE0000, LENGTH = 128K    /* CM33 Code TCM   */
   DTCM       (RW)  : ORIGIN = 0x20000000, LENGTH = 128K    /* CM33 System TCM */
@@ -43,27 +37,11 @@ MEMORY
   PSRAM      (RW)  : ORIGIN = 0x28600000, LENGTH = 2M      /* HyperRAM 뒤 2 MB : CM33 몫 (SDK 와 같은 분할) */
 }
 
-/* 컨테이너 이미지 엔트리가 쓰는 값 (bsp/boot/boot_hdr.c) */
-__CONTAINER_IMG_OFFSET = ORIGIN(VECTORS) - ORIGIN(CONTAINER);
-__VECTOR_TABLE         = ORIGIN(VECTORS);
+/* firm_ver_t 가 쓰는 값 (hw/hw.c) */
+_fw_flash_begin = ORIGIN(VECTORS);
 
 SECTIONS
 {
-  .fcb :
-  {
-    KEEP(*(.boot_hdr.conf))
-  } > FCB
-
-  .xmcd :
-  {
-    KEEP(*(.boot_hdr.xmcd_data))
-  } > XMCD
-
-  .container :
-  {
-    KEEP(*(.boot_hdr.container))
-  } > CONTAINER
-
   .interrupts :
   {
     . = ALIGN(4);
@@ -71,6 +49,12 @@ SECTIONS
     KEEP(*(.isr_vector))
     . = ALIGN(4);
   } > VECTORS
+
+  /* 벡터 바로 뒤 (+0x400). 부트로더와 PC 도구가 이 자리에서 읽는다 */
+  .version :
+  {
+    KEEP(*(.version))
+  } > FLASH
 
   .text :
   {
@@ -159,10 +143,10 @@ SECTIONS
     __ram_function_end__ = .;
   } > ITCM
 
-  /* ROM 이 복사/검증할 이미지 크기 = 벡터부터 마지막 로드 바이트까지 */
-  __image_end = __ram_function_flash_start + (__ram_function_end__ - __ram_function_start__);
-  __CONTAINER_IMG_SIZE = __image_end - ORIGIN(VECTORS);
-  ASSERT(__image_end <= ORIGIN(FLASH) + LENGTH(FLASH), "image exceeds the 256 KB boot slot")
+  /* 이미지 = 벡터부터 마지막 로드 바이트까지. TAG 의 CRC 범위와 firm_ver_t.firm_size */
+  __image_end    = __ram_function_flash_start + (__ram_function_end__ - __ram_function_start__);
+  _fw_flash_size = __image_end - _fw_flash_begin;
+  ASSERT(__image_end <= ORIGIN(FLASH) + LENGTH(FLASH), "image runs into the CM7 slot")
 
   .bss (NOLOAD) :
   {

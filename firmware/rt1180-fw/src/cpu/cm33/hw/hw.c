@@ -3,6 +3,22 @@
 #include "clock.h"
 
 
+/* 앱 정보 — 벡터 테이블 바로 뒤(0x0404_1400, 링커 .version). N657X0 와 같은 형식이다.
+   부트로더(rt1180-boot)와 tools/mkfwtag.py 가 이 자리에서 읽는다.
+   firm_size 는 링커 심볼 값이다. TAG 의 fw_size 와 다르면 부트로더가 옛 TAG 로 본다 (docs/42). */
+extern uint32_t _fw_flash_begin;
+extern uint32_t _fw_flash_size;
+
+volatile const firm_ver_t firm_ver __attribute__((section(".version"), used)) =
+{
+  .magic_number = VERSION_MAGIC_NUMBER,
+  .version_str  = _DEF_FIRMWATRE_VERSION,
+  .name_str     = _DEF_BOARD_NAME,
+  .firm_addr    = (uint32_t)&_fw_flash_begin,
+  .firm_size    = (uint32_t)&_fw_flash_size,
+};
+
+
 bool hwInit(void)
 {
   //-- 순서가 중요하다. (titan-mini 와 같다)

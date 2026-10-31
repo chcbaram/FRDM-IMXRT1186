@@ -96,11 +96,11 @@ FlexSPI2 는 ROM 이 부팅할 때 우리 FCB 로 잡아 둔 상태 그대로다
 - [x] ROM 이 컨테이너 load address 를 **CM33 Code TCM** 으로 받아 복사 · 실행하는지 — **NS `0x0FFE_0000` 으로 된다** ([41](41-bootloader.md))
 - [x] non-XIP 컨테이너에서 ELE 가 이미지 해시를 검사하는지 — 해시 없이 부팅된다 ([41](41-bootloader.md))
 - [ ] 부트로더가 ROM API 로 QSPI 를 쓰는 동안 UART 수신이 끊기지 않는지 (TCM 실행의 이점)
-- [ ] 점프 뒤 앱 `SystemInit()` · `clockInit()` · `mpuInit()` 이 이미 설정된 상태에서 문제없는지
-- [ ] probe-rs 로 TCM 에서 도는 부트로더를 디버그할 수 있는지
+- [x] 점프 뒤 앱 `SystemInit()` · `clockInit()` · `mpuInit()` 이 이미 설정된 상태에서 문제없는지 — 문제없다 ([42](42-app-jump.md) 5절)
+- [x] probe-rs 로 TCM 에서 도는 부트로더를 디버그할 수 있는지 — gdb 로 붙어 PC `0x0FFE_xxxx` 를 읽고, `boot jump` 뒤 앱 브레이크포인트에서 멈췄다 ([42](42-app-jump.md) 5절)
 
 ## 9. 다음
 
 - [x] 41 — `firmware/rt1180-boot` 골격: 컨테이너 load = Code TCM, LED 파랑, UART · CLI · 로그 ([41](41-bootloader.md))
-- [ ] 42 — TAG 검증과 점프, 앱을 `0x0404_1000` 으로
+- [x] 42 — TAG 검증과 점프, 앱을 `0x0404_1000` 으로 ([42](42-app-jump.md))
 - [ ] 43 — UART 다운로드 (cmd · `download.py`)

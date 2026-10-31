@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="640" fill="#fbfbfd"/>
+  <text x="20" y="28" class="ttl">부트로더가 앱을 고르고 넘긴다 — TAG 검증과 점프</text>
+  <text x="20" y="48" class="s">rt1180-boot ap/ap.c bootUp() · ap/modules/boot/boot.c · bsp/bsp.c bspJumpToApp() → rt1180-fw (XIP)</text>
+  <rect x="20" y="66" width="420" height="34" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="230" y="88" class="b" text-anchor="middle" fill="#3730a3">부트로더 (Code TCM, 파랑)</text>
+  <rect x="520" y="66" width="420" height="34" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="730" y="88" class="b" text-anchor="middle" fill="#166534">앱 (QSPI XIP 0x0404_1000, 초록)</text>
+  <rect x="40" y="116" width="380" height="46" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="54" y="136" class="b" fill="#3730a3">resetInit()</text>
+  <text x="54" y="153" class="s">SRSR → 리셋 원인 · 더블클릭 → GPR 에 남김 (HW_RESET_BOOT 1)</text>
+  <rect x="40" y="174" width="380" height="46" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="54" y="194" class="b" fill="#3730a3">① MODE_BIT_BOOT ?</text>
+  <text x="54" y="211" class="s">앱의 reset boot · (43) FW_UPDATE</text>
+  <rect x="40" y="232" width="380" height="46" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="54" y="252" class="b" fill="#3730a3">② reset_count ≥ 2 ?</text>
+  <text x="54" y="269" class="s">SW3 를 300 ms 안에 두 번</text>
+  <rect x="40" y="290" width="380" height="46" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="54" y="310" class="b" fill="#3730a3">③ bootVerifyFirm() == TAG ?</text>
+  <text x="54" y="327" class="s">magic · tag_crc → 크기 → CRC-16 (75 KB, 8 ms)</text>
+  <rect x="40" y="348" width="380" height="46" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="54" y="368" class="b" fill="#3730a3">④ firm_addr == 0x0404_1000 ?</text>
+  <text x="54" y="385" class="s">앱은 XIP 로만 돈다</text>
+  <rect x="40" y="420" width="180" height="60" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="130" y="442" class="b" text-anchor="middle" fill="#b45309">머문다</text>
+  <text x="130" y="460" class="s" text-anchor="middle">moduleInit · CLI · boot</text>
+  <text x="130" y="474" class="s" text-anchor="middle">(no valid app 등)</text>
+  <text x="428" y="203" class="s">예 → 머문다</text>
+  <text x="428" y="261" class="s">예 → 머문다</text>
+  <text x="428" y="319" class="s">아니오 →</text>
+  <text x="428" y="335" class="s">머문다</text>
+  <line x1="48" y1="394" x2="60" y2="418" stroke="#d97706" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="240" y="420" width="180" height="150" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="330" y="440" class="b" text-anchor="middle" fill="#3730a3">bspJumpToApp()</text>
+  <text x="254" y="460" class="s">uartClose</text>
+  <text x="254" y="478" class="s">PRIMASK 막기</text>
+  <text x="254" y="496" class="s">SysTick · NVIC 끄기</text>
+  <text x="254" y="514" class="s">XCACHE_PC 무효화</text>
+  <text x="254" y="532" class="s">MSPLIM 0 · CONTROL 0</text>
+  <text x="254" y="550" class="s">VTOR · MSP · bx PC</text>
+  <line x1="330" y1="396" x2="330" y2="418" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="540" y="420" width="380" height="46" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="554" y="440" class="b" fill="#166534">Reset_Handler (SDK startup)</text>
+  <text x="554" y="457" class="s">VTOR · MSP · MSPLIM 다시 · SystemInit · .data/.bss · cpsie i</text>
+  <rect x="540" y="478" width="380" height="46" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="554" y="498" class="b" fill="#166534">bspInit → clockInit · mpuInit</text>
+  <text x="554" y="515" class="s">이미 켜진 PLL 을 다시 잡아도 문제없다 (실측)</text>
+  <rect x="540" y="536" width="380" height="46" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="554" y="556" class="b" fill="#166534">hwInit (HW_RESET_BOOT 0)</text>
+  <text x="554" y="573" class="s">리셋 원인은 GPR 에서 읽기만 · CM7 기동 · FreeRTOS</text>
+  <line x1="422" y1="495" x2="538" y2="445" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="540" y="128" class="s">QSPI</text>
+  <rect x="540" y="138" width="380" height="34" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="554" y="160" class="m">0x0404_0000</text>
+  <text x="906" y="160" class="b" text-anchor="end" fill="#b45309">TAG 4 KB</text>
+  <rect x="540" y="180" width="380" height="34" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="554" y="202" class="m">0x0404_1000</text>
+  <text x="906" y="202" class="b" text-anchor="end" fill="#166534">벡터 1 KB</text>
+  <rect x="540" y="222" width="380" height="34" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="554" y="244" class="m">0x0404_1400</text>
+  <text x="906" y="244" class="b" text-anchor="end" fill="#166534">firm_ver_t</text>
+  <rect x="540" y="264" width="380" height="34" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="554" y="286" class="m">0x0404_1450 ~</text>
+  <text x="906" y="286" class="b" text-anchor="end" fill="#166534">코드 · .data 초기값</text>
+  <text x="540" y="322" class="s">TAG = magic · fw_addr · fw_size · fw_crc · tag_crc (N657X0 와 같다)</text>
+  <text x="540" y="340" class="s">probe-rs 기록: tools/mkfwtag.py 가 붙인 -tag.bin 을 0x0404_0000 에</text>
+  <text x="540" y="358" class="s">UART 다운로드(43): 부트로더가 앱을 다 쓰고 TAG 를 마지막에</text>
+  <text x="20" y="600" class="s">실측: 리셋 → 앱 점프 정상 (CM7 기동 · peer echo 100/100), reset boot → 머문다, TAG 지움 → no valid app, boot jump → 앱</text>
+  <text x="20" y="620" class="s">디버그: 부트로더에 머문 채 attach → 앱 bspInit 에 브레이크포인트 → boot jump 하면 거기서 멈춘다</text>
+</svg>

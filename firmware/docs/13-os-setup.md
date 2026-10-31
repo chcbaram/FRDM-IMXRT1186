@@ -150,20 +150,22 @@ probe-rs 확장은 이름이 세 가지라 헷갈린다. 모두 같은 확장이
 |---|---|
 | 빌드 | `Cmd/Ctrl + Shift + B` (`build-build`) |
 | 기록 | 태스크 `flash` |
-| 디버그 | 실행 및 디버그 → `Debug CM33` (빌드 → 기록 → 리셋 후 정지) |
+| 디버그 | 실행 및 디버그 → `Flash + Debug CM33 (Cortex-Debug)` (빌드 → TAG 붙여 기록 → GDB 서버 → 리셋 → 앱 `main` 에서 멈춤) 또는 `Flash + Attach CM33` (probe-rs 확장, 점프한 뒤 붙는다) |
 | 실행 중 붙기 | `Attach CM33` (기록하지 않는다) |
 
-`Debug CM33` 은 시작할 때마다 elf 를 기록한다. `verifyBeforeFlashing` 이 켜져 있어 내용이 같으면 쓰지 않는다. 기록 없이 붙으려면 `Attach CM33` 을 쓴다.
+부트로더(`rt1180-boot`)가 먼저 기록되어 있어야 한다([41](41-bootloader.md)). 기록 없이 붙으려면 `Attach CM33` 을 쓴다. 로드맵 41 전까지는 `Debug CM33`(elf 를 직접 기록하고 리셋 후 정지)이었다. 앱이 부트로더 뒤로 옮겨 가면서 바꿨다([42](42-app-jump.md) 5절).
 
 #### main 에서 멈추려면
 
 probe-rs 확장에는 cortex-debug 의 `runToEntryPoint` 같은 옵션이 없다. `haltAfterReset` 으로 리셋 직후 멈추면 **BootROM 안**이다. 이 칩은 리셋되면 ROM 부터 돌기 때문이다.
 
-1. `main.c` 의 `bspInit();` 에 브레이크포인트를 건다. VSCode 가 워크스페이스별로 기억하므로 한 번만 하면 된다.
-2. `Debug CM33` 을 시작한다. 소스가 없는 ROM 주소에서 멈춘다.
-3. F5 를 누른다. ROM 이 FlexSPI 와 컨테이너를 처리한 뒤 `main` 에서 멈춘다.
+앱의 초기화부터 보려면 부트로더에 머물게 한 뒤 붙는다([42](42-app-jump.md) 5절).
 
-같은 흐름을 명령줄 GDB 로 확인한 결과는 다음과 같다.
+1. 앱 CLI 에서 `reset boot` → 부트로더에 머문다 (D4 파랑).
+2. `Attach CM33` 으로 붙고 앱 `main.c` 의 `bspInit();` 에 브레이크포인트를 건다.
+3. 부트로더 CLI 에서 `boot jump` → 앱 `main` 에서 멈춘다.
+
+로드맵 41 전에는 `Debug CM33`(`haltAfterReset`)으로 ROM 에서 멈춘 뒤 F5 로 `main` 까지 갔다. 아래는 그때 명령줄 GDB 로 확인한 결과다.
 
 ```
 $ probe-rs gdb --chip MIMXRT1180 --reset-halt     # 다른 터미널에서 arm-none-eabi-gdb 로 접속

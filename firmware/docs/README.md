@@ -2,17 +2,17 @@
 
 i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스위치, EtherCAT) 기반 FRDM-IMXRT1186 보드의 브링업 기록. 제조사 IDE/SDK 를 설치하지 않고 gcc + CMake + Ninja + probe-rs 만으로 진행한다.
 
-## 현재 상태 (2026-10-09)
+## 현재 상태 (2026-10-31)
 
 | | |
 |---|---|
 | 보드 | FRDM-IMXRT1186 (SCH-95302 Rev C) · MCU `MIMXRT1186CVJ8C` (LFBGA196) |
 | 디버거 | 온보드 MCU-Link (CMSIS-DAP) · probe-rs 0.32 |
-| 펌웨어 | `firmware/rt1180-fw` — 두 코어 **FreeRTOS** · module · thread · event. CM33 240 MHz: LED(PWM) · UART · CLI · 로그 · 버튼 · RTC · reset · **QSPI 지우기/쓰기** · **HyperRAM 8 MB** · MPU/캐시. CM7 792 MHz: 기동 · 캐시/MPU · cmd 스레드 (doorbell) |
+| 펌웨어 | **부트로더** `firmware/rt1180-boot` (Code TCM, TAG 검증 → 점프, [42](42-app-jump.md)) + **앱** `firmware/rt1180-fw` (`0x0404_1000` XIP) — 두 코어 **FreeRTOS** · module · thread · event. CM33 240 MHz: LED(PWM) · UART · CLI · 로그 · 버튼 · RTC · reset · **QSPI 지우기/쓰기** · **HyperRAM 8 MB** · MPU/캐시. CM7 792 MHz: 기동 · 캐시/MPU · cmd 스레드 (doorbell) |
 | 부팅 | QSPI(W25Q128, FlexSPI2) · 서명 없는 컨테이너 · 부트 헤더 직접 생성. 앱은 XIP, **부트로더 `rt1180-boot` 는 Code TCM (non-XIP)** ([41](41-bootloader.md)) |
 | 클럭 | CM33 **240 MHz** (SYS_PLL3 ÷ 2, Normal Drive) · 버스 132 MHz · `hwinfo clock` 로 CCM 실측 ([22](22-clock.md)) |
 | SDK | MCUXpresso SDK · FreeRTOS-Kernel 에서 193개 파일만, 커밋/태그 고정 ([11](11-sdk-vendoring.md)) |
-| 빌드 | CM33: FLASH 74,392 B / 211 KB · DTCM 62,648 B / 128 KB (RTOS 힙 32 KB 포함). CM7: ITCM 23,836 B / 256 KB · DTCM 53,088 B / 256 KB |
+| 빌드 | 부트로더: Code TCM 48,656 B / 128 KB. CM33 앱: FLASH 74,112 B · DTCM 62,648 B / 128 KB (RTOS 힙 32 KB 포함). CM7: ITCM 23,836 B / 256 KB · DTCM 53,088 B / 256 KB |
 | 콘솔 | **LPUART1 → MCU-Link VCOM** (J23 하나로 기록·디버그·콘솔) · 115200 8N1 · `hwinfo boot` 로 부트 모드/퓨즈/클럭 확인 |
 | CM7 | **기동 확인** — ELE kick-off, ITCM 실행, 공유 블록 핸드셰이크 ([25](25-cm7-boot.md)). `-DBUILD_CM7=ON` |
 
@@ -21,27 +21,29 @@ i.MX RT1186(Cortex-M33 부트 코어 + Cortex-M7 800 MHz, EdgeLock, NETC TSN 스
 ```bash
 python3 tools/setup_tools.py              # 도구 점검 + SVD (새 PC 에서 처음 한 번)
 
-cd firmware/rt1180-fw
+cd firmware/rt1180-boot                   # 부트로더 (한 번 쓰면 된다)
 cmake -S . -B build -G Ninja
-cmake --build build
-cmake --build build --target flash        # D4 녹색 500 ms 점멸
+cmake --build build --target flash        # 앱이 없으면 D4 파랑 500 ms 점멸
+
+cd ../rt1180-fw                           # 앱
+cmake -S . -B build -G Ninja -DBUILD_CM7=ON
+cmake --build build --target flash        # TAG + 앱 + CM7 → 부트로더가 점프 → D4 녹색
 
 # 콘솔: /dev/cu.usbmodem*3 115200 (baram-term 등) → 부팅 배너 + cli#
 ```
 
-VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다. 부트로더는 `firmware/rt1180-boot` 에서 같은 명령 (D4 파랑, [41](41-bootloader.md)) · `prj/rt1180-boot.code-workspace`.
+VSCode 는 `firmware/rt1180-fw` 폴더(또는 `prj/rt1180-fw-cm33.code-workspace`)를 연다. 부트로더는 `firmware/rt1180-boot`. 디버그 구성 · 태스크는 각 `.vscode/` 에 있다 — `Flash + Debug CM33 (Cortex-Debug)` 가 `main` 에서 멈춘다([42](42-app-jump.md) 5절, [12](12-project-skeleton.md) 5절). 앱에서 `reset boot` 하면 부트로더에 머문다.
 
 ### 다음 작업
 
-1. **42 TAG 검증 · 점프** (앱을 `0x0404_1000` 으로) → 43 UART 다운로드. 지금은 부트로더와 앱이 같은 부트 슬롯을 쓰므로 마지막에 기록한 쪽만 돈다 ([41](41-bootloader.md) 6절)
-2. 손으로 하는 시험 — SW4 누름 → `EVENT_BUTTON` ([29](29-event.md) 4절, [23](23-button-swtimer.md) 6절)
+1. **43 UART 다운로드** — 부트로더 cmd 모듈 + `download.py` (N657X0)
+2. 손으로 하는 시험 — SW3 두 번 → 부트로더에 머묾 ([42](42-app-jump.md) 7절), 전원 재인가 부팅, SW4 누름 → `EVENT_BUTTON` ([29](29-event.md) 4절)
 3. TODO — `cli cm7` 원격 CLI ([90](90-todo-cm7-remote-cli.md))
 
 ### 미해결 과제
 
 | 과제 | 왜 중요한가 | 언제 |
 |---|---|---|
-| VSCode 에서 main 자동 정지 | probe-rs 확장에 `runToEntryPoint` 가 없다. 지금은 브레이크포인트를 걸고 ROM 에서 F5. cortex-debug + `probe-rs gdb` 조합을 검토 중 | 21 전후 |
 | Windows / Linux 환경 미검증 | 절차만 적어 두었다 ([13](13-os-setup.md)) | 다른 PC 를 쓸 때 |
 | TRDC 권한 | SDK 예제는 시작할 때 TRDC 를 연다. GPIO 에는 필요 없었지만 DMA/CM7/NETC 에서는 필요할 수 있다 | 24~25 |
 | VCOM 앞쪽 바이트 손실 | 출력 덩어리 앞 0~8 B 가 가끔 빠진다. 클럭과 무관. MCU 수신은 정상 ([22](22-clock.md) 5절) | 로직 분석기 확보 시 |
@@ -100,7 +102,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다. �
 | 30~33 | USB(tinyusb CDC) · CAN-FD · I2C · SPI | 예정 |
 | [40](40-boot-architecture.md) | **부트 구조 (설계)** — 부트로더(`rt1180-boot`, Code TCM non-XIP) / 앱(XIP `0x0404_1000`), 파티션 확정, TAG = N657X0 `firm_tag_t`, 머무는 조건, 점프 절차 | 설계 |
 | [41](41-bootloader.md) | **부트로더 골격** — `firmware/rt1180-boot`, ROM 이 Code TCM `0x0FFE_0000` 으로 복사해 실행 (non-XIP). LED 파랑 · UART · CLI · QSPI. 앱 드라이버를 경로로 공유 | ✅ (POR 부팅 · TCM 디버그 확인 남음) |
-| 42 | 앱 TAG (`firm_tag_t`, CRC-16 — N657X0 와 같다) 검증과 점프, 앱을 `0x0404_1000` 으로 | 예정 |
+| [42](42-app-jump.md) | **앱 TAG 검증과 점프** — `firm_tag_t` · `firm_ver_t` (N657X0 와 같다), 앱을 `0x0404_1000` 으로, `tools/mkfwtag.py`, `bspJumpToApp`, 디버그는 attach | ✅ (SW3 더블클릭 확인 남음) |
 | 43 | UART 다운로드 (cmdproto, TAG 를 마지막에 쓰는 안전 갱신) | 예정 |
 | 44 | CM7 이미지 적재 · 통합 이미지 | 예정 |
 | 45~47 | USB 다운로드 · 웹 업데이터 · 네트워크 업데이트 | 예정 |
@@ -150,6 +152,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다. �
 | ![](images/hyperram-xmcd.svg) | [27](27-hyperram.md) HyperRAM 과 두 코어의 캐시 |
 | ![](images/boot-architecture.svg) | [40](40-boot-architecture.md) 부트 구조 |
 | ![](images/boot-tcm-load.svg) | [41](41-bootloader.md) 부트로더 TCM 로드 |
+| ![](images/boot-jump.svg) | [42](42-app-jump.md) TAG 검증과 점프 |
 | ![](images/cm7-remote-cli.svg) | [90](90-todo-cm7-remote-cli.md) CM7 원격 CLI 통로 세 안 (TODO) |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 | ![](images/cm7-debug-path.svg) | [14](14-cm7-debug.md) CM7 디버그 경로 |

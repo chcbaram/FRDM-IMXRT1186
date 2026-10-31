@@ -5,7 +5,7 @@
 #include "bsp.h"
 
 
-#define _DEF_FIRMWATRE_VERSION    "V261009R2"
+#define _DEF_FIRMWATRE_VERSION    "V261031R1"
 #define _DEF_BOARD_NAME           "FRDM-IMXRT1186-CM33"
 
 #define _HW_DEF_THREAD_MAIN_PRI       2
@@ -51,7 +51,7 @@
 #define      HW_RTC_ECC_VALID       6
 
 #define _USE_HW_RESET
-#define      HW_RESET_BOOT          1                 // 부트로더(41)가 생기면 앱은 0
+#define      HW_RESET_BOOT          0
 #define      HW_RESET_DBLCLK_MS     300
 #define      HW_RESET_DBLCLK_CNT    2
 

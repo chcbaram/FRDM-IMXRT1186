@@ -59,6 +59,8 @@ set(FW_SRC_FILES
   ${FW_CORE_DIR}/hw/driver/reset.c
   ${FW_CORE_DIR}/hw/driver/qspi.c
   ${FW_CORE_DIR}/hw/driver/hw_info.c
+
+  ${FW_CORE_DIR}/ap/modules/module.c
   )
 
 file(GLOB_RECURSE FW_CORE_SRC_FILES CONFIGURE_DEPENDS
@@ -95,9 +97,11 @@ add_executable(${EXECUTABLE}
 target_include_directories(${EXECUTABLE} PRIVATE
   src
   src/ap
+  src/ap/modules
   src/bsp
   src/hw
 
+  ${FW_CORE_DIR}/ap/modules
   ${FW_CORE_DIR}/bsp
   ${FW_CORE_DIR}/hw/driver
 

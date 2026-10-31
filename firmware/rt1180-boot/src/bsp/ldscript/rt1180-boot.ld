@@ -113,6 +113,16 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } > ITCM AT> FLASH
 
+  /* 모듈 등록 테이블 (앱과 같은 MODULE_DEF 구조) */
+  .module :
+  {
+    . = ALIGN(4);
+    _smodule = .;
+    KEEP (*(.module))
+    KEEP (*(.module*))
+    _emodule = .;
+  } > ITCM AT> FLASH
+
   __etext = .;
 
   /* .data : 초기값은 이미지 끝(플래시 → ROM 이 Code TCM 으로 복사), 실행은 System TCM */
@@ -140,7 +150,7 @@ SECTIONS
   __VECTOR_TABLE         = ADDR(.interrupts);
 
   ASSERT(ADDR(.interrupts) == ORIGIN(ITCM), "vector table must start Code TCM")
-  ASSERT(ADDR(.fini_array) - ORIGIN(ITCM) == LOADADDR(.fini_array) - __image_lma_start,
+  ASSERT(ADDR(.module) - ORIGIN(ITCM) == LOADADDR(.module) - __image_lma_start,
          "Code TCM and flash offsets differ")
   ASSERT(__CONTAINER_IMG_SIZE <= LENGTH(ITCM), "boot image exceeds Code TCM (128 KB)")
 

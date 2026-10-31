@@ -34,7 +34,6 @@ firmware/rt1180-fw/
     │   │   │   └── modules/    module.c (MODULE_DEF) · common/cli · common/cmd (cmd_task.c · driver/drv_ipc.c · process/cmd_peer.c)
     │   │   ├── bsp/            bsp.c (delay, millis, micros), mpu.c, clock.c, syscalls.c
     │   │   │   ├── rtos/       FreeRTOSConfig.h, rtos.c (훅) — docs/28
-    │   │   │   ├── boot/       boot_hdr.c — FCB + 컨테이너
     │   │   │   └── ldscript/   rt1180-fw-cm33.ld
     │   │   └── hw/             hw.c (초기화 순서, 배너), hw_def.h (_USE_HW_*), driver/ led · pwm · uart · cli · log · event · qspi · psram · ipc · hw_info · osal/thread …
     │   ├── cm7/                CM7 (로드맵 25). 같은 ap/bsp/hw 구조 — modules/common/cmd, osal/thread, log (버퍼만)
@@ -91,27 +90,14 @@ titan-mini 와 같다. `hw_def.h` 에는 `_USE_HW_LED` 와 `HW_LED_MAX_CH` 만 �
 
 | 영역 | 주소 | 크기 | 섹션 |
 |---|---|---|---|
-| FCB | `0x0400_0400` | 512 B | `.boot_hdr.conf` |
-| XMCD | `0x0400_0800` | 512 B | `.boot_hdr.xmcd_data` (비움) |
-| CONTAINER | `0x0400_1000` | 8 KB | `.boot_hdr.container` |
-| VECTORS | `0x0400_B000` | 1 KB | `.isr_vector` |
-| FLASH | `0x0400_B400` | ~211 KB | `.text`, `.rodata`, `.module`, `.data` 초기값 |
+| VECTORS | `0x0404_1000` | 1 KB | `.isr_vector` |
+| FLASH | `0x0404_1400` | ~7.7 MB | `.version`(`firm_ver_t`, 맨 앞), `.text`, `.rodata`, `.module`, `.data` 초기값 |
 | ITCM | `0x0FFE_0000` | 128 KB | `.ram_function` (`CodeQuickAccess`) |
 | DTCM | `0x2000_0000` | 128 KB | `.data`, `.bss`, 힙 4 KB, 스택 8 KB (끝) |
 
-FLASH 영역을 **첫 256 KB 슬롯에서 끝나게** 잡았다. 이미지가 커져서 넘치면 링크가 멈춘다. 이 자리는 나중에 부트로더가 쓴다([02-memory-map.md](02-memory-map.md) 5절).
+FLASH 영역은 CM7 슬롯(`0x0480_0000`) 앞에서 끝난다. 넘치면 링크가 멈춘다. 앞의 `0x0400_0000` 부트 슬롯(FCB · XMCD · 컨테이너 · 부트로더)과 `0x0404_0000` TAG 는 이 이미지에 없다. 부트 헤더는 부트로더 `rt1180-boot` 가 가지고([41](41-bootloader.md)), TAG 는 빌드 뒤 `tools/mkfwtag.py` 가 bin 앞에 붙인다([42](42-app-jump.md)).
 
-### 컨테이너가 링커 심볼을 읽는다
-
-`boot_hdr.c` 의 컨테이너는 이미지 위치와 크기를 상수로 적지 않는다. 링커가 계산한 절대 심볼을 쓴다.
-
-```
-__CONTAINER_IMG_OFFSET = ORIGIN(VECTORS) - ORIGIN(CONTAINER);       // 0xA000
-__CONTAINER_IMG_SIZE   = __image_end - ORIGIN(VECTORS);             // 벡터 ~ 마지막 로드 바이트
-__VECTOR_TABLE         = ORIGIN(VECTORS);                           // load = entry
-```
-
-`__image_end` 는 `.data` 초기값과 `.ram_function` 원본까지 포함한 끝이다. 이 크기가 작으면 ROM 이 non-XIP 로 복사할 때 잘린다. XIP 에서는 크기를 쓰지 않지만 부트로더 단계를 위해 맞춰 둔다.
+로드맵 41 전까지는 이 이미지가 부트 헤더를 가지고 `0x0400_B000` 에서 돌았다. 그때 쓰던 `boot_hdr.c` 와 컨테이너 링커 심볼은 부트로더로 옮겼다.
 
 ## 4. 크로스 플랫폼 규칙
 
@@ -129,25 +115,34 @@ titan-mini 의 규칙을 그대로 지킨다. 실제로 돌려 본 것은 macOS 
 
 ## 5. VSCode
 
-`prj/` 에 워크스페이스가 셋 있다. 모두 같은 폴더(`../`)를 연다.
+**디버그 구성과 태스크는 `.vscode/launch.json` · `.vscode/tasks.json` 에 둔다.** 폴더(`rt1180-fw`, `rt1180-boot`)를 그대로 열어도, `prj/` 의 워크스페이스로 열어도 같은 구성이 보인다. 워크스페이스 파일에는 폴더 설정(숨기는 폴더 · IntelliSense)만 남겼다.
 
-| 파일 | 숨기는 것 | IntelliSense | 디버그 구성 |
-|---|---|---|---|
-| `rt1180-fw-cm33.code-workspace` | `src/cpu/cm7` | `build/cm33/compile_commands.json` | **Debug CM33**, **Attach CM33** |
-| `rt1180-fw-cm7.code-workspace` | `src/cpu/cm33` | `build/cm7/compile_commands.json` | **Flash + Attach CM7**, **Attach CM7** ([14](14-cm7-debug.md)) |
-| `rt1180-fw.code-workspace` | — | CM33 | **Flash + Attach CM33 + CM7**, **Attach CM33 + CM7**, **Attach CM33**, **Attach CM7** |
+| `prj/` 워크스페이스 | 숨기는 것 | IntelliSense |
+|---|---|---|
+| `rt1180-fw-cm33.code-workspace` | `src/cpu/cm7` | `build/cm33/compile_commands.json` |
+| `rt1180-fw-cm7.code-workspace` | `src/cpu/cm33` | `build/cm7/compile_commands.json` |
+| `rt1180-fw.code-workspace` | — | CM33 |
 
-CM7 이 들어간 두 워크스페이스(`-cm7`, 전체)는 configure 태스크가 `-DBUILD_CM7=ON` 으로 돈다. CM33 워크스페이스는 옵션을 넘기지 않아 CMake 캐시에 남은 값을 쓴다.
+| 디버그 구성 (`rt1180-fw/.vscode/launch.json`) | 방식 |
+|---|---|
+| **Flash + Debug CM33 (Cortex-Debug)** · **Attach CM33 (Cortex-Debug)** | GDB + probe-rs GDB 서버 ([42](42-app-jump.md) 5절). `main` 에서 멈춘다 |
+| **Flash + Attach CM33** · **Attach CM33** | probe-rs 확장 |
+| **Flash + Attach CM7** · **Attach CM7** | probe-rs 확장 ([14](14-cm7-debug.md)) |
+| **Flash + Attach CM33 + CM7** · **Attach CM33 + CM7** | probe-rs 확장, 두 코어 |
 
-> 같은 폴더를 열기 때문에 `.vscode/launch.json` 은 세 워크스페이스가 공유하게 된다. 그래서 디버그 구성은 `.vscode` 가 아니라 **각 워크스페이스 파일의 `"launch"` 안에** 둔다.
->
-> ⚠️ **태스크도 워크스페이스 파일에 둔다.** 워크스페이스 파일의 launch 는 `preLaunchTask` 를 **같은 워크스페이스 파일의 `"tasks"` 에서만** 찾는다. 처음에 태스크를 `.vscode/tasks.json` 에 두었더니 빌드(`Cmd+Shift+B`)는 되는데 디버그를 시작하면 *"Could not find the task 'build-build'"* 가 떴다. 그래서 `.vscode/tasks.json` 을 지우고 네 태스크(`build-configure`, `build-build`, `build-clean`, `flash`)를 세 워크스페이스 파일에 똑같이 넣었다. 태스크를 고칠 때는 세 파일을 같이 고친다(configure 의 `-DBUILD_CM7=ON` 만 다르다). `.vscode/` 에는 `c_cpp_properties.json` 과 `extensions.json` 만 남는다.
+부트로더(`rt1180-boot/.vscode`)도 같은 구성이다: Cortex-Debug 두 개 + probe-rs `Debug CM33` · `Attach CM33`.
 
-디버그는 `probe-rs-debug` 타입이다. `Debug CM33` 의 동작은 다음과 같다.
+| 태스크 | 내용 |
+|---|---|
+| `build-configure` · `build-build` · `build-clean` | CMake. 앱은 configure 가 `-DBUILD_CM7=ON` 으로 돈다 |
+| `flash` | `cmake --build build --target flash` |
+| `gdb-server` | `tools/gdbserver.py start` — `probe-rs gdb` 를 떼어 낸 프로세스로 띄우고 `Firing up GDB stub` 이 나오면 끝난다. 남아 있던 서버는 먼저 내린다 |
+| `flash + gdb-server` | 기록한 뒤 서버. Cortex-Debug 의 `preLaunchTask` |
+| `gdb-server-stop` | `tools/gdbserver.py stop` (`build/probe-rs-gdb.pid`). Cortex-Debug 의 `postDebugTask` |
 
-1. `build-build` 태스크를 실행한다.
-2. elf 를 기록한다.
-3. 리셋 후 멈춘다.
+> 처음에는 구성을 워크스페이스 파일에 두었다. 같은 폴더를 여는 워크스페이스 셋이 서로 다른 구성을 가지게 하려던 것이다. 이때 launch 는 워크스페이스에, 태스크는 `.vscode/tasks.json` 에 두었더니 *"Could not find the task 'build-build'"* 가 떴다(launch 와 태스크는 같은 곳에 있어야 한다). 그 뒤 폴더만 열면 구성이 보이지 않는 불편이 커서 둘 다 `.vscode` 로 옮겼다.
+
+디버그 타입은 둘이다. 로드맵 42 부터 앱은 부트로더가 점프해 들어오므로 probe-rs 구성은 **모두 attach** 다. `Flash + Attach` 는 `flash` 태스크(TAG 를 붙인 bin 기록 → 리셋) 뒤에 붙는다. elf 를 디버거가 직접 쓰면 TAG 가 옛 것으로 남아 부트로더가 앱을 실행하지 않기 때문이다. Cortex-Debug 구성도 GDB 로 elf 를 쓰지 않고(`overrideLaunchCommands`), `flash` 태스크로 쓴 뒤 `monitor reset halt` 부터 시작한다([42](42-app-jump.md) 5절).
 
 SVD 는 `tools/svd/MIMXRT1186_cm33.xml` 이다(`setup_tools.py` 가 준비).
 

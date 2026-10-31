@@ -6,8 +6,10 @@
 #
 # probe-rs 는 MIMXRT1180 타깃과 FlexSPI2 QSPI 기록 알고리즘을 내장하고 있어서
 # 팩 파일이나 제조사 도구가 필요 없다. 온보드 MCU-Link(CMSIS-DAP)를 그대로 쓴다.
-# elf 의 로드 주소(0x0400_0400 FCB, 0x0400_1000 컨테이너, 0x0400_B000 이미지)를
-# 보고 필요한 섹터만 지우고 쓴다.
+#
+# 앱은 TAG 를 붙인 bin(-tag.bin)을 0x0404_0000 에 쓴다 (docs/42). elf 를 그대로 쓰면
+# TAG 가 옛 것으로 남아 부트로더가 앱을 실행하지 않는다. 부트 슬롯(0x0400_0000~,
+# 부트 헤더 + 부트로더)은 rt1180-boot 의 flash 타깃이 쓴다.
 #
 # 쓰고 나면 리셋한다. probe-rs 의 리셋은 SWD 로 SYSRESETREQ 를 쓰는 소프트 리셋이다
 # (SRSR = CM33_REQUEST, docs/24-rtc-reset.md). BootROM 부터 다시 부팅하지만 POR 이
@@ -18,7 +20,6 @@ find_program(PROBE_RS_EXECUTABLE NAMES probe-rs probe-rs.exe)
 set(PROBE_RS_CHIP "MIMXRT1180" CACHE STRING "probe-rs chip name")
 
 if(PROBE_RS_EXECUTABLE)
-  set(_flash_elfs $<TARGET_FILE:${PRJ_NAME}-cm33.elf>)
   set(_flash_deps ${PRJ_NAME}-cm33.elf)
 
   #-- CM7 이미지는 elf 가 아니라 헤더를 붙인 bin(.img)을 CM7 슬롯에 쓴다.
@@ -42,7 +43,9 @@ if(PROBE_RS_EXECUTABLE)
     COMMAND ${PROBE_RS_EXECUTABLE} download
             --chip ${PROBE_RS_CHIP}
             --verify
-            ${_flash_elfs}
+            --binary-format bin
+            --base-address 0x04040000
+            ${CMAKE_BINARY_DIR}/cm33/${PRJ_NAME}-cm33-tag.bin
     COMMAND ${PROBE_RS_EXECUTABLE} reset
             --chip ${PROBE_RS_CHIP}
     DEPENDS ${_flash_deps}

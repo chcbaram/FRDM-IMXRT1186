@@ -132,6 +132,7 @@ typedef struct
   char     version_str[32];
   char     name_str[32];
   uint32_t firm_addr;
+  uint32_t firm_size;         // 링커가 아는 이미지 크기. 0 이면 미신고 (N657X0 와 같다)
 } firm_ver_t;
 
 typedef struct 
