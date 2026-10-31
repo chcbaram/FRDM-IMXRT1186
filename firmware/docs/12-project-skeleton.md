@@ -45,6 +45,8 @@ firmware/rt1180-fw/
         └── nxp/                SDK 에서 골라 온 것 (SOURCES.md)
 ```
 
+부트로더는 옆 폴더 `firmware/rt1180-boot` 다([41](41-bootloader.md) 2절). main · ap · bsp · hw 만 가지고, 공통 헤더 · SDK · CM33 드라이버는 위 `src/` 를 CMake 경로로 가져온다.
+
 ### 계층 규칙 — ap 는 벤더 HAL 을 모른다
 
 | 층 | NXP SDK / 레지스터 |

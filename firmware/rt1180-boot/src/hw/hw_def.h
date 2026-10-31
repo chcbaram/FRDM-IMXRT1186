@@ -1,0 +1,60 @@
+#ifndef HW_DEF_H_
+#define HW_DEF_H_
+
+
+#include "bsp.h"
+
+
+#define _DEF_FIRMWATRE_VERSION    "B261031R1"
+#define _DEF_BOARD_NAME           "FRDM-IMXRT1186-BOOT"
+
+
+#define _USE_HW_INFO
+#define _USE_HW_QSPI
+
+#define _USE_HW_LED
+#define      HW_LED_MAX_CH          3
+#define      HW_LED_DEF_DUTY        10
+
+#define _USE_HW_RTC
+#define      HW_RTC_BOOT_MODE       0
+#define      HW_RTC_RESET_BITS      1
+#define      HW_RTC_RESET_CNT       2
+#define      HW_RTC_BOOT_TRY        3
+#define      HW_RTC_FAULT_CNT       4
+#define      HW_RTC_ECC_ADDR        5
+#define      HW_RTC_ECC_VALID       6
+
+#define _USE_HW_RESET
+#define      HW_RESET_BOOT          1
+#define      HW_RESET_DBLCLK_MS     300
+#define      HW_RESET_DBLCLK_CNT    2
+
+#define _USE_HW_UART
+#define      HW_UART_MAX_CH         1
+#define      HW_UART_CH_CLI         _DEF_UART1
+#define      HW_UART_CH_LOG         _DEF_UART1
+
+#define _USE_HW_CLI
+#define      HW_CLI_CMD_LIST_MAX    32
+#define      HW_CLI_CMD_NAME_MAX    16
+#define      HW_CLI_LINE_HIS_MAX    8
+#define      HW_CLI_LINE_BUF_MAX    64
+
+#define _USE_HW_LOG
+#define      HW_LOG_CH              HW_UART_CH_LOG
+#define      HW_LOG_BOOT_BUF_MAX    1024
+#define      HW_LOG_LIST_BUF_MAX    1024
+
+
+//-- CLI
+//
+#define _USE_CLI_HW_UART             1
+#define _USE_CLI_HW_LOG              1
+#define _USE_CLI_HW_INFO             1
+#define _USE_CLI_HW_RTC              1
+#define _USE_CLI_HW_RESET            1
+#define _USE_CLI_HW_QSPI             1
+
+
+#endif

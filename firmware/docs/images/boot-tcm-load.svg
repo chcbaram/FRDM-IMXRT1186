@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="600" fill="#fbfbfd"/>
+  <text x="20" y="28" class="ttl">부트로더는 QSPI 에 있지만 Code TCM 에서 돈다 — non-XIP 컨테이너</text>
+  <text x="20" y="48" class="s">rt1180-boot · bsp/ldscript/rt1180-boot.ld (> ITCM AT> FLASH) · bsp/boot/boot_hdr.c (load = entry = 0x0FFE_0000)</text>
+  <rect x="20" y="70" width="300" height="34" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="170" y="92" class="b" text-anchor="middle" fill="#1e40af">QSPI NOR (LMA, 기록 위치)</text>
+  <rect x="640" y="70" width="300" height="34" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="790" y="92" class="b" text-anchor="middle" fill="#3730a3">CM33 TCM (VMA, 실행 위치)</text>
+  <rect x="40" y="120" width="260" height="32" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="52" y="140" class="m">0x0400_0400</text>
+  <text x="288" y="140" class="b" text-anchor="end" fill="#1e40af">FCB</text>
+  <rect x="40" y="160" width="260" height="32" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="52" y="180" class="m">0x0400_0800</text>
+  <text x="288" y="180" class="b" text-anchor="end" fill="#1e40af">XMCD</text>
+  <rect x="40" y="200" width="260" height="32" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="52" y="220" class="m">0x0400_1000</text>
+  <text x="288" y="220" class="b" text-anchor="end" fill="#1e40af">컨테이너</text>
+  <rect x="30" y="248" width="280" height="186" rx="8" fill="#f0f9ff" stroke="#93c5fd" stroke-width="1.4"/>
+  <text x="42" y="266" class="s">이미지  offset 0xA000 · size 0xB55C</text>
+  <rect x="40" y="276" width="260" height="32" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="52" y="296" class="m">0x0400_B000</text>
+  <text x="288" y="296" class="b" text-anchor="end" fill="#1e40af">벡터 1 KB</text>
+  <rect x="40" y="316" width="260" height="52" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="52" y="336" class="m">0x0400_B400</text>
+  <text x="288" y="336" class="b" text-anchor="end" fill="#1e40af">.text · .rodata</text>
+  <rect x="40" y="376" width="260" height="40" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="52" y="396" class="m">0x0401_62E8</text>
+  <text x="288" y="396" class="b" text-anchor="end" fill="#b45309">.data 초기값</text>
+  <text x="42" y="456" class="s">부트 슬롯 끝 0x0404_0000 (256 KB)</text>
+  <text x="42" y="476" class="s">→ 0x0404_0000 TAG · 0x0404_1000 앱 (42)</text>
+  <text x="650" y="134" class="s">Code TCM 128 KB</text>
+  <rect x="660" y="144" width="260" height="32" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="672" y="164" class="m">0x0FFE_0000</text>
+  <text x="908" y="164" class="b" text-anchor="end" fill="#3730a3">벡터 (VTOR)</text>
+  <rect x="660" y="184" width="260" height="52" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="672" y="204" class="m">0x0FFE_0400</text>
+  <text x="908" y="204" class="b" text-anchor="end" fill="#3730a3">.text · .rodata</text>
+  <rect x="660" y="244" width="260" height="40" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="672" y="264" class="m">0x0FFE_B2E8</text>
+  <text x="908" y="264" class="b" text-anchor="end" fill="#b45309">.data 사본</text>
+  <text x="650" y="318" class="s">System TCM 128 KB</text>
+  <rect x="660" y="328" width="260" height="32" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="672" y="348" class="m">0x2000_0000</text>
+  <text x="908" y="348" class="b" text-anchor="end" fill="#b45309">.data</text>
+  <rect x="660" y="368" width="260" height="32" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="672" y="388" class="m">0x2000_0274</text>
+  <text x="908" y="388" class="b" text-anchor="end" fill="#3730a3">.bss · 힙</text>
+  <rect x="660" y="408" width="260" height="32" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="672" y="428" class="m">0x2001_E000</text>
+  <text x="908" y="428" class="b" text-anchor="end" fill="#3730a3">스택 8 KB (MSPLIM)</text>
+  <rect x="360" y="240" width="240" height="64" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="480" y="262" class="b" text-anchor="middle" fill="#b45309">① BootROM 이 통째로 복사</text>
+  <text x="480" y="280" class="s" text-anchor="middle">컨테이너 offset · size → load</text>
+  <text x="480" y="296" class="s" text-anchor="middle">그 뒤 entry 로 점프</text>
+  <line x1="312" y1="330" x2="358" y2="290" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="602" y1="262" x2="656" y2="166" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="345" y="420" width="270" height="64" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="480" y="442" class="b" text-anchor="middle" fill="#374151">② startup 이 .data 복사</text>
+  <text x="480" y="460" class="m" text-anchor="middle">__data_flash_start → __data_start__</text>
+  <text x="480" y="476" class="s" text-anchor="middle">Code TCM 사본 → System TCM</text>
+  <path d="M920,264 C950,264 950,344 922,344" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#a)"/>
+  <line x1="616" y1="452" x2="656" y2="346" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#a)"/>
+  <text x="20" y="530" class="s">플래시와 Code TCM 에서 오프셋이 같다 (링커 ASSERT). 그래서 .data 초기값을 플래시가 아니라 TCM 사본에서 읽는다.</text>
+  <text x="20" y="550" class="s">부팅이 끝나면 부트로더는 플래시를 코드로 읽지 않는다 → ROM API 로 QSPI 를 지우고 쓰는 동안에도 코드 · ISR 이 그대로 돈다 (43).</text>
+  <text x="20" y="570" class="s">실측: VTOR 0x0FFE_0000 · 이미지 46,428 B (Code TCM 35 %) · 4 KB 쓰기 8.5 ms · 읽기 31.7 MB/s</text>
+</svg>

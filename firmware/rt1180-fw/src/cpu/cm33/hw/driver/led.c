@@ -26,6 +26,15 @@
 #define LED_TYPE_GPIO     0
 #define LED_TYPE_PWM      1
 
+//-- PWM 드라이버가 없는 빌드(부트로더, docs/41)에서는 녹색도 GPIO 로 켜고 끈다
+#ifdef _USE_HW_PWM
+#define LED_GREEN_TYPE    LED_TYPE_PWM
+#define LED_GREEN_PWM_CH  PWM_LED_GREEN
+#else
+#define LED_GREEN_TYPE    LED_TYPE_GPIO
+#define LED_GREEN_PWM_CH  0
+#endif
+
 
 typedef struct
 {
@@ -45,7 +54,7 @@ static void ledApply(uint8_t ch);
 static const led_tbl_t led_tbl[LED_MAX_CH] =
 {
   {LED_TYPE_GPIO, RGPIO2, 9,  {IOMUXC_GPIO_EMC_B1_09_GPIO2_IO09}, _DEF_HIGH, _DEF_LOW, 0},               // RED
-  {LED_TYPE_PWM,  RGPIO2, 11, {IOMUXC_GPIO_EMC_B1_11_GPIO2_IO11}, _DEF_HIGH, _DEF_LOW, PWM_LED_GREEN},   // GREEN
+  {LED_GREEN_TYPE, RGPIO2, 11, {IOMUXC_GPIO_EMC_B1_11_GPIO2_IO11}, _DEF_HIGH, _DEF_LOW, LED_GREEN_PWM_CH}, // GREEN
   {LED_TYPE_GPIO, RGPIO3, 7,  {IOMUXC_GPIO_EMC_B1_39_GPIO3_IO07}, _DEF_HIGH, _DEF_LOW, 0},               // BLUE
 };
 
@@ -131,6 +140,7 @@ static void ledApply(uint8_t ch)
 {
   const led_tbl_t *p_tbl = &led_tbl[ch];
 
+#ifdef _USE_HW_PWM
   if (p_tbl->type == LED_TYPE_PWM)
   {
     uint32_t max  = pwmGetMax(p_tbl->pwm_ch);
@@ -145,6 +155,7 @@ static void ledApply(uint8_t ch)
     pwmWrite(p_tbl->pwm_ch, (uint16_t)duty);
   }
   else
+#endif
   {
     bool on = led_on[ch] && led_duty[ch] > 0;
 
