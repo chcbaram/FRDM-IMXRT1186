@@ -107,6 +107,19 @@ Clock LPUART1 : 24000000 Hz
 | `uart info` / `uart test ch` | uart.c | 속도, 클럭, 송수신 바이트 수 / 에코 |
 | `hwinfo boot` · `hwinfo clock` | hw_info.c | 부트 모드, 리셋 원인, 퓨즈 · PLL과 클럭 루트 실측 |
 
+로드맵 21 이후에 더한 명령 (CM33, 지금 `help` 기준):
+
+| 명령 | 문서 | 내용 |
+|---|---|---|
+| `button` | [23](23-button-swtimer.md) · [29](29-event.md) | 버튼 상태 · 시험 |
+| `rtc` · `reset` | [24](24-rtc-reset.md) | 시각, GPR, 리셋 원인 · 부트 모드 |
+| `ipc` · `peer` | [25](25-cm7-boot.md) | CM7 상태 · ping / CM7 과 cmd 패킷(info · echo · read · cpu · log) |
+| `pwm` | [20](20-led.md) | FlexPWM 듀티 |
+| `qspi` | [26](26-qspi-nor.md) | QSPI 정보 · 읽기 · 지우기 · 쓰기 · 시험 (지우기/쓰기는 데이터 영역만) |
+| `psram` | [27](27-hyperram.md) | HyperRAM 정보 · 시험 |
+| `thread` · `module` | [28](28-freertos.md) | 스레드 스택 · CPU 사용률 / 모듈 목록 |
+| `event` | [29](29-event.md) | 이벤트 구독자 · 발행 · 로그 |
+
 ```
 cli# uart info
 _DEF_UART1 : LPUART1 MCU-Link 115200 bps, clk 24000000 Hz  rx 25, tx 936

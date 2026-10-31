@@ -77,13 +77,13 @@ main()
 | `configTICK_RATE_HZ` | 1000 | 틱 = 1 ms = `millis()` |
 | `configUSE_TICKLESS_IDLE` | 0 | `micros()` 가 SysTick LOAD 를 믿는다 |
 | `configTOTAL_HEAP_SIZE` | 32 KB (heap_4, System TCM) | 지금 28 KB 남는다 |
-| `configUSE_TICK_HOOK` | 1 | swtimer 1 ms 를 여기서 (4절) |
+| `configUSE_TICK_HOOK` | 1 | swtimer 1 ms 를 여기서 (4절). 버튼이 29 에서 스레드로 옮겨 지금은 swtimer 를 쓰는 곳이 없다 |
 | `configGENERATE_RUN_TIME_STATS` | 1 | DWT 사이클 >> 8 (약 0.94 MHz) |
 
 ## 4. 바꾼 것 / 걸렸던 것
 
 - **SysTick 은 포트가 가진다.** ARMv8-M 포트는 `SysTick_Handler` · `SVC_Handler` · `PendSV_Handler` 를 이름 그대로 정의한다. `bsp.c` 의 SysTick 설정과 핸들러는 `_USE_HW_RTOS` 가 없을 때만 남겼다. 미리 켜면 스케줄러 없이 틱 처리가 돌아 죽는다(titan-mini 와 같다).
-- **swtimer(버튼 1 ms) 는 틱 훅으로 옮겼다.** 전에는 SysTick 핸들러가 `swtimerISR()` 를 불렀다. 버튼을 원본(NUCLEO-C5A3ZG)처럼 1 ms 스레드로 되돌리는 것은 다음에 한다.
+- **swtimer(버튼 1 ms) 는 틱 훅으로 옮겼다.** 전에는 SysTick 핸들러가 `swtimerISR()` 를 불렀다. 버튼은 29 에서 원본(NUCLEO-C5A3ZG)처럼 1 ms 스레드로 되돌렸다([29](29-event.md) 3절).
 - **`thread cpu` 가 처음엔 전부 0 % 였다.** DWT 사이클 카운터가 멈춰 있었다. probe-rs 는 연결을 끊을 때 `DEMCR`(`0xE000_EDFC`)에 0 을 써서 `TRCENA` 를 끈다([14](14-cm7-debug.md) 로그). 기록 → 리셋 뒤 펌웨어가 켜 둔 DWT 가 그때 멈춘다. `bspGetRunTimeCounter()` 가 꺼져 있으면 다시 켜게 했다. `qspi test` · `psram test` 의 시간 측정은 매번 켜서 영향이 없었다.
 - **QSPI 지우기 동안 틱을 잃는다.** `qspi` 는 ROM 호출 동안 인터럽트를 막는다(섹터 46 ms, 블록 254 ms). 그만큼 RTOS 틱이 밀린다([26](26-qspi-nor.md) 6 · 7절).
 - cmd 태스크를 첫 모듈로 바꿨다(`MODULE_DEF(cmd)`, 우선순위 LOWEST, `update` 로 수신 처리). CM7 을 빌드하지 않아도 채널은 연다. ipc 스트림이 열리지 않았으면 아무것도 오가지 않는다.
@@ -157,5 +157,5 @@ CM33 ipcStreamWrite → 링 m2p → MU GP0 ─IRQ→ CM7 MU1_IRQHandler
 
 - [x] **CM7 FreeRTOS** — 5절
 - [x] CM7 에 `module` · `thread` — 5절. 로그는 CM33 의 `peer log` 로 본다
-- [ ] 버튼을 1 ms 스레드로 (원본과 같이)
-- [ ] event 모듈 (`eventPub` / `eventSub`, titan-mini · N657X0)
+- [x] 버튼을 1 ms 스레드로 — [29](29-event.md) 3절
+- [x] event 모듈 — [29](29-event.md) 2절
