@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="640" fill="#fbfbfd"/>
+
+  <text x="20" y="28" class="ttl">부트 구조 (로드맵 40) — 부트로더는 TCM, 앱은 XIP</text>
+  <text x="20" y="48" class="s">N657X0 의 FSBL / 앱 분리를 따른다 · TAG = firm_tag_t (CRC-16) · 앱 +0x400 = firm_ver_t</text>
+  <text x="20" y="80" class="b" text-anchor="start">QSPI 16 MB (FlexSPI2)</text>
+  <text x="20" y="131.0" class="m" text-anchor="start">0x0400_0000</text>
+  <rect x="116" y="92" width="300" height="64" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="266.0" y="112" class="b" text-anchor="middle" fill="#1e40af">부트 슬롯 256 KB</text>
+  <text x="266.0" y="130" class="s" text-anchor="middle">FCB · XMCD · 컨테이너 · 부트로더 이미지</text>
+  <text x="20" y="188.0" class="m" text-anchor="start">0x0404_0000</text>
+  <rect x="116" y="162" width="300" height="38" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="266.0" y="179" class="b" text-anchor="middle" fill="#b45309">TAG 4 KB</text>
+  <text x="266.0" y="193" class="s" text-anchor="middle">firm_tag_t (magic · 크기 · CRC-16)</text>
+  <text x="20" y="245.0" class="m" text-anchor="start">0x0404_1000</text>
+  <rect x="116" y="206" width="300" height="64" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="266.0" y="226" class="b" text-anchor="middle" fill="#3730a3">앱 ~7.7 MB (XIP)</text>
+  <text x="266.0" y="244" class="s" text-anchor="middle">벡터 1 KB · +0x400 firm_ver_t · 코드</text>
+  <text x="20" y="308.0" class="m" text-anchor="start">0x0480_0000</text>
+  <rect x="116" y="276" width="300" height="50" rx="6" fill="#ffedd5" stroke="#ea580c" stroke-width="1.4"/>
+  <text x="266.0" y="296" class="b" text-anchor="middle" fill="#c2410c">CM7 슬롯 4 MB</text>
+  <text x="266.0" y="314" class="s" text-anchor="middle">RMC7 헤더 + ITCM 이미지 (지금과 같다)</text>
+  <text x="20" y="360.0" class="m" text-anchor="start">0x04C0_0000</text>
+  <rect x="116" y="332" width="300" height="42" rx="6" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text x="266.0" y="352" class="b" text-anchor="middle" fill="#6b7280">데이터 4 MB</text>
+  <text x="266.0" y="370" class="s" text-anchor="middle">NVS · 업데이트 (나중)</text>
+  <text x="470" y="80" class="b" text-anchor="start">부팅</text>
+  <rect x="470" y="92" width="200" height="48" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="570.0" y="112" class="b" text-anchor="middle" fill="#b45309">BootROM</text>
+  <text x="570.0" y="130" class="s" text-anchor="middle">컨테이너 → TCM 으로 복사</text>
+  <rect x="470" y="160" width="200" height="70" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="570.0" y="180" class="b" text-anchor="middle" fill="#1e40af">부트로더 (Code TCM)</text>
+  <text x="570.0" y="198" class="m" text-anchor="middle">0x0FFE_0000 · non-XIP</text>
+  <text x="570.0" y="214" class="s" text-anchor="middle">LED 파랑 · CLI · cmd</text>
+  <line x1="570" y1="142" x2="570" y2="158" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="700" y="160" width="240" height="170" rx="6" fill="#ffffff" stroke="#d1d5db" stroke-width="1.4"/>
+  <text x="820.0" y="180" class="b" text-anchor="middle" fill="#374151">머문다 (부트로더 모드)</text>
+  <text x="820.0" y="198" class="s" text-anchor="middle">앱 TAG · CRC · firm_ver 가 틀림</text>
+  <text x="820.0" y="214" class="s" text-anchor="middle">GPR MODE_BIT_BOOT</text>
+  <text x="820.0" y="230" class="s" text-anchor="middle">(앱 reset boot · cmd FW_UPDATE)</text>
+  <text x="820.0" y="246" class="s" text-anchor="middle">SW3 두 번 (reset_count ≥ 2)</text>
+  <text x="820.0" y="262" class="s" text-anchor="middle"></text>
+  <text x="820.0" y="278" class="s" text-anchor="middle">→ UART 다운로드 (43)</text>
+  <text x="820.0" y="294" class="s" text-anchor="middle">→ cmd FW_JUMP 로 앱</text>
+  <line x1="672" y1="195" x2="698" y2="215" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="470" y="262" width="200" height="104" rx="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4"/>
+  <text x="570.0" y="282" class="b" text-anchor="middle" fill="#374151">점프 전 정리</text>
+  <text x="570.0" y="300" class="s" text-anchor="middle">SysTick · NVIC 끄기</text>
+  <text x="570.0" y="316" class="s" text-anchor="middle">XCACHE_PC 비우기</text>
+  <text x="570.0" y="332" class="s" text-anchor="middle">MSPLIM = 0</text>
+  <text x="570.0" y="348" class="m" text-anchor="middle">VTOR · MSP · PC</text>
+  <line x1="570" y1="232" x2="570" y2="260" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <rect x="470" y="388" width="200" height="64" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="570.0" y="408" class="b" text-anchor="middle" fill="#3730a3">앱 (QSPI XIP)</text>
+  <text x="570.0" y="426" class="m" text-anchor="middle">0x0404_1000</text>
+  <text x="570.0" y="442" class="s" text-anchor="middle">LED 초록 · RTOS · CM7 기동</text>
+  <line x1="570" y1="368" x2="570" y2="386" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="24" y="530" class="s" text-anchor="start">부트로더는 TCM 에서 돈다 → QSPI 를 지우고 쓰는 동안에도 인터럽트를 막을 필요가 없다 (26 의 XIP 쓰기 제약이 없다).</text>
+  <text x="24" y="550" class="s" text-anchor="start">부트 헤더(FCB · XMCD · 컨테이너)는 부트로더 이미지가 가진다. 앱에는 없다. XMCD 덕에 HyperRAM 은 그대로 ROM 이 연다.</text>
+  <text x="24" y="570" class="s" text-anchor="start">TAG · firm_ver_t · CRC-16 은 N657X0 와 같은 형식 → download.py · flash.py(--target fw) 를 그대로 쓴다.</text>
+  <text x="24" y="590" class="s" text-anchor="start">CM7 은 지금처럼 앱이 깨운다. 부트로더는 다운로드 대상으로 CM7 슬롯도 쓸 수 있다.</text>
+</svg>

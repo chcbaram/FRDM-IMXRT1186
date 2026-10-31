@@ -98,9 +98,9 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | [28](28-freertos.md) | **FreeRTOS** — CM33 `ARM_CM33_NTZ` (Secure only) · CM7 `ARM_CM4F`, thread · module, CM7 cmd 가 doorbell 에 깨어남 (idle 99.9 %) | ✅ |
 | [29](29-event.md) | **event · 버튼 스레드** — titan-mini event (발행 · 구독, `EVENT_BOOT_DONE`), 버튼 1 ms 스레드 + `EVENT_BUTTON` | ✅ (SW4 눌러 확인 남음) |
 | 30~33 | USB(tinyusb CDC) · CAN-FD · I2C · SPI | 예정 |
-| 40 | 부트 아키텍처 — 부트로더/앱 분리, 파티션 확정, 진입 조건 (24 의 부트 모드 플래그 · 더블클릭) | 예정 |
-| 41 | 부트로더 골격 — `firmware/rt1180-boot`, 컨테이너 load = ITCM (non-XIP) | 예정 |
-| 42 | 앱 TAG (CRC32) 검증과 점프 | 예정 |
+| [40](40-boot-architecture.md) | **부트 구조 (설계)** — 부트로더(`rt1180-boot`, Code TCM non-XIP) / 앱(XIP `0x0404_1000`), 파티션 확정, TAG = N657X0 `firm_tag_t`, 머무는 조건, 점프 절차 | 설계 |
+| 41 | 부트로더 골격 — `firmware/rt1180-boot`, 컨테이너 load = CM33 Code TCM (non-XIP) | 예정 |
+| 42 | 앱 TAG (`firm_tag_t`, CRC-16 — N657X0 와 같다) 검증과 점프, 앱을 `0x0404_1000` 으로 | 예정 |
 | 43 | UART 다운로드 (cmdproto, TAG 를 마지막에 쓰는 안전 갱신) | 예정 |
 | 44 | CM7 이미지 적재 · 통합 이미지 | 예정 |
 | 45~47 | USB 다운로드 · 웹 업데이터 · 네트워크 업데이트 | 예정 |
@@ -148,6 +148,7 @@ VSCode 는 `firmware/rt1180-fw/prj/rt1180-fw-cm33.code-workspace` 를 연다.
 | ![](images/ipc-stream.svg) | [25](25-cm7-boot.md) 코어 간 패킷 통신 |
 | ![](images/qspi-xip-write.svg) | [26](26-qspi-nor.md) XIP 로 돌면서 QSPI 쓰기 |
 | ![](images/hyperram-xmcd.svg) | [27](27-hyperram.md) HyperRAM 과 두 코어의 캐시 |
+| ![](images/boot-architecture.svg) | [40](40-boot-architecture.md) 부트 구조 |
 | ![](images/cm7-remote-cli.svg) | [90](90-todo-cm7-remote-cli.md) CM7 원격 CLI 통로 세 안 (TODO) |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 | ![](images/cm7-debug-path.svg) | [14](14-cm7-debug.md) CM7 디버그 경로 |
