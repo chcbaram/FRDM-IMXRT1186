@@ -1,0 +1,120 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-configure",
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-G",
+        "Ninja",
+        "-DBUILD_CM7=ON"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "build-build",
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "-j8"
+      ],
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": "build-configure",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "build-clean",
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "--target",
+        "clean"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "flash",
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "--target",
+        "flash"
+      ],
+      "problemMatcher": [],
+      "dependsOn": "build-build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "gdb-server",
+      "type": "process",
+      "command": "python3",
+      "windows": {
+        "command": "python"
+      },
+      "args": [
+        "${workspaceFolder}/tools/gdbserver.py",
+        "start",
+        "--pidfile",
+        "${workspaceFolder}/build/probe-rs-gdb.pid"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "flash + gdb-server",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "flash",
+        "gdb-server"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "gdb-server-stop",
+      "type": "process",
+      "command": "python3",
+      "windows": {
+        "command": "python"
+      },
+      "args": [
+        "${workspaceFolder}/tools/gdbserver.py",
+        "stop",
+        "--pidfile",
+        "${workspaceFolder}/build/probe-rs-gdb.pid"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flash + Debug CM33 (Cortex-Debug)",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "external",
+      "gdbTarget": "127.0.0.1:1337",
+      "gdbPath": "arm-none-eabi-gdb",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+      "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml",
+      "preLaunchTask": "flash + gdb-server",
+      "postDebugTask": "gdb-server-stop",
+      "preLaunchCommands": [
+        "set confirm off",
+        "set mem inaccessible-by-default off",
+        "mem 0x30000000 0x30000004 rw",
+        "delete mem",
+        "mem 0x04000000 0x05000000 ro",
+        "mem 0x0ffc0000 0x10000000 ro"
+      ],
+      "overrideLaunchCommands": [
+        "monitor reset halt",
+        "maintenance flush register-cache"
+      ],
+      "overrideRestartCommands": [
+        "monitor reset halt",
+        "maintenance flush register-cache"
+      ],
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "Attach CM33 (Cortex-Debug)",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "gdbTarget": "127.0.0.1:1337",
+      "gdbPath": "arm-none-eabi-gdb",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+      "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml",
+      "preLaunchTask": "gdb-server",
+      "postDebugTask": "gdb-server-stop",
+      "preAttachCommands": [
+        "set confirm off",
+        "set mem inaccessible-by-default off",
+        "mem 0x30000000 0x30000004 rw",
+        "delete mem",
+        "mem 0x04000000 0x05000000 ro",
+        "mem 0x0ffc0000 0x10000000 ro"
+      ]
+    },
+    {
+      "name": "Flash + Attach CM33",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1180",
+      "preLaunchTask": "flash",
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml"
+        }
+      ]
+    },
+    {
+      "name": "Attach CM33",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1180",
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml"
+        }
+      ]
+    },
+    {
+      "name": "Flash + Attach CM7",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1186",
+      "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
+      "preLaunchTask": "flash",
+      "coreConfigs": [
+        {
+          "coreIndex": 1,
+          "programBinary": "${workspaceFolder}/build/cm7/rt1180-fw-cm7.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm7.xml"
+        }
+      ]
+    },
+    {
+      "name": "Attach CM7",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1186",
+      "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
+      "coreConfigs": [
+        {
+          "coreIndex": 1,
+          "programBinary": "${workspaceFolder}/build/cm7/rt1180-fw-cm7.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm7.xml"
+        }
+      ]
+    },
+    {
+      "name": "Flash + Attach CM33 + CM7",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1186",
+      "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
+      "preLaunchTask": "flash",
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml"
+        },
+        {
+          "coreIndex": 1,
+          "programBinary": "${workspaceFolder}/build/cm7/rt1180-fw-cm7.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm7.xml"
+        }
+      ]
+    },
+    {
+      "name": "Attach CM33 + CM7",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1186",
+      "chipDescriptionPath": "${workspaceFolder}/tools/probe-rs/MIMXRT1186.yaml",
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "${workspaceFolder}/build/cm33/rt1180-fw-cm33.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm33.xml"
+        },
+        {
+          "coreIndex": 1,
+          "programBinary": "${workspaceFolder}/build/cm7/rt1180-fw-cm7.elf",
+          "svdFile": "${workspaceFolder}/tools/svd/MIMXRT1186_cm7.xml"
+        }
+      ]
+    }
+  ]
+}

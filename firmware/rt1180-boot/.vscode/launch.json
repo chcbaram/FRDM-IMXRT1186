@@ -1,0 +1,91 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flash + Debug CM33 (Cortex-Debug)",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "external",
+      "gdbTarget": "127.0.0.1:1337",
+      "gdbPath": "arm-none-eabi-gdb",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/rt1180-boot.elf",
+      "svdFile": "${workspaceFolder}/../rt1180-fw/tools/svd/MIMXRT1186_cm33.xml",
+      "preLaunchTask": "flash + gdb-server",
+      "postDebugTask": "gdb-server-stop",
+      "preLaunchCommands": [
+        "set confirm off",
+        "set mem inaccessible-by-default off",
+        "mem 0x30000000 0x30000004 rw",
+        "delete mem",
+        "mem 0x04000000 0x05000000 ro",
+        "mem 0x0ffc0000 0x10000000 ro"
+      ],
+      "overrideLaunchCommands": [
+        "monitor reset halt",
+        "maintenance flush register-cache"
+      ],
+      "overrideRestartCommands": [
+        "monitor reset halt",
+        "maintenance flush register-cache"
+      ],
+      "runToEntryPoint": "main"
+    },
+    {
+      "name": "Attach CM33 (Cortex-Debug)",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "gdbTarget": "127.0.0.1:1337",
+      "gdbPath": "arm-none-eabi-gdb",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/rt1180-boot.elf",
+      "svdFile": "${workspaceFolder}/../rt1180-fw/tools/svd/MIMXRT1186_cm33.xml",
+      "preLaunchTask": "gdb-server",
+      "postDebugTask": "gdb-server-stop",
+      "preAttachCommands": [
+        "set confirm off",
+        "set mem inaccessible-by-default off",
+        "mem 0x30000000 0x30000004 rw",
+        "delete mem",
+        "mem 0x04000000 0x05000000 ro",
+        "mem 0x0ffc0000 0x10000000 ro"
+      ]
+    },
+    {
+      "name": "Debug CM33",
+      "type": "probe-rs-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1180",
+      "preLaunchTask": "build-build",
+      "flashingConfig": {
+        "flashingEnabled": true,
+        "verifyBeforeFlashing": true,
+        "verifyAfterFlashing": true,
+        "haltAfterReset": true
+      },
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "${workspaceFolder}/build/rt1180-boot.elf",
+          "svdFile": "${workspaceFolder}/../rt1180-fw/tools/svd/MIMXRT1186_cm33.xml"
+        }
+      ]
+    },
+    {
+      "name": "Attach CM33",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "cwd": "${workspaceFolder}",
+      "chip": "MIMXRT1180",
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "${workspaceFolder}/build/rt1180-boot.elf",
+          "svdFile": "${workspaceFolder}/../rt1180-fw/tools/svd/MIMXRT1186_cm33.xml"
+        }
+      ]
+    }
+  ]
+}
