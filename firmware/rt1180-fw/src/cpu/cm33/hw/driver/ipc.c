@@ -43,6 +43,8 @@ static IpcState_t ipc_state    = IPC_STATE_DISABLED;
 static uint32_t   boot_time_ms = 0;
 static cm7_err_t  start_err    = CM7_OK;
 static uint32_t   image_crc    = 0;
+
+extern const uint32_t ipc_cm7_pair_crc;    // 빌드가 만든다 (tools/mkcm7pair.py)
 #if _HW_DEF_CM7_IMAGE
 static uint32_t   image_size   = 0;
 #endif
@@ -201,6 +203,19 @@ const char *ipcGetVersion(void)
 uint32_t ipcGetClock(void)
 {
   return ipcIsBooted() ? shared.peer_clock : 0;
+}
+
+bool ipcIsImagePaired(void)
+{
+  if (ipc_cm7_pair_crc == 0)
+    return true;
+
+  return ((const cm7_image_t *)SHARED_CM7_IMAGE_ADDR)->crc32 == ipc_cm7_pair_crc;
+}
+
+uint32_t ipcGetPairCrc(void)
+{
+  return ipc_cm7_pair_crc;
 }
 
 bool ipcMsgSend(uint32_t id, uint32_t data, uint32_t timeout_ms)
@@ -519,6 +534,11 @@ void cliIpc(cli_args_t *args)
     cliPrintf("image      : 0x%08X magic 0x%08X size %d crc 0x%08X (calc 0x%08X)\n",
               (unsigned)SHARED_CM7_IMAGE_ADDR, (unsigned)p_hdr->magic, (int)p_hdr->size,
               (unsigned)p_hdr->crc32, (unsigned)image_crc);
+    if (ipc_cm7_pair_crc == 0)
+      cliPrintf("pair       : - (BUILD_CM7=OFF 로 빌드한 앱)\n");
+    else
+      cliPrintf("pair       : %s (app 0x%08X, slot 0x%08X)\n", ipcIsImagePaired() ? "OK" : "MISMATCH",
+                (unsigned)ipc_cm7_pair_crc, (unsigned)p_hdr->crc32);
     cliPrintf("ele resp   : 0x%08X 0x%08X (err %d)\n",
               (unsigned)cm7GetEleResp(0), (unsigned)cm7GetEleResp(1), (int)start_err);
 

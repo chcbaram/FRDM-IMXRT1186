@@ -65,6 +65,10 @@ bool hwInit(void)
     logPrintf("     name  : %s\n", ipcGetName());
     logPrintf("     ver   : %s\n", ipcGetVersion());
     logPrintf("     clock : %d MHz\n", (int)(ipcGetClock() / 1000000));
+    if (ipcIsImagePaired() != true)
+    {
+      logPrintf("[W_] CM7 image is not the one built with this app (app 0x%08X)\n", (unsigned)ipcGetPairCrc());
+    }
   }
   else
   {

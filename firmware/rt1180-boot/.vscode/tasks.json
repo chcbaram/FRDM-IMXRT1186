@@ -71,6 +71,25 @@
       }
     },
     {
+      "label": "download-all",
+      "type": "process",
+      "command": "python3",
+      "windows": {
+        "command": "python"
+      },
+      "args": [
+        "${workspaceFolder}/tools/download.py",
+        "--target",
+        "all",
+        "--port",
+        "${input:downloadPort}"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
       "label": "download-cm33",
       "type": "process",
       "command": "python3",

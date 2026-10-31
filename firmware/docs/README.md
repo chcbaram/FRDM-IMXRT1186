@@ -30,7 +30,7 @@ cmake -S . -B build -G Ninja -DBUILD_CM7=ON
 cmake --build build --target flash        # TAG + 앱 + CM7 → 부트로더가 점프 → D4 녹색
 
 # 디버거 없이 UART 로 (앱이 돌고 있어도 된다, docs/43)
-python3 ../rt1180-boot/tools/download.py --target fw     # cm7 · data 도
+python3 ../rt1180-boot/tools/download.py --target all    # fw · cm7 · data 따로도
 
 # 콘솔: /dev/cu.usbmodem*3 115200 (baram-term 등) → 부팅 배너 + cli#
 ```
@@ -107,7 +107,7 @@ VSCode 는 `firmware/rt1180-fw` 폴더(또는 `prj/rt1180-fw-cm33.code-workspace
 | [41](41-bootloader.md) | **부트로더 골격** — `firmware/rt1180-boot`, ROM 이 Code TCM `0x0FFE_0000` 으로 복사해 실행 (non-XIP). LED 파랑 · UART · CLI · QSPI. 앱 드라이버를 경로로 공유 | ✅ (POR 부팅 · TCM 디버그 확인 남음) |
 | [42](42-app-jump.md) | **앱 TAG 검증과 점프** — `firm_tag_t` · `firm_ver_t` (N657X0 와 같다), 앱을 `0x0404_1000` 으로, `tools/mkfwtag.py`, `bspJumpToApp`, 디버그는 attach | ✅ (SW3 더블클릭 확인 남음) |
 | [43](43-uart-download.md) | **UART 다운로드** — `download.py` (N657X0) · 앱 → `FW_UPDATE` → 부트로더 · fw / cm7 / data, TAG 를 마지막에. 4 Mbps 160 KB/s. 지우는 동안 UART 수신 유지(TCM) | ✅ |
-| 44 | CM7 이미지 적재 · 통합 이미지 | 예정 |
+| [44](44-cm7-pair.md) | **앱 · CM7 짝** — `download.py --target all` (CM7 → 앱 → TAG, 1.49 s), 앱에 같이 빌드한 CM7 CRC 를 심어 부팅 때 비교 (다르면 경고만) | ✅ |
 | 45~47 | USB 다운로드 · 웹 업데이터 · 네트워크 업데이트 | 예정 |
 | ~~48~~ | 보안 부트 · 이중 이미지 | **제외** — 퓨즈를 구워야 하고 되돌릴 수 없다 |
 | 50 | MDIO · PHY 4개 링크 | 예정 |
@@ -158,6 +158,7 @@ VSCode 는 `firmware/rt1180-fw` 폴더(또는 `prj/rt1180-fw-cm33.code-workspace
 | ![](images/boot-tcm-load.svg) | [41](41-bootloader.md) 부트로더 TCM 로드 |
 | ![](images/boot-jump.svg) | [42](42-app-jump.md) TAG 검증과 점프 |
 | ![](images/uart-download.svg) | [43](43-uart-download.md) UART 다운로드 |
+| ![](images/cm7-pair.svg) | [44](44-cm7-pair.md) 앱 · CM7 짝 |
 | ![](images/cm7-remote-cli.svg) | [90](90-todo-cm7-remote-cli.md) CM7 원격 CLI 통로 세 안 (TODO) |
 | ![](images/flash-download.svg) | [10](10-dev-environment.md) 디버거로 플래시에 쓰는 경로 |
 | ![](images/cm7-debug-path.svg) | [14](14-cm7-debug.md) CM7 디버그 경로 |

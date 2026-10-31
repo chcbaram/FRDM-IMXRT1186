@@ -102,6 +102,7 @@ CM33 이 주인이다. CM7 은 CM33 이 깨워야 돌고, 죽어도 CM33 이 안
 | 이미지 | `rt1180-fw-cm33-tag.bin` (TAG + 앱) → `0x0404_0000` | `rt1180-fw-cm7.img` (RMC7 16 B + ITCM bin) → `0x0480_0000` |
 | probe-rs | 태스크 `flash-cm33` (둘 다는 `flash-all`) | `flash-cm7` |
 | UART | `download.py --target fw` (태스크 `download-cm33`) | `download.py --target cm7` (`download-cm7`) — 점프한 뒤 앱이 새 이미지로 CM7 을 깨운다 |
+| 둘 다 | `download.py --target all` (`download-all`) — CM7 → 앱 → TAG | 앱이 부팅 때 짝 확인, 다르면 경고만 ([44](44-cm7-pair.md)) |
 | 디버그 | AP 0. `Flash + Debug CM33 (Cortex-Debug)` 또는 probe-rs `Attach CM33` | AP 2. 커스텀 타깃 `tools/probe-rs/MIMXRT1186.yaml` 로 **attach 만** ([14](14-cm7-debug.md)) |
 
 CM7 elf 는 ITCM 주소(`0x0`)라 플래시에 그대로 쓸 수 없다. 그래서 헤더를 붙인 bin 을 슬롯에 쓰고, 실행 위치로는 CM33 이 매 부팅 복사한다([25](25-cm7-boot.md) 3절).

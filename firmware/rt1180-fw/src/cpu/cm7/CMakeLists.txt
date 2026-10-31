@@ -134,5 +134,8 @@ add_custom_command(TARGET ${EXECUTABLE}
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/mkcm7img.py
           ${CORE_OUT}/${PRJ_NAME}-${CORE_NAME}.bin
           ${CORE_OUT}/${PRJ_NAME}-${CORE_NAME}.img
+  BYPRODUCTS
+          ${CORE_OUT}/${PRJ_NAME}-${CORE_NAME}.bin
+          ${CORE_OUT}/${PRJ_NAME}-${CORE_NAME}.img
   COMMENT "Invoking: Make CM7 bin / img"
   )

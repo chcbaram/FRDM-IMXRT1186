@@ -50,6 +50,24 @@ add_executable(${EXECUTABLE}
   )
 
 
+# 같이 빌드한 CM7 이미지의 CRC 를 앱에 심는다 (tools/mkcm7pair.py, docs/44).
+#   부팅 때 QSPI CM7 슬롯과 비교해 다르면 경고한다. CM7 은 그대로 깨운다.
+#
+set(CM7_PAIR_SRC ${CORE_OUT}/cm7_pair.c)
+if(BUILD_CM7)
+  set(CM7_IMG ${CMAKE_BINARY_DIR}/cm7/${PRJ_NAME}-cm7.img)
+  add_custom_command(OUTPUT ${CM7_PAIR_SRC}
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/mkcm7pair.py ${CM7_IMG} ${CM7_PAIR_SRC}
+    DEPENDS ${CM7_IMG} ${CMAKE_SOURCE_DIR}/tools/mkcm7pair.py
+    COMMENT "CM7 짝 CRC"
+    )
+else()
+  file(CONFIGURE OUTPUT ${CM7_PAIR_SRC} CONTENT
+"// tools/mkcm7pair.py 와 같은 형식. BUILD_CM7=OFF\n#include <stdint.h>\n\nconst uint32_t ipc_cm7_pair_crc = 0x00000000UL;\n")
+endif()
+target_sources(${EXECUTABLE} PRIVATE ${CM7_PAIR_SRC})
+
+
 # elf / bin / map 을 build/<코어>/ 로 모은다
 #
 set_target_properties(${EXECUTABLE} PROPERTIES

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """UART(MCU-Link VCOM) 로 앱 / CM7 / 데이터를 내려받는다. (macOS / Linux / Windows, docs/43)
 
-  python3 tools/download.py [bin] [--target fw|cm7|data] [--offset N] [--port P] [--baud B]
+  python3 tools/download.py [bin] [--target fw|cm7|all|data] [--offset N] [--port P] [--baud B]
   python3 tools/download.py --list          # 시리얼 포트 목록 (* = auto 가 고르는 것)
 
   대상
@@ -9,6 +9,9 @@
            다 쓴 뒤 부트로더가 TAG 를 기록하고 (커밋) 앱으로 점프한다 (--no-reset 으로 끈다)
     cm7  : CM7 슬롯 (기본 bin: ../rt1180-fw/build/cm7/rt1180-fw-cm7.img, RMC7 헤더가 붙은 것).
            끝나면 앱으로 점프한다. 앱이 부팅하면서 CM7 을 새 이미지로 깨운다
+    all  : cm7 → fw 를 한 번 연결로 (기본 bin 둘). TAG 가 맨 마지막이다 (docs/44).
+           cm7 쓰다 끊기면 옛 앱이 돈다(CM7 은 NO_IMAGE). fw 쓰다 끊기면 TAG 가 없어 부트로더에 머문다.
+           어느 쪽이든 다시 보내면 된다
     data : 데이터 영역 + --offset (4 KB 단위)
   부트로더 자신(boot)은 받지 않는다. 부트 슬롯이 하나라 쓰다 끊기면 부팅이 안 된다. probe-rs 로 쓴다.
 
@@ -178,7 +181,7 @@ def download(ch, target, image, offset, args):
 def main():
   ap = argparse.ArgumentParser(description="UART 로 앱 / CM7 / 데이터 내려받기")
   ap.add_argument("binary", nargs="?", help="보낼 bin (fw: ../rt1180-fw/build/cm33/rt1180-fw-cm33.bin, cm7: ../rt1180-fw/build/cm7/rt1180-fw-cm7.img)")
-  ap.add_argument("--target", choices=["fw", "cm7", "data"], default="fw")
+  ap.add_argument("--target", choices=["fw", "cm7", "all", "data"], default="fw")
   ap.add_argument("--offset", type=lambda s: int(s, 0), default=0, help="data 영역 안 오프셋 (4 KB 단위)")
   ap.add_argument("--port", help="시리얼 포트. 없거나 auto 면 MCU-Link VCOM 자동")
   ap.add_argument("--baud", type=int, default=4000000, help="전송 보율 (기본 4 Mbps, 0 이면 115200 그대로)")
@@ -194,14 +197,24 @@ def main():
   # 줄 단위로 내보내 진행 표시가 바로 보이게 한다
   sys.stdout.reconfigure(line_buffering=True)
 
-  target = {"fw": TARGET_FW, "cm7": TARGET_CM7, "data": TARGET_DATA}[args.target]
-  path = args.binary or {TARGET_FW: DEF_FW, TARGET_CM7: DEF_CM7}.get(target)
-  if not path or not os.path.isfile(path):
-    sys.exit(f"bin 이 없다: {path}")
-  image = open(path, "rb").read()
-  #-- 보드에 붙기 전에 거른다. 보율을 바꾼 뒤에 끝나면 보드가 3 초 동안 높은 보율에 남는다
-  if target == TARGET_CM7 and image[:4] != CM7_MAGIC:
-    sys.exit("RMC7 헤더가 없다. rt1180-fw 의 build/cm7/rt1180-fw-cm7.img 를 줄 것 (-DBUILD_CM7=ON)")
+  #-- 보낼 것 : (대상, 경로). all 은 CM7 을 먼저, 앱을 나중에 (TAG 가 맨 마지막)
+  if args.target == "all":
+    if args.binary:
+      sys.exit("--target all 은 기본 bin 둘을 보낸다. bin 을 주지 말 것")
+    jobs = [(TARGET_CM7, DEF_CM7), (TARGET_FW, DEF_FW)]
+  else:
+    target = {"fw": TARGET_FW, "cm7": TARGET_CM7, "data": TARGET_DATA}[args.target]
+    jobs = [(target, args.binary or {TARGET_FW: DEF_FW, TARGET_CM7: DEF_CM7}.get(target))]
+
+  images = []
+  for target, path in jobs:
+    if not path or not os.path.isfile(path):
+      sys.exit(f"bin 이 없다: {path}")
+    image = open(path, "rb").read()
+    #-- 보드에 붙기 전에 거른다. 보율을 바꾼 뒤에 끝나면 보드가 3 초 동안 높은 보율에 남는다
+    if target == TARGET_CM7 and image[:4] != CM7_MAGIC:
+      sys.exit("RMC7 헤더가 없다. rt1180-fw 의 build/cm7/rt1180-fw-cm7.img 를 줄 것 (-DBUILD_CM7=ON)")
+    images.append((target, path, image))
 
   port = args.port if args.port and args.port.lower() != "auto" else find_port()
   if not port:
@@ -230,8 +243,9 @@ def main():
       if info["cmd_ver"] < 2:
         sys.exit("CM7 슬롯이 있는 INFO(cmd_ver 2)가 아니다 (다른 보드의 부트로더?)")
 
-      print(f"보낼 것  : {os.path.basename(path)}  {len(image)/1024:.1f} KB -> {TARGET_STR[target]}"
-            + (f" +0x{args.offset:X}" if target == TARGET_DATA else ""))
+      for target, path, image in images:
+        print(f"보낼 것  : {os.path.basename(path)}  {len(image)/1024:.1f} KB -> {TARGET_STR[target]}"
+              + (f" +0x{args.offset:X}" if target == TARGET_DATA else ""))
 
       baud = BAUD_DEF
       if args.baud and args.baud != BAUD_DEF:
@@ -239,7 +253,10 @@ def main():
       print(f"보율     : {baud}")
 
       t0 = time.time()
-      download(ch, target, image, args.offset, args)
+      for target, path, image in images:
+        if len(images) > 1:
+          print(f"[{TARGET_STR[target]}]")
+        download(ch, target, image, args.offset, args)
       print(f"합계     : {time.time()-t0:.2f}s")
 
       if baud != BAUD_DEF:
@@ -249,7 +266,7 @@ def main():
           pass
         tr.set_baud(BAUD_DEF)
 
-      if target in (TARGET_FW, TARGET_CM7) and not args.no_reset:
+      if any(t in (TARGET_FW, TARGET_CM7) for t, _, _ in images) and not args.no_reset:
         r = ch.request(BOOT_CMD_FW_JUMP, timeout=2.0)
         print("실행     : 앱으로 점프" if r["err"] == 0 else f"실행     : 실패 err={err_str(r['err'])}")
     finally:

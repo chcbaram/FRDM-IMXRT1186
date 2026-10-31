@@ -136,7 +136,7 @@ titan-mini 의 규칙을 그대로 지킨다. 실제로 돌려 본 것은 macOS 
 |---|---|
 | `build-configure` · `build-build` · `build-clean` | CMake. 앱은 configure 가 `-DBUILD_CM7=ON` 으로 돈다 |
 | `flash-all` · `flash-cm33` · `flash-cm7` | probe-rs 기록. CMake 타깃 `flash`(CM33 + CM7) · `flash-cm33` · `flash-cm7`. 부트로더 쪽은 `flash-boot` |
-| `download-cm33` · `download-cm7` | UART 로 앱 · CM7 이미지 쓰기 (`rt1180-boot/tools/download.py`, [43](43-uart-download.md)). 포트는 Firmware Task Manager 확장의 시리얼 포트 선택으로 고르고, 마지막 값을 기억한다. 앱 쪽은 빌드한 뒤 보낸다 |
+| `download-all` · `download-cm33` · `download-cm7` | UART 로 앱 · CM7 이미지 쓰기 (`rt1180-boot/tools/download.py`, [43](43-uart-download.md)). 포트는 Firmware Task Manager 확장의 시리얼 포트 선택으로 고르고, 마지막 값을 기억한다. 앱 쪽은 빌드한 뒤 보낸다 |
 | `download-list` | 시리얼 포트 목록 (`*` = `auto` 가 고르는 것) |
 | `gdb-server` | `tools/gdbserver.py start` — `probe-rs gdb` 를 떼어 낸 프로세스로 띄우고 `Firing up GDB stub` 이 나오면 끝난다. 남아 있던 서버는 먼저 내린다 |
 | `flash + gdb-server` | 기록한 뒤 서버. Cortex-Debug 의 `preLaunchTask` |

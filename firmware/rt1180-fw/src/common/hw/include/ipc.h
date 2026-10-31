@@ -62,6 +62,11 @@ const char  *ipcGetName(void);
 const char  *ipcGetVersion(void);
 uint32_t     ipcGetClock(void);            // Hz
 
+//-- 슬롯의 CM7 이미지가 이 앱과 같이 빌드한 것인지 (docs/44). 짝 정보가 없으면 true.
+//   다르면 경고만 한다. CM7 은 그대로 깨운다.
+bool         ipcIsImagePaired(void);
+uint32_t     ipcGetPairCrc(void);          // 이 앱이 기대하는 CM7 crc32 (0 = 모름)
+
 //-- 상대 코어가 자기 생존을 알린다. 상대 코어 쪽에서만 구현한다.
 void         ipcUpdate(void);
 

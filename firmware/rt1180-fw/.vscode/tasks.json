@@ -104,6 +104,26 @@
       }
     },
     {
+      "label": "download-all",
+      "type": "process",
+      "command": "python3",
+      "windows": {
+        "command": "python"
+      },
+      "args": [
+        "${workspaceFolder}/../rt1180-boot/tools/download.py",
+        "--target",
+        "all",
+        "--port",
+        "${input:downloadPort}"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "build-build"
+    },
+    {
       "label": "download-cm33",
       "type": "process",
       "command": "python3",

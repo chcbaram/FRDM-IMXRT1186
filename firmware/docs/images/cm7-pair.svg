@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="440" fill="#fbfbfd"/>
+  <text x="20" y="28" class="ttl">앱 · CM7 을 짝으로 — 같이 빌드하고, 한 번에 쓰고, 부팅 때 맞는지 본다</text>
+  <text x="20" y="48" class="s">rt1180-fw/tools/mkcm7pair.py · cm33/hw/driver/ipc.c ipcIsImagePaired() · rt1180-boot/tools/download.py --target all</text>
+  <text x="20" y="80" class="b" fill="#374151">① 빌드 (BUILD_CM7=ON, 같은 CMake)</text>
+  <rect x="20" y="92" width="280" height="62" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="32" y="112" class="b" fill="#166534">CM7 → rt1180-fw-cm7.img</text>
+  <text x="32" y="130" class="s">RMC7 헤더 · size · crc32</text>
+  <rect x="340" y="92" width="280" height="62" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="352" y="112" class="b" fill="#b45309">mkcm7pair.py → cm7_pair.c</text>
+  <text x="352" y="130" class="s">ipc_cm7_pair_crc = 헤더의 crc32</text>
+  <text x="352" y="147" class="s">OFF 로 빌드하면 0 (확인 안 함)</text>
+  <rect x="660" y="92" width="280" height="62" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="672" y="112" class="b" fill="#3730a3">CM33 앱 → -tag.bin</text>
+  <text x="672" y="130" class="s">앱 안에 짝 CRC 상수가 들어간다</text>
+  <line x1="302" y1="123" x2="338" y2="123" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="622" y1="123" x2="658" y2="123" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="20" y="190" class="b" fill="#374151">② 쓰기 — download.py --target all (한 번 연결, 4 Mbps)</text>
+  <rect x="20" y="202" width="280" height="62" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="32" y="222" class="b" fill="#166534">CM7 슬롯 0x0480_0000</text>
+  <text x="32" y="240" class="s">BEGIN · ERASE · WRITE · END (RMC7 확인)</text>
+  <text x="32" y="257" class="s">끊기면: 옛 앱이 돈다, CM7 은 NO_IMAGE</text>
+  <rect x="340" y="202" width="280" height="62" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="352" y="222" class="b" fill="#3730a3">앱 0x0404_1000</text>
+  <text x="352" y="240" class="s">BEGIN 에서 TAG 를 먼저 지운다</text>
+  <text x="352" y="257" class="s">끊기면: TAG 없음 → 부트로더에 머문다</text>
+  <rect x="660" y="202" width="280" height="62" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="672" y="222" class="b" fill="#b45309">TAG 0x0404_0000 — 맨 마지막</text>
+  <text x="672" y="240" class="s">END 에서 CRC 를 내고 기록 (커밋)</text>
+  <text x="672" y="257" class="s">→ FW_JUMP. 합계 1.49 s</text>
+  <line x1="302" y1="233" x2="338" y2="233" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="622" y1="233" x2="658" y2="233" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="20" y="300" class="b" fill="#374151">③ 부팅 — 앱 ipcInit</text>
+  <rect x="20" y="312" width="280" height="62" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="32" y="332" class="b" fill="#374151">슬롯 헤더 crc32 확인</text>
+  <text x="32" y="350" class="s">CRC 가 깨졌으면 NO_IMAGE (깨우지 않음)</text>
+  <rect x="340" y="312" width="280" height="62" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="352" y="332" class="b" fill="#374151">짝 비교 : 슬롯 crc32 vs 앱 상수</text>
+  <text x="352" y="350" class="s">같으면 pair OK</text>
+  <rect x="660" y="312" width="280" height="62" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1.4"/>
+  <text x="672" y="332" class="b" fill="#b91c1c">다르면 경고만 — CM7 은 그대로 깨운다</text>
+  <text x="672" y="350" class="s">[W_] CM7 image is not the one built ...</text>
+  <text x="672" y="367" class="s">ipc info : pair MISMATCH (app, slot)</text>
+  <line x1="302" y1="343" x2="338" y2="343" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="622" y1="343" x2="658" y2="343" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="20" y="408" class="s">짝 CRC 는 cm7_image_t.crc32 (CM7 bin 의 CRC-32) 를 그대로 쓴다. 헤더에 이미 있어서 앱이 부팅 때 따로 계산할 것이 없다.</text>
+  <text x="20" y="428" class="s">실측: 같은 CM7 → pair OK · 4 바이트 다른 CM7 → MISMATCH 경고, CM7 RUNNING. 맞는 이미지를 다시 쓰면 OK 로 돌아온다.</text>
+</svg>
