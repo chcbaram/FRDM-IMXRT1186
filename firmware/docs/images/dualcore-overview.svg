@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="960" height="620" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif">
+  <style>
+    .b   { font-size: 13px; font-weight: 600; }
+    .s   { font-size: 11.5px; fill: #6b7280; }
+    .m   { font-size: 11.5px; font-family: ui-monospace, Menlo, Consolas, monospace; fill: #4b5563; }
+    .ttl { font-size: 15px; font-weight: 700; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="620" fill="#fbfbfd"/>
+  <text x="20" y="28" class="ttl">두 코어 한눈에 — 누가 어디서 돌고 무엇으로 이야기하나</text>
+  <text x="20" y="48" class="s">CM33 = 주 코어 (부트 · 앱 · CLI · 업데이트), CM7 = 상대 코어 (계산 · 네트워크 예정). 자세한 것은 25 · 27 · 28 · 14 · 40~43</text>
+  <rect x="20" y="66" width="300" height="300" rx="8" fill="#f5f7ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="170" y="88" class="b" text-anchor="middle" fill="#3730a3">CM33  240 MHz  (Secure)</text>
+  <rect x="36" y="100" width="268" height="44" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="48" y="119" class="b" fill="#3730a3">부트로더  Code TCM 0x0FFE_0000</text>
+  <text x="48" y="136" class="s">ROM 이 복사 → TAG 확인 → 앱으로 (41~43)</text>
+  <rect x="36" y="152" width="268" height="44" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="48" y="171" class="b" fill="#3730a3">앱  QSPI XIP 0x0404_1000</text>
+  <text x="48" y="188" class="s">XCACHE_PC 16 KB · FreeRTOS · CLI · cmd</text>
+  <rect x="36" y="204" width="268" height="44" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="48" y="223" class="b" fill="#3730a3">System TCM 0x2000_0000 128 KB</text>
+  <text x="48" y="240" class="s">.data · .bss · RTOS 힙 32 KB · 스택</text>
+  <rect x="36" y="256" width="268" height="44" rx="6" fill="#ffffff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="48" y="275" class="b" fill="#3730a3">MPU + XCACHE_PS 16 KB</text>
+  <text x="48" y="292" class="s">OCRAM · CM7 TCM alias non-cacheable</text>
+  <rect x="36" y="308" width="268" height="44" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="48" y="327" class="b" fill="#b45309">CM7 을 깨운다 (bsp/cm7.c)</text>
+  <text x="48" y="344" class="s">슬롯 → 0x303C_0000 복사 → ELE kick-off</text>
+  <rect x="640" y="66" width="300" height="300" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="790" y="88" class="b" text-anchor="middle" fill="#166534">CM7  792 MHz</text>
+  <rect x="656" y="100" width="268" height="44" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="668" y="119" class="b" fill="#166534">ITCM 0x0000_0000 256 KB</text>
+  <text x="668" y="136" class="s">벡터 · 코드 · .data 초기값 (CM33 이 복사)</text>
+  <rect x="656" y="152" width="268" height="44" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="668" y="171" class="b" fill="#166534">DTCM 0x2000_0000 256 KB</text>
+  <text x="668" y="188" class="s">.data · .bss · RTOS 힙 32 KB · 로그 버퍼</text>
+  <rect x="656" y="204" width="268" height="44" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="668" y="223" class="b" fill="#166534">L1 I/D 캐시 + MPU</text>
+  <text x="668" y="240" class="s">공유 블록 4 KB 만 non-cacheable</text>
+  <rect x="656" y="256" width="268" height="44" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="668" y="275" class="b" fill="#166534">FreeRTOS (ARM_CM4F 포트)</text>
+  <text x="668" y="292" class="s">cmd 스레드가 doorbell 에 깨어난다</text>
+  <rect x="656" y="308" width="268" height="44" rx="6" fill="#ffffff" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="668" y="327" class="b" fill="#166534">CLI · 로그 출력 없음</text>
+  <text x="668" y="344" class="s">CM33 이 peer log · peer cpu 로 가져간다</text>
+  <rect x="350" y="100" width="260" height="252" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <text x="480" y="122" class="b" text-anchor="middle" fill="#374151">코어 사이</text>
+  <rect x="362" y="134" width="236" height="44" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+  <text x="374" y="153" class="b" fill="#b45309">공유 블록 OCRAM2 0x2050_0000</text>
+  <text x="374" y="170" class="s">4 KB · magic · alive · 이름 · 링 2 개</text>
+  <rect x="362" y="186" width="236" height="44" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="374" y="205" class="b" fill="#374151">MU1  TR0/TR1 메시지</text>
+  <text x="374" y="222" class="s">PING ↔ PONG 3 µs (ISR 에서 응답)</text>
+  <rect x="362" y="238" width="236" height="44" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="374" y="257" class="b" fill="#374151">MU1  GP0 doorbell</text>
+  <text x="374" y="274" class="s">링에 쓰고 울린다 → 받는 쪽이 깨어남</text>
+  <rect x="362" y="290" width="236" height="44" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.4"/>
+  <text x="374" y="309" class="b" fill="#374151">cmd 패킷 (02 FD)</text>
+  <text x="374" y="326" class="s">peer info · echo · read · cpu · log</text>
+  <line x1="322" y1="206" x2="360" y2="206" stroke="#9ca3af" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="600" y1="206" x2="638" y2="206" stroke="#9ca3af" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="322" y1="258" x2="360" y2="258" stroke="#9ca3af" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="600" y1="258" x2="638" y2="258" stroke="#9ca3af" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="322" y1="156" x2="360" y2="156" stroke="#9ca3af" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="600" y1="156" x2="638" y2="156" stroke="#9ca3af" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+  <rect x="20" y="390" width="920" height="150" rx="8" fill="#ffffff" stroke="#93c5fd" stroke-width="1.4"/>
+  <text x="36" y="412" class="b" fill="#1e40af">바깥 메모리</text>
+  <rect x="36" y="424" width="430" height="50" rx="6" fill="#f0f9ff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="48" y="443" class="b" fill="#1e40af">QSPI W25Q128 16 MB  (FlexSPI2, 0x0400_0000)</text>
+  <text x="48" y="460" class="s">부트 슬롯 · TAG + 앱 · CM7 슬롯 0x0480_0000 · 데이터 0x04C0_0000</text>
+  <rect x="36" y="482" width="430" height="50" rx="6" fill="#f0f9ff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="48" y="501" class="b" fill="#1e40af">HyperRAM 8 MB  (FlexSPI1, 0x2800_0000)</text>
+  <text x="48" y="518" class="s">CM7 몫 앞 6 MB · CM33 몫 뒤 2 MB (.psram_bss)</text>
+  <rect x="494" y="424" width="430" height="50" rx="6" fill="#f0f9ff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="506" y="443" class="b" fill="#1e40af">CM7 이미지는 QSPI 에 두고 실행은 ITCM</text>
+  <text x="506" y="460" class="s">CM33 이 매 부팅 RMC7 헤더 · CRC 를 보고 복사한다</text>
+  <rect x="494" y="482" width="430" height="50" rx="6" fill="#f0f9ff" stroke="#3b82f6" stroke-width="1.4"/>
+  <text x="506" y="501" class="b" fill="#1e40af">HyperRAM 을 같이 쓸 때는 캐시를 다룬다</text>
+  <text x="506" y="518" class="s">CM7 은 WB 캐시 — Clean / Invalidate 또는 non-cacheable</text>
+  <line x1="170" y1="366" x2="170" y2="422" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <line x1="790" y1="366" x2="790" y2="422" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <text x="20" y="568" class="s">기동 : 전원 → ROM → 부트로더(TCM) → 앱(XIP) → CM7 준비 · 복사 · kick-off → magic 핸드셰이크 (500 ms 안) → RUNNING</text>
+  <text x="20" y="588" class="s">디버그 : probe-rs AP0 = CM33, AP2 = CM7 (커스텀 타깃 yaml, 14) · 업데이트 : download.py --target fw | cm7 (43)</text>
+  <text x="20" y="608" class="s">CM33 CLI : ipc info · ipc ping · peer info / echo / read / cpu / log</text>
+</svg>

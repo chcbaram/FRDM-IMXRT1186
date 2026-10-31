@@ -75,7 +75,7 @@ VSCode 는 `firmware/rt1180-fw` 폴더(또는 `prj/rt1180-fw-cm33.code-workspace
 | [01-boot-sequence](01-boot-sequence.md) | BOOT_MODE, FlexSPI NOR 부팅, FCB/컨테이너, 퓨즈 실측, CM7 기동 경로 | ✅ |
 | [02-memory-map](02-memory-map.md) | CM33/CM7 주소 공간, NS/S alias, QSPI 파티션 계획 | ✅ |
 | [03-board-mapping](03-board-mapping.md) | 부트 스위치, 리셋, 디버거, LED/버튼/UART, 메모리, 전원 | ✅ |
-| 04-dualcore | 코어 간 구조 정리 — 지금은 [25-cm7-boot](25-cm7-boot.md) 에 있다 | 25b 이후 |
+| [04-dualcore](04-dualcore.md) | 두 코어 정리 — 역할, 실행 위치와 캐시(측정값), 코어 간 통신 세 층, 기동 순서, 기록 · 디버그 | ✅ |
 | [05-network-overview](05-network-overview.md) | NETC, eCAT, PHY 4개와 핀 공유 점퍼 | ✅ |
 
 ### 환경과 구조
@@ -146,6 +146,7 @@ VSCode 는 `firmware/rt1180-fw` 폴더(또는 `prj/rt1180-fw-cm33.code-workspace
 | ![](images/flash-partition.svg) | [02](02-memory-map.md) QSPI 파티션 |
 | ![](images/board-block.svg) | [03](03-board-mapping.md) 보드 블록도 |
 | ![](images/board-boot-config.svg) | [03](03-board-mapping.md) 부트 설정 |
+| ![](images/dualcore-overview.svg) | [04](04-dualcore.md) 두 코어 한눈에 |
 | ![](images/network-topology.svg) | [05](05-network-overview.md) 네트워크 |
 | ![](images/clock-tree.svg) | [22](22-clock.md) CM33 클럭 트리 |
 | ![](images/cm7-boot.svg) | [25](25-cm7-boot.md) CM7 기동 순서 |
